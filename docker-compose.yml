@@ -1,20 +1,18 @@
-version: '3' # specify docker-compose version
+version: '3'
 
 services:
-  go-andrewwillette: # name of the first service
-    build:  # specify the directory of the Dockerfile
-      context: ./go-andrewwillette.com
-      # dockerfile: ./../git/go-andrewwillette.com
+  andrewwillette-backend:
+    build:
+      context: ./backend
     image: andrewwillette-backend:1.0
     ports:
-      - "9099:9099" # maps port 4200 on localhost to 80 in container
-    # depends_on:
-    #   - "express"
+      - "9099:9099"
 
-  react-andrewwillette: # name of the second service
-    build:  # specify the directory of the Dockerfile
-      context: ./node-andrewwillette.com
-      # dockerfile: ./../node-andrewwillette.com
+  andrewwillette-frontend:
+    build:
+      context: ./frontend
     image: andrewwillette-frontend:1.0
     ports:
-      - "80:80" # maps port 8000 on localhost to 8000 in container
+      - "80:80"
+    depends_on:
+      - "andrewwillette-backend"
