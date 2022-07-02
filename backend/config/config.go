@@ -12,14 +12,10 @@ const (
 )
 
 func GetDatabaseFile() string {
-	const dockerDatabase = "/goApp/db"
-	_, err := os.Stat(dockerDatabase)
+	const dockerDbDir = "/awillettebackend/db"
+	_, err := os.Stat(dockerDbDir)
 	if errors.Is(err, os.ErrNotExist) {
 		return "sqlite-database.db"
 	}
-	return fmt.Sprintf("%s/%s", dockerDatabase, "sqlite-database.db")
-}
-
-func GetCorsWhiteList() []string {
-	return []string{"http://localhost:3000", "http://andrewwillette.com"}
+	return fmt.Sprintf("%s/%s", dockerDbDir, "sqlite-database.db")
 }
