@@ -3,7 +3,7 @@ version: '3' # specify docker-compose version
 services:
   go-andrewwillette: # name of the first service
     build:  # specify the directory of the Dockerfile
-      context: ./../go-andrewwillette.com
+      context: ./go-andrewwillette.com
       # dockerfile: ./../git/go-andrewwillette.com
     image: andrewwillette-backend:1.0
     ports:
@@ -13,7 +13,7 @@ services:
 
   react-andrewwillette: # name of the second service
     build:  # specify the directory of the Dockerfile
-      context: ./../node-andrewwillette.com
+      context: ./node-andrewwillette.com
       # dockerfile: ./../node-andrewwillette.com
     image: andrewwillette-frontend:1.0
     ports:
