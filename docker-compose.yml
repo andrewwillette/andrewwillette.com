@@ -7,6 +7,8 @@ services:
     image: andrewwillette-backend:1.0
     ports:
       - "9099:9099"
+    volumes:
+      - "~/db:/awillettebackend/db"
 
   andrewwillette-frontend:
     build:

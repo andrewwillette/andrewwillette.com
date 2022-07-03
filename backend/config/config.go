@@ -2,20 +2,20 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"os"
+	"path/filepath"
 )
 
 const (
-	/*SqliteFile = "sqlite-database.db"*/
 	Port = 9099
 )
 
 func GetDatabaseFile() string {
 	const dockerDbDir = "/awillettebackend/db"
+	const dbFile = "sqlite-database.db"
 	_, err := os.Stat(dockerDbDir)
 	if errors.Is(err, os.ErrNotExist) {
-		return "sqlite-database.db"
+		return dbFile
 	}
-	return fmt.Sprintf("%s/%s", dockerDbDir, "sqlite-database.db")
+	return filepath.Join(dockerDbDir, dbFile)
 }
