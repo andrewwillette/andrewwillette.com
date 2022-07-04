@@ -21,22 +21,6 @@ resource "aws_key_pair" "willette_key" {
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCwDnlIDc2KfSJ/9Cq2jmZ3VuV9iFORuOyQME/Q0rebyPKes0Lx7wxwLW+D5woGRNOxMmckL2/xyIx0RKZkHzGFg6GyKEDftk2D/f298dwHB2UCSpF1hNXW/JFKrMSPNfW1Sa71hgUpVBmB4qYRnYeEM16oohIqe4JWBfcL9HDQxhmyqkBnKfzG4hsxyaxfWwsBA+kxwVlb08Sh++h5XbdJVMpWLw7UQsL5evZZEXFw9xJZqYo+VEBcomaXbF4iLcj7vX6v5xoF08Kx+YJqnvTEVIiLLgMvzoPHSTeH9K+Bf2Fvrn/xetyrYNjlCaA3J9y7WOxZbTjtXfgUHia/a/qr2rei03zBgJNBNPbdTPEZM7HE6V1jUun7LqK3h1a1BWnmtfRNEA3n17rXG3a7Ohvdx3qqwiEIGYoMP9u03nXT4bHCc0XJb5XMEaNKdwyozdbCVHfUsGkATOs+phPN+VrapWPzhhzZzDGHWY6l7LvwV8y61Z5sVGS3vM8FdXgi/fk= andrewwillette@andrewmacbook.local"
 }
 
-# data "aws_ami" "ubuntu" {
-#   most_recent = true
-
-#   filter {
-#     name   = "name"
-#     values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-#   }
-
-#   filter {
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
-
-#   owners = ["099720109477"] # Canonical
-# }
-
 resource "aws_instance" "willette_website" {
   # ami           = data.aws_ami.ubuntu.id
   ami           = "ami-04347cf5004fed072"
