@@ -40,7 +40,7 @@ resource "aws_key_pair" "willette_key" {
 resource "aws_instance" "willette_website" {
   # ami           = data.aws_ami.ubuntu.id
   ami           = "ami-04347cf5004fed072"
-  instance_type = "t3.micro"
+  instance_type = "t3.medium"
 
   tags = {
     Name = "AndrewWilletteDotCom"

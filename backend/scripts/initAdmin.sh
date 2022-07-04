@@ -1,12 +1,7 @@
-#!/usr/bin/env bash
-read -p "username: " username
-read -p "password: " password
+#!/bin/sh
+read -p "ip address: " ipAddress
+read -p "username: " usernameVal
+read -p "password: " passwordVal
 
-# if running in docker deployment
-if [[ -d ~/db ]]
-then
-	sqlite3 ~/db/sqlite-database.db "INSERT INTO userCredentials(username, password) VALUES('$username', '$password');"
-else
-  # this might need to be deleted
-	sqlite3 ./../sqlite-database.db "INSERT INTO userCredentials(username, password) VALUES('$username', '$password');"
-fi
+toExecute="sqlite3 /Users/andrewwillette/db/sqlite-database.db \"INSERT INTO userCredentials(username, password) VALUES('\"$usernameVal\"', '\"$passwordVal\"');\""
+ssh $ipAddress $toExecute
