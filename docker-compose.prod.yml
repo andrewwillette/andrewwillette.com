@@ -1,0 +1,4 @@
+services:
+  andrewwillette-backend:
+    volumes:
+      - "/home/ubuntu/db:/awillettebackend/db"
