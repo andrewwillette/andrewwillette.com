@@ -3,7 +3,7 @@ module github.com/andrewwillette/willette_api
 go 1.18
 
 require (
-	github.com/andrewwillette/keyOfDay v0.0.0-20220613025935-334cb8c152ea
+	github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/mattn/go-sqlite3 v1.14.10
 	github.com/newrelic/go-agent/v3 v3.16.0

@@ -4,6 +4,8 @@ github.com/BurntSushi/toml v1.0.0 h1:dtDWrepsVPfW9H/4y7dDgFc2MBUSeJhlaDtK13CxFlU
 github.com/BurntSushi/toml v1.0.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/andrewwillette/keyOfDay v0.0.0-20220613025935-334cb8c152ea h1:elmrN2A1glObDnJFil3zfcIfEu6AAKA43zgUYexQ840=
 github.com/andrewwillette/keyOfDay v0.0.0-20220613025935-334cb8c152ea/go.mod h1:r8/OSxdKD7usPltCPFnTpWQM7i2C5kXVUC5ObryDd8A=
+github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544 h1:lzpuNzARvn7CWnCSAL0NDKqDK66HGqbKghd+XYgkkbU=
+github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544/go.mod h1:r8/OSxdKD7usPltCPFnTpWQM7i2C5kXVUC5ObryDd8A=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/go-systemd/v22 v22.3.2/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
