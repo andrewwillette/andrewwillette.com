@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	Port = 9099
+	Port        = 9099
+	dockerDbDir = "/awillettebackend/db"
+	dbFile      = "sqlite-database.db"
 )
 
 func GetDatabaseFile() string {
-	const dockerDbDir = "/awillettebackend/db"
-	const dbFile = "sqlite-database.db"
 	_, err := os.Stat(dockerDbDir)
 	if errors.Is(err, os.ErrNotExist) {
 		return dbFile

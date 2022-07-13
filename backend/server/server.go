@@ -23,6 +23,7 @@ const (
 	keyOfDayEndpoint             = "/keyOfDay"
 	loginEndpoint                = "/login"
 	updateSoundcloudUrlsEndpoint = "/update-soundcloud-urls"
+	port                         = 9099
 )
 
 func StartServer() {
@@ -34,7 +35,7 @@ func StartServer() {
 
 	e := newServer(*websiteServices)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
 
 // authService manages logging users in and authenticating tokens
@@ -72,7 +73,6 @@ func getNewRelicApp() *newrelic.Application {
 	app, err := newrelic.NewApplication(
 		newrelic.ConfigAppName("go-andrewwillette"),
 		newrelic.ConfigLicense(newrelicLicense),
-		// newrelic.ConfigDebugLogger(os.Stdout),
 	)
 	if err != nil {
 		logging.GlobalLogger.Error().Msgf("Failed to start new relic app, newrelic key: %s", newrelicLicense)
