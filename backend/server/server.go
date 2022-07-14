@@ -21,6 +21,7 @@ const (
 	addSoundcloudEndpoint        = "/add-soundcloud-url"
 	deleteSoundcloudEndpoint     = "/delete-soundcloud-url"
 	keyOfDayEndpoint             = "/keyOfDay"
+	healthEndpoint               = "/health"
 	loginEndpoint                = "/login"
 	updateSoundcloudUrlsEndpoint = "/update-soundcloud-urls"
 	port                         = 9099
@@ -87,11 +88,18 @@ func newServer(services webServices) *echo.Echo {
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	e.GET(getSoundcloudAllEndpoint, services.getAllSoundcloudUrls)
 	e.GET(keyOfDayEndpoint, services.getKeyOfDay)
+	e.GET(healthEndpoint, services.getHealth)
 	e.POST(loginEndpoint, services.loginHandler)
 	e.PUT(addSoundcloudEndpoint, services.addSoundcloudUrl)
 	e.DELETE(deleteSoundcloudEndpoint, services.deleteSoundcloudUrl)
 	e.PUT(updateSoundcloudUrlsEndpoint, services.updateSoundcloudUrlUiOrders)
 	return e
+}
+
+// getHealth return health check information
+func (u *webServices) getHealth(c echo.Context) error {
+	logging.GlobalLogger.Info().Msg("Calling health endpoint.")
+	return nil
 }
 
 func (u *webServices) getKeyOfDay(c echo.Context) error {
