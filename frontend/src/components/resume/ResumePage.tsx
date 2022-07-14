@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import React from 'react';
 import "./resume.css";
 import resumePdf from "./resume.pdf";
 
