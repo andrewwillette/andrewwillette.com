@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	Port        = 9099
 	dockerDbDir = "/awillettebackend/db"
 	dbFile      = "sqlite-database.db"
 )

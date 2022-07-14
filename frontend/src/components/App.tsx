@@ -2,6 +2,7 @@ import './App.css';
 import './audio/AudioPlayer'
 import { AudioPage } from "./audio/AudioPage";
 import { Route, Routes, Link } from "react-router-dom"
+import React from 'react';
 import { ResumePage } from "./resume/ResumePage";
 import { HomePage } from "./home/HomePage";
 import { AdminPage } from "./user/AdminPage";
