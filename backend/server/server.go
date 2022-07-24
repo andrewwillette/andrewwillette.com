@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"runtime/debug"
 
 	"github.com/andrewwillette/keyOfDay/key"
 	"github.com/andrewwillette/willette_api/config"
@@ -96,10 +97,37 @@ func newServer(services webServices) *echo.Echo {
 	return e
 }
 
+var buildTime = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.time" {
+				return setting.Value
+			}
+		}
+	}
+	return ""
+}()
+var commit = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				return setting.Value
+			}
+		}
+	}
+	return ""
+}()
+
+type healthCheckResp struct {
+	Buildtime string `json:"buildTime"`
+	Commit    string `json:"gitCommit"`
+}
+
 // getHealth return health check information
 func (u *webServices) getHealth(c echo.Context) error {
 	logging.GlobalLogger.Info().Msg("Calling health endpoint.")
-	return nil
+	hcr := healthCheckResp{Buildtime: buildTime, Commit: commit}
+	return c.JSON(http.StatusOK, hcr)
 }
 
 func (u *webServices) getKeyOfDay(c echo.Context) error {
