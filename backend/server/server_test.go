@@ -223,14 +223,6 @@ func TestGetAllSoundcloudUrls_ServiceErr(t *testing.T) {
 	require.Equal(t, "Failed to get soundcloud urls from service.", responseTwo.Body.String())
 }
 
-func TestGitCommit(t *testing.T) {
-	cm := commit
-	sw := swaggy
-	println(cm)
-	println(sw)
-
-}
-
 func authenticatedSoundcloudUrlToJSON(url SoundcloudUrlJson) io.Reader {
 	marshalledUser, _ := json.Marshal(url)
 	return bytes.NewReader(marshalledUser)
