@@ -1,5 +1,9 @@
 FROM golang:1.18
 
+ARG GIT_COMMIT_ARG=unspecified
+LABEL git_commit=$GIT_COMMIT_ARG
+
+ENV GIT_COMMIT=$GIT_COMMIT
 WORKDIR /awillettebackend
 COPY . .
 

@@ -108,6 +108,10 @@ var buildTime = func() string {
 	return ""
 }()
 var commit = func() string {
+	cm := os.Getenv("GIT_COMMIT")
+	if cm != "" {
+		return cm
+	}
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, setting := range info.Settings {
 			if setting.Key == "vcs.revision" {
