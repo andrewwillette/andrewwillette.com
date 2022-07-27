@@ -4,9 +4,9 @@ services:
   andrewwillette-backend:
     build:
       context: ./backend
-      args:
-        GIT_COMMIT=${GIT_COMMIT}
     image: andrewwillette-backend:1.0
+    environment:
+      GIT_COMMIT: ${GIT_COMMIT}
     ports:
       - "9099:9099"
     volumes:

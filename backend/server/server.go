@@ -107,19 +107,22 @@ var buildTime = func() string {
 	}
 	return ""
 }()
+
 var commit = func() string {
 	cm := os.Getenv("GIT_COMMIT")
 	if cm != "" {
 		return cm
+	} else {
+		return "GIT_COMMIT not set"
 	}
-	if info, ok := debug.ReadBuildInfo(); ok {
-		for _, setting := range info.Settings {
-			if setting.Key == "vcs.revision" {
-				return setting.Value
-			}
-		}
-	}
-	return ""
+	// if info, ok := debug.ReadBuildInfo(); ok {
+	// 	for _, setting := range info.Settings {
+	// 		if setting.Key == "vcs.revision" {
+	// 			return setting.Value
+	// 		}
+	// 	}
+	// }
+	// return ""
 }()
 
 type healthCheckResp struct {
