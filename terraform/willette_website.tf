@@ -23,7 +23,7 @@ resource "aws_key_pair" "willette_key" {
 
 resource "aws_instance" "willette_website" {
   ami           = "ami-04347cf5004fed072"
-  instance_type = "t3.medium"
+  instance_type = "t3.small"
 
   tags = {
     Name = "AndrewWilletteDotCom"

@@ -1,12 +1,12 @@
 import {Component} from 'react';
-import homepage_photo from './website_photo_2.jpeg';
 import "./homePage.css";
 
 export class HomePage extends Component<any, any> {
+	readonly homeImageUrl = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/website_photo_2.jpeg";
     render() {
         return (
             <>
-                <img src={homepage_photo} className="personalImage" alt="logo" />
+                <img src={this.homeImageUrl} className="personalImage" alt="logo" />
                 <div id="home-page">
                     <p>
                         Hi! My name is Andrew Willette. I am a software developer based in Madison, Wisconsin.

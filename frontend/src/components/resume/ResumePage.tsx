@@ -1,11 +1,12 @@
 import { Component } from 'react';
 import "./resume.css";
-import resumePdf from "./resume.pdf";
 
 export class ResumePage extends Component<any, any> {
+	readonly resumeUrl = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf";
+
 	render() {
 		return (
-			<object aria-label="Personal Resume" data={resumePdf} type="application/pdf" width="100%" height="1000em" />
+			<object aria-label="Personal Resume" data={this.resumeUrl} type="application/pdf" width="100%" height="1000em" />
 		);
 	}
 }
