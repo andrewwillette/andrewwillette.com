@@ -11,6 +11,6 @@ ENV GIT_COMMIT=$GIT_COMMIT
 WORKDIR /awillettebackend
 RUN mkdir /awillettebackend/db
 COPY . .
-ENV CGO_ENABLED=0
+ENV CGO_ENABLED=1
 RUN go build .
 CMD ["./willette_api"]
