@@ -78,3 +78,11 @@ func (suite *PersistenceTestSuite) TestCreateDatabase() {
 	}
 	assert.FileExists(suite.T(), testDatabaseFile)
 }
+
+// FuzzCreateDatabase test what we can send CreateDatabase
+func FuzzCreateDatabase(f *testing.F) {
+	f.Add("swag.sqlite")
+	f.Fuzz(func(t *testing.T, filename string) {
+		createDatabase(filename)
+	})
+}
