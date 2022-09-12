@@ -9,83 +9,73 @@ import (
 	"path"
 )
 
-var logConfig = LogConfig{
-	ConsoleLoggingEnabled: true,
-	EncodeLogsAsJson:      true,
-	FileLoggingEnabled:    true,
-	Directory:             "./logging",
-	Filename:              "server.log",
-	MaxSizeMB:             200,
-	MaxBackups:            2,
-	MaxAge:                31,
-	LogLevel:              zerolog.DebugLevel,
-}
-var GlobalLogger = Configure(logConfig)
-var testlogConfig = LogConfig{
-	ConsoleLoggingEnabled: true,
-	EncodeLogsAsJson:      true,
-	FileLoggingEnabled:    true,
-	Directory:             "./logging",
-	Filename:              "test.log",
-	MaxSizeMB:             200,
-	MaxBackups:            2,
-	MaxAge:                31,
-	LogLevel:              zerolog.DebugLevel,
-}
-var TestLogger = Configure(testlogConfig)
-
-type LogConfig struct {
-	ConsoleLoggingEnabled bool
-	EncodeLogsAsJson      bool
-	FileLoggingEnabled    bool
-	Directory             string
-	Filename              string
-	MaxSizeMB             int
-	MaxBackups            int
-	MaxAge                int
-	LogLevel              zerolog.Level
+type logConfig struct {
+	consoleLoggingEnabled bool
+	encodeLogsAsJson      bool
+	fileLoggingEnabled    bool
+	directory             string
+	filename              string
+	maxSizeMB             int
+	maxBackups            int
+	maxAge                int
+	logLevel              zerolog.Level
 }
 
 type Logger struct {
 	*zerolog.Logger
 }
 
-func Configure(config LogConfig) *Logger {
+var globalLogConfig = logConfig{
+	consoleLoggingEnabled: true,
+	encodeLogsAsJson:      true,
+	fileLoggingEnabled:    true,
+	directory:             "./logging",
+	filename:              "server.log",
+	maxSizeMB:             200,
+	maxBackups:            2,
+	maxAge:                31,
+	logLevel:              zerolog.DebugLevel,
+}
+var GlobalLogger = configure(globalLogConfig)
+
+// configure return a zerolog logger with provided behavior based off
+// the provided LogConfig
+func configure(config logConfig) *Logger {
 	var writers []io.Writer
 
-	if config.ConsoleLoggingEnabled {
+	if config.consoleLoggingEnabled {
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr})
 	}
-	if config.FileLoggingEnabled {
+	if config.fileLoggingEnabled {
 		writers = append(writers, newRollingFile(config))
 	}
 	mw := io.MultiWriter(writers...)
-	zerolog.SetGlobalLevel(config.LogLevel)
+	zerolog.SetGlobalLevel(config.logLevel)
 	logger := zerolog.New(mw).With().Timestamp().Logger()
 	logger.Info().
-		Bool("fileLogging", config.FileLoggingEnabled).
-		Bool("jsonLogOutput", config.EncodeLogsAsJson).
-		Str("logDirectory", config.Directory).
-		Str("fileName", config.Filename).
-		Int("maxSizeMB", config.MaxSizeMB).
-		Int("maxBackups", config.MaxBackups).
-		Int("maxAgeInDays", config.MaxAge)
+		Bool("fileLogging", config.fileLoggingEnabled).
+		Bool("jsonLogOutput", config.encodeLogsAsJson).
+		Str("logDirectory", config.directory).
+		Str("fileName", config.filename).
+		Int("maxSizeMB", config.maxSizeMB).
+		Int("maxBackups", config.maxBackups).
+		Int("maxAgeInDays", config.maxAge)
 
 	return &Logger{
 		Logger: &logger,
 	}
 }
 
-func newRollingFile(config LogConfig) io.Writer {
-	if err := os.MkdirAll(config.Directory, 0744); err != nil {
-		log.Error().Err(err).Str("path", config.Directory).Msg("can't create log directory")
+func newRollingFile(config logConfig) io.Writer {
+	if err := os.MkdirAll(config.directory, 0744); err != nil {
+		log.Error().Err(err).Str("path", config.directory).Msg("can't create log directory")
 		return nil
 	}
 
 	return &lumberjack.Logger{
-		Filename:   path.Join(config.Directory, config.Filename),
-		MaxBackups: config.MaxBackups, // files
-		MaxSize:    config.MaxSizeMB,  // megabytes
-		MaxAge:     config.MaxAge,     // days
+		Filename:   path.Join(config.directory, config.filename),
+		MaxBackups: config.maxBackups, // files
+		MaxSize:    config.maxSizeMB,  // megabytes
+		MaxAge:     config.maxAge,     // days
 	}
 }
