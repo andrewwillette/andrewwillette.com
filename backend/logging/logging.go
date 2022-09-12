@@ -66,6 +66,7 @@ func configure(config logConfig) *Logger {
 	}
 }
 
+// newRollingFile return new Writer value for use with zerolog logging writers
 func newRollingFile(config logConfig) io.Writer {
 	if err := os.MkdirAll(config.directory, 0744); err != nil {
 		log.Error().Err(err).Str("path", config.directory).Msg("can't create log directory")
