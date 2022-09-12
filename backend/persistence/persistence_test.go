@@ -3,10 +3,12 @@ package persistence
 import (
 	"database/sql"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 const testDatabaseFile = "testDatabase.db"
@@ -79,10 +81,16 @@ func (suite *PersistenceTestSuite) TestCreateDatabase() {
 	assert.FileExists(suite.T(), testDatabaseFile)
 }
 
-// FuzzCreateDatabase test what we can send CreateDatabase
+// FuzzCreateDatabase test CreateDatabase fuzz handling
+// I don't think this is a good test. There are occurrences where
+// trying to create afile from a string should throw an error.
+// Fuzzing over strings will eventually throw an error, it's wrong to
+// assume otherwise. Makes we wonder about fuzzing in general. Aren't
+// there always workflows where your function should throw an error?
 func FuzzCreateDatabase(f *testing.F) {
 	f.Add("swag.sqlite")
 	f.Fuzz(func(t *testing.T, filename string) {
-		createDatabase(filename)
+		err := createDatabase(filename)
+		require.NoError(t, err)
 	})
 }

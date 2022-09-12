@@ -34,6 +34,7 @@ func runSqlScript(databaseFile, sqlScriptFilePath string) error {
 	return nil
 }
 
+// createDatabase create database with the given string
 func createDatabase(databaseFile string) error {
 	file, err := os.Create(databaseFile)
 	if err != nil {
