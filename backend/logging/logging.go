@@ -47,7 +47,11 @@ func configure(config logConfig) *Logger {
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 	if config.fileLoggingEnabled {
-		writers = append(writers, newRollingFile(config))
+		logWriter, err := newRollingFile(config)
+		if err != nil {
+			panic(err)
+		}
+		writers = append(writers, logWriter)
 	}
 	mw := io.MultiWriter(writers...)
 	zerolog.SetGlobalLevel(config.logLevel)
@@ -67,10 +71,10 @@ func configure(config logConfig) *Logger {
 }
 
 // newRollingFile return new Writer value for use with zerolog logging writers
-func newRollingFile(config logConfig) io.Writer {
+func newRollingFile(config logConfig) (io.Writer, error) {
 	if err := os.MkdirAll(config.directory, 0744); err != nil {
-		log.Error().Err(err).Str("path", config.directory).Msg("can't create log directory")
-		return nil
+		log.Error().Err(err).Str("path", config.directory).Msgf("Failed to create log directory: %s", config.directory)
+		return nil, err
 	}
 
 	return &lumberjack.Logger{
@@ -78,5 +82,5 @@ func newRollingFile(config logConfig) io.Writer {
 		MaxBackups: config.maxBackups, // files
 		MaxSize:    config.maxSizeMB,  // megabytes
 		MaxAge:     config.maxAge,     // days
-	}
+	}, nil
 }
