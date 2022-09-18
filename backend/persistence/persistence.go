@@ -53,6 +53,11 @@ func createDatabase(databaseFile string) error {
 	return nil
 }
 
+// createDbString to test fuzzing
+func createDbString(databaseFile string) error {
+	return nil
+}
+
 func getQueryResponseAsMap(sqlQuery *sql.Stmt) ([]map[string]interface{}, error) {
 	rows, err := sqlQuery.Query()
 	if err != nil {

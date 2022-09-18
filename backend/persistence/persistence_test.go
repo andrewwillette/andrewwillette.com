@@ -90,7 +90,7 @@ func (suite *PersistenceTestSuite) TestCreateDatabase() {
 func FuzzCreateDatabase(f *testing.F) {
 	f.Add("swag.sqlite")
 	f.Fuzz(func(t *testing.T, filename string) {
-		err := createDatabase(filename)
+		err := createDbString(filename)
 		require.NoError(t, err)
 	})
 }
