@@ -9,6 +9,24 @@ import (
 	"os"
 )
 
+// InitDatabaseIdempotent - Creates database if it doesn't currently exist.
+// Database creation includes creating the user and soundcloud table.
+func InitDatabaseIdempotent(sqliteFile string) {
+	if _, err := os.Stat(sqliteFile); os.IsNotExist(err) {
+		if err = createDatabase(sqliteFile); err != nil {
+			logging.GlobalLogger.Fatal().Msg("failed to create database")
+		}
+		initializeDbTables(sqliteFile)
+	}
+}
+
+func initializeDbTables(sqliteFile string) {
+	userService := &UserService{SqliteDbFile: sqliteFile}
+	userService.createUserTable()
+	soundcloudUrlService := &SoundcloudUrlService{SqliteFile: sqliteFile}
+	soundcloudUrlService.createSoundcloudUrlTable()
+}
+
 func runSqlScript(databaseFile, sqlScriptFilePath string) error {
 	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("./%s", databaseFile))
 	if err != nil {
@@ -129,19 +147,4 @@ func alterSoundcloudTableUiOrderAddition(sqlDbFile string) error {
 		return err
 	}
 	return nil
-}
-
-// InitDatabaseIdempotent - Creates database if it doesn't currently exist.
-// Database creation includes creating the user and soundcloud table.
-func InitDatabaseIdempotent(sqliteFile string) {
-	if _, err := os.Stat(sqliteFile); os.IsNotExist(err) {
-		if err = createDatabase(sqliteFile); err != nil {
-			logging.GlobalLogger.Fatal().Msg("failed to create database")
-		}
-		userService := &UserService{SqliteDbFile: sqliteFile}
-		userService.createUserTable()
-		soundcloudUrlService := &SoundcloudUrlService{SqliteFile: sqliteFile}
-		soundcloudUrlService.createSoundcloudUrlTable()
-		//_ = alterSoundcloudTableUiOrderAddition(sqliteFile)
-	}
 }

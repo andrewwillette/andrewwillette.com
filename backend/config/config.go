@@ -8,13 +8,13 @@ import (
 
 const (
 	dockerDbDir = "/awillettebackend/db"
-	dbFile      = "sqlite-database.db"
+	localDbFile = "sqlite-database.db"
 )
 
 func GetDatabaseFile() string {
 	_, err := os.Stat(dockerDbDir)
 	if errors.Is(err, os.ErrNotExist) {
-		return dbFile
+		return localDbFile
 	}
-	return filepath.Join(dockerDbDir, dbFile)
+	return filepath.Join(dockerDbDir, localDbFile)
 }

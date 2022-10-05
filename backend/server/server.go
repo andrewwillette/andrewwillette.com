@@ -93,7 +93,7 @@ func newServer(services webServices) *echo.Echo {
 	e.POST(loginEndpoint, services.loginHandler)
 	e.PUT(addSoundcloudEndpoint, services.addSoundcloudUrl)
 	e.DELETE(deleteSoundcloudEndpoint, services.deleteSoundcloudUrl)
-	e.PUT(updateSoundcloudUrlsEndpoint, services.updateSoundcloudUrlUiOrders)
+	e.PUT(updateSoundcloudUrlsEndpoint, services.updateSoundcloudUrlUiOrdersHandler)
 	return e
 }
 
@@ -229,10 +229,11 @@ func (u *webServices) deleteSoundcloudUrl(c echo.Context) error {
 	}
 }
 
-func (u *webServices) updateSoundcloudUrlUiOrders(c echo.Context) error {
-	if c.Request().Method == "OPTIONS" {
-		return c.String(http.StatusOK, "Allowing OPTIONS because of prior failed handshaking.")
-	}
+// updateSoundcloudUrlUiOrdersHandler handle http request for updating soundcloud urls
+func (u *webServices) updateSoundcloudUrlUiOrdersHandler(c echo.Context) error {
+	// if c.Request().Method == "OPTIONS" {
+	// 	return c.String(http.StatusOK, "Allowing OPTIONS because of prior failed handshaking.")
+	// }
 	var urls []SoundcloudUrlUiOrderJson
 	if err := json.NewDecoder(c.Request().Body).Decode(&urls); err != nil {
 		const errMsg = "Error decoding soundcloud urls in update soundcloud urls."
