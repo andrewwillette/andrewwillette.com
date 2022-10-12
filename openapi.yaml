@@ -1,0 +1,139 @@
+openapi: 3.0.4
+
+info:
+  title: andrewwillette.com REST API
+  description: Rest API which provides resources for my personal website.
+  version: 1.0.0
+  contact:
+    name: Andrew Willette
+    email: willette.andrew1846@gmail.com
+paths:
+  /get-soundcloud-urls:
+    get:
+      summary: Get soundcloud urls
+      operationId: getSoundcloudUrls
+      description: Retrieves all soundcloud urls
+      tags:
+        - Soundcloud Management
+      responses:
+        200:
+          description: soundcloud urls were successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SoundcloudUrl"
+  /add-soundcloud-url:
+    put:
+      summary: Add soundcloud url
+      operationId: addSoundcloudUrl
+      description: Adds a souncloud url
+      tags:
+        - Soundcloud Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SoundcloudUrl"
+      responses:
+        200:
+          description: The url was successfully added
+        401:
+          description: Unauthorized
+  /update-soundcloud-url:
+    put:
+      summary: Batch update soundcloud urls
+      operationId: updateSoundcloudUrl
+      description: Updates an array of souncloud url objects
+      tags:
+        - Soundcloud Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SoundcloudUrl"
+      responses:
+        200:
+          description: The urls were successfully updated
+        401:
+          description: Unauthorized
+  /delete-soundcloud-url:
+    delete:
+      summary: Delete soundcloud url
+      operationId: deleteSoundcloudUrl
+      description: Deletes a soundcloud url
+      tags:
+        - Soundcloud Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthenticatedSoundcloudUrl"
+      responses:
+        200:
+          description: Soundcloud url was successfully deleted
+        401:
+          description: Unauthorized
+  /login:
+    post:
+      summary: Login to andrewwillette.com
+      operationId: siteLogin
+      description: Authenticate to andrewwillette.com
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentials"
+      responses:
+        200:
+          description: User successfully authenticated
+        401:
+          description: Login failed
+components:
+  schemas:
+    SoundcloudUrl:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: the soundcloud url
+        uiOrder:
+          type: integer
+          description: the order of the soundcloud display
+    AuthenticatedSoundcloudUrl:
+      type: object
+      required:
+        - url
+        - bearerToken
+      properties:
+        url:
+          type: string
+          description: the soundcloud url
+        bearerToken:
+          type: string
+          description: a valid "BearerToken"
+    UserCredentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: the user's username
+        password:
+          type: string
+          description: the user's password
+    BearerToken:
+      type: object
+      required:
+        - bearerToken
+      properties:
+        bearerToken:
+          type: string
+          description: bearerToken for accessing protected resources

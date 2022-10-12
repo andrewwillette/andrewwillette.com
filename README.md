@@ -1,10 +1,13 @@
-# andrewwillette.com
-Repository for my personal website.
+# go andrewwillette.com
+My personal website which hosts my CV and music recordings.
 
-The [backend](./backend) is a go server.
+## Installation and startup
+* Ensure `go` is available in your `$PATH`.
+* Execute `go install`
+* Execute `go build .`
+* Execute `./willette_api`
 
-The [frontend](./frontend) is a typescript react client-side single-page-application.
+## Database management
+The rest api uses a sqlite database for persistence of users and music data.
 
-The [terraform](./terraform) is configuration to manage the cloud infrastructure.
-
-The [docker-compose](./docker-compose) and Dockerfiles ([backend](./backend/Dockerfile), [frontend](./frontend/Dockerfile)) allow for quick testing and deployment of the services, locally and in the cloud.
+The database location is conditional. If the directory `/awillettebackend/db` exists, it is used as the location for the sqlite database. This directory is created in the Docker image, and is used to persist the sqlite database between docker deployments. The below example assumes `~/db` is the desired location for the database on the hostOS.

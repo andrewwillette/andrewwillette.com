@@ -1,0 +1,51 @@
+p {
+	font-size: 28px;
+}
+
+.navbar {
+    list-style:none;
+    padding-left: 0;
+    padding-bottom: 1rem;
+}
+
+.navbar li {
+    display: inline;
+    padding: .7rem;
+}
+
+#personalImage {
+	text-align: center;
+	width: 500px;
+	height: auto;
+}
+
+.center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 50%;
+    text-align: center;
+}
+
+a {
+    color: black;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #5F5B1A;
+}
+
+#music-page ul iframe {
+	width: 100%;
+	height: 5rem;
+}
+
+#home-page {
+    width: 100%;
+}
+
+#home-page p {
+    width: 100%;
+	font-size: 1.5rem;
+}
