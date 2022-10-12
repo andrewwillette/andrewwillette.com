@@ -1,22 +1,11 @@
 version: '3'
 
 services:
-  andrewwillette-backend:
+  andrewwillette:
     build:
-      context: ./backend
-    image: andrewwillette-backend:1.0
+      context: .
+    image: andrewwillette-dot-com:1.0
     environment:
       GIT_COMMIT: ${GIT_COMMIT}
     ports:
-      - "9099:9099"
-    volumes:
-      - "~/db:/awillettebackend/db"
-
-  andrewwillette-frontend:
-    build:
-      context: ./frontend
-    image: andrewwillette-frontend:1.0
-    ports:
       - "80:80"
-    depends_on:
-      - "andrewwillette-backend"

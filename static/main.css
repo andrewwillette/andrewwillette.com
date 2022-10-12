@@ -23,7 +23,7 @@ p {
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
-	width: 50%;
+	/* width: 50%; */
     text-align: center;
 }
 
@@ -37,8 +37,12 @@ a:hover {
 }
 
 #music-page ul iframe {
-	width: 100%;
+	width: 80%;
 	height: 5rem;
+}
+
+#music-page ul {
+	padding: 0;
 }
 
 #home-page {
