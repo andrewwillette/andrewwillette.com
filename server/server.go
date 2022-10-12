@@ -36,6 +36,7 @@ func StartServer() {
 	e.GET("/", handleHomePage)
 	e.GET("/resume", handleResumePage)
 	e.GET("/music", handleMusicPage)
+	e.GET("/kod", handleKeyOfDay)
 	e.File("/static/main.css", "static/main.css")
 	e.Renderer = t
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
@@ -60,6 +61,16 @@ func handleResumePage(c echo.Context) error {
 
 func handleMusicPage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "musicpage", nil)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+func handleKeyOfDay(c echo.Context) error {
+
+	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
 	if err != nil {
 		log.Println(err)
 		return err
