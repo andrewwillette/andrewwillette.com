@@ -1,7 +1,5 @@
 FROM alpine:3.16.2
 RUN apk update && apk upgrade
-RUN apk add --no-cache sqlite
-RUN apk add --no-cache libc6-compat
 RUN apk add --no-cache go
 EXPOSE 9099
 
