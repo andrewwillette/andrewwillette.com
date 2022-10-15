@@ -6,6 +6,7 @@ p {
     list-style:none;
     padding-left: 0;
     padding-bottom: 1rem;
+	font-size: 1.5rem;
 }
 
 .navbar li {
@@ -15,8 +16,8 @@ p {
 
 #personalImage {
 	text-align: center;
-	width: 500px;
-	height: auto;
+	height: 40rem;
+	width: auto;
 }
 
 .center {
