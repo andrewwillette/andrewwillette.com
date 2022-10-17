@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544
-	github.com/getkin/kin-openapi v0.97.0
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/newrelic/go-agent/v3 v3.19.2
 	github.com/rs/zerolog v1.28.0
@@ -13,13 +12,8 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.0.0 // indirect
-	github.com/go-openapi/jsonpointer v0.19.5 // indirect
-	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/invopop/yaml v0.2.0 // indirect
-	github.com/josharian/intern v1.0.0 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
