@@ -12,7 +12,7 @@ import (
 
 func TestHandleMusicPage(t *testing.T) {
 	e := echo.New()
-	e.Renderer = getRenderer()
+	e.Renderer = getTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
@@ -25,7 +25,7 @@ func TestHandleMusicPage(t *testing.T) {
 
 func TestHandleHomePage(t *testing.T) {
 	e := echo.New()
-	e.Renderer = getRenderer()
+	e.Renderer = getTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
@@ -39,7 +39,7 @@ func TestHandleHomePage(t *testing.T) {
 
 func TestHandleResumePage(t *testing.T) {
 	e := echo.New()
-	e.Renderer = getRenderer()
+	e.Renderer = getTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()

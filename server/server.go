@@ -36,7 +36,7 @@ func StartServer() {
 	e.GET("/music", handleMusicPage)
 	e.GET("/kod", handleKeyOfDay)
 	e.File("/static/main.css", "static/main.css")
-	e.Renderer = getRenderer()
+	e.Renderer = getTemplateRenderer()
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
 
@@ -89,7 +89,7 @@ var (
 	basepath   = filepath.Dir(b)
 )
 
-func getRenderer() *Template {
+func getTemplateRenderer() *Template {
 	t := &Template{
 		templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
 	}
