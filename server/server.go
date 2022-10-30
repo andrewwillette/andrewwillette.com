@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 	"runtime/debug"
 
 	"github.com/andrewwillette/keyOfDay/key"
@@ -28,17 +30,13 @@ const (
 )
 
 func StartServer() {
-
-	t := &Template{
-		templates: template.Must(template.ParseGlob("templates/*.tmpl")),
-	}
 	e := echo.New()
 	e.GET("/", handleHomePage)
 	e.GET("/resume", handleResumePage)
 	e.GET("/music", handleMusicPage)
 	e.GET("/kod", handleKeyOfDay)
 	e.File("/static/main.css", "static/main.css")
-	e.Renderer = t
+	e.Renderer = getRenderer()
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
 
@@ -84,6 +82,18 @@ type Template struct {
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	basepath   = filepath.Dir(b)
+)
+
+func getRenderer() *Template {
+	t := &Template{
+		templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
+	}
+	return t
 }
 
 type keyOfDayService interface {
