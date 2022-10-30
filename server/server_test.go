@@ -48,3 +48,16 @@ func TestHandleResumePage(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusPermanentRedirect, rec.Code)
 }
+
+func BenchmarkHandleHomePage(b *testing.B) {
+	e := echo.New()
+	e.Renderer = getTemplateRenderer()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	for n := 0; n < b.N; n++ {
+		err := handleResumePage(c)
+		require.NoError(b, err)
+	}
+}
