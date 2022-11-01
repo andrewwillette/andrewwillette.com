@@ -16,8 +16,15 @@ p {
 
 #personalImage {
 	text-align: center;
-	height: 40rem;
-	width: auto;
+	height: auto;
+	width: 20%;
+}
+@media only screen and (max-device-width: 400px) {
+	#personalImage {
+		text-align: center;
+		height: auto;
+		width: 40%;
+	}
 }
 
 .center {
