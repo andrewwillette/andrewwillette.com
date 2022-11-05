@@ -29,7 +29,7 @@ func StartServer() {
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleMusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDay)
-	e.File("/static/main.css", "static/main.css")
+	e.File(cssEndpoint, "static/main.css")
 	e.Renderer = getTemplateRenderer()
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
