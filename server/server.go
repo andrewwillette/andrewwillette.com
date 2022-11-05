@@ -22,6 +22,7 @@ const (
 	port             = 80
 )
 
+// StartServer starts the web server
 func StartServer() {
 	e := echo.New()
 	e.GET(homeEndpoint, handleHomePage)
@@ -33,6 +34,7 @@ func StartServer() {
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
 
+// handleHomePage handles returning the homepage template
 func handleHomePage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "homepage", nil)
 	if err != nil {
@@ -41,6 +43,7 @@ func handleHomePage(c echo.Context) error {
 	return nil
 }
 
+// handleResumePage handles returning the resume template
 func handleResumePage(c echo.Context) error {
 	err := c.Redirect(http.StatusPermanentRedirect, "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf")
 	if err != nil {
@@ -50,6 +53,7 @@ func handleResumePage(c echo.Context) error {
 	return nil
 }
 
+// handleMusicPage handles returning the music template
 func handleMusicPage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "musicpage", nil)
 	if err != nil {
@@ -59,6 +63,7 @@ func handleMusicPage(c echo.Context) error {
 	return nil
 }
 
+// handleKeyOfDay handles returning the key of the day
 func handleKeyOfDay(c echo.Context) error {
 	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
 	if err != nil {
@@ -68,10 +73,12 @@ func handleKeyOfDay(c echo.Context) error {
 	return nil
 }
 
+// Template is the template renderer for my echo webserver
 type Template struct {
 	templates *template.Template
 }
 
+// Render renders the template
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
@@ -81,6 +88,7 @@ var (
 	basepath   = filepath.Dir(b)
 )
 
+// getTemplateRenderer returns a template renderer for my echo webserver
 func getTemplateRenderer() *Template {
 	t := &Template{
 		templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
