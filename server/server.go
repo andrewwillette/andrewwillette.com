@@ -14,13 +14,12 @@ import (
 )
 
 const (
-	homeEndpoint                 = "/"
-	musicEndpoint                = "/music"
-	resumeEndpoint               = "/resume"
-	cssEndpoint                  = "/static/main.css"
-	keyOfDayEndpoint             = "/kod"
-	updateSoundcloudUrlsEndpoint = "/update-soundcloud-urls"
-	port                         = 80
+	homeEndpoint     = "/"
+	musicEndpoint    = "/music"
+	resumeEndpoint   = "/resume"
+	cssEndpoint      = "/static/main.css"
+	keyOfDayEndpoint = "/kod"
+	port             = 80
 )
 
 func StartServer() {
