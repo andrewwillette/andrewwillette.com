@@ -16,6 +16,7 @@ import (
 	"github.com/andrewwillette/willette_api/logging"
 	"github.com/labstack/echo/v4"
 	"github.com/newrelic/go-agent/v3/newrelic"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 const (
@@ -26,18 +27,20 @@ const (
 	healthEndpoint               = "/health"
 	loginEndpoint                = "/login"
 	updateSoundcloudUrlsEndpoint = "/update-soundcloud-urls"
-	port                         = 80
+	port                         = 443
 )
 
 func StartServer() {
 	e := echo.New()
+	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("localhost", "andrewwillette.com")
+	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
 	e.GET("/", handleHomePage)
 	e.GET("/resume", handleResumePage)
 	e.GET("/music", handleMusicPage)
 	e.GET("/kod", handleKeyOfDay)
 	e.File("/static/main.css", "static/main.css")
 	e.Renderer = getTemplateRenderer()
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
+	e.Logger.Fatal(e.StartAutoTLS(fmt.Sprintf(":%d", port)))
 }
 
 func handleHomePage(c echo.Context) error {
