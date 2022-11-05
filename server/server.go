@@ -36,6 +36,7 @@ func StartServer() {
 	e.GET("/music", handleMusicPage)
 	e.GET("/kod", handleKeyOfDay)
 	e.File("/static/main.css", "static/main.css")
+	e.File("/static/illuminati.gif", "static/illuminati.gif")
 	e.Renderer = getTemplateRenderer()
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
@@ -67,7 +68,6 @@ func handleMusicPage(c echo.Context) error {
 }
 
 func handleKeyOfDay(c echo.Context) error {
-
 	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
 	if err != nil {
 		log.Println(err)
