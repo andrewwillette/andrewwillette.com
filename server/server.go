@@ -11,6 +11,7 @@ import (
 
 	"github.com/andrewwillette/keyOfDay/key"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -20,9 +21,9 @@ const (
 	resumeEndpoint   = "/resume"
 	cssEndpoint      = "/static/main.css"
 	keyOfDayEndpoint = "/kod"
-	port             = 443
 )
 
+// StartHttpServer starts the web server with http
 func StartHttpServer() {
 	e := echo.New()
 	e.GET(homeEndpoint, handleHomePage)
@@ -34,10 +35,12 @@ func StartHttpServer() {
 	e.Logger.Fatal(e.Start(":80"))
 }
 
-// StartHttpsServer starts the web server
+// StartHttpsServer starts the web server with https certificate
+// provided by letsencrypt
+// TODO: make this work
 func StartHttpsServer() {
 	e := echo.New()
-	// e.Pre(middleware.HTTPSRedirect())
+	e.Pre(middleware.HTTPSRedirect())
 	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
 	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
 	e.GET(homeEndpoint, handleHomePage)

@@ -1,7 +1,8 @@
 FROM alpine:3.16.2
 RUN apk update && apk upgrade
 RUN apk add --no-cache go
-EXPOSE 9099
+EXPOSE 80
+EXPOSE 443
 
 ARG GIT_COMMIT_ARG=unspecified
 
