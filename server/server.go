@@ -11,6 +11,7 @@ import (
 
 	"github.com/andrewwillette/keyOfDay/key"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 const (
@@ -19,11 +20,10 @@ const (
 	resumeEndpoint   = "/resume"
 	cssEndpoint      = "/static/main.css"
 	keyOfDayEndpoint = "/kod"
-	port             = 80
+	port             = 443
 )
 
-// StartServer starts the web server
-func StartServer() {
+func StartServerHttpServer() {
 	e := echo.New()
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
@@ -31,7 +31,22 @@ func StartServer() {
 	e.GET(keyOfDayEndpoint, handleKeyOfDay)
 	e.File(cssEndpoint, "static/main.css")
 	e.Renderer = getTemplateRenderer()
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
+	e.Logger.Fatal(e.Start(":80"))
+}
+
+// StartServerHttpsServer starts the web server
+func StartServerHttpsServer() {
+	e := echo.New()
+	// e.Pre(middleware.HTTPSRedirect())
+	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
+	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+	e.GET(homeEndpoint, handleHomePage)
+	e.GET(resumeEndpoint, handleResumePage)
+	e.GET(musicEndpoint, handleMusicPage)
+	e.GET(keyOfDayEndpoint, handleKeyOfDay)
+	e.File(cssEndpoint, "static/main.css")
+	e.Renderer = getTemplateRenderer()
+	e.Logger.Fatal(e.StartAutoTLS(":443"))
 }
 
 // handleHomePage handles returning the homepage template

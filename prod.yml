@@ -1,12 +1,10 @@
-version: '3'
-
 services:
   andrewwillette:
     build:
       context: .
     image: andrewwillette-dot-com:1.0
     environment:
-      GIT_COMMIT: ${GIT_COMMIT}
+      ENV: "PROD"
     ports:
       - "80:80"
       - "443:443"
