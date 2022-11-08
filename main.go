@@ -15,8 +15,8 @@ func main() {
 	println(os.Getenv("ENV"))
 	env := os.Getenv("ENV")
 	if env == "PROD" {
-		server.StartServerHttpsServer()
+		server.StartHttpsServer()
 	} else {
-		server.StartServerHttpServer()
+		server.StartHttpServer()
 	}
 }

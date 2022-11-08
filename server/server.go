@@ -23,7 +23,7 @@ const (
 	port             = 443
 )
 
-func StartServerHttpServer() {
+func StartHttpServer() {
 	e := echo.New()
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
@@ -34,8 +34,8 @@ func StartServerHttpServer() {
 	e.Logger.Fatal(e.Start(":80"))
 }
 
-// StartServerHttpsServer starts the web server
-func StartServerHttpsServer() {
+// StartHttpsServer starts the web server
+func StartHttpsServer() {
 	e := echo.New()
 	// e.Pre(middleware.HTTPSRedirect())
 	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
