@@ -49,6 +49,10 @@ func StartHttpsServer() {
 	e.GET(keyOfDayEndpoint, handleKeyOfDay)
 	e.File(cssEndpoint, "static/main.css")
 	e.Renderer = getTemplateRenderer()
+	// hoping this will allow httpsredirect to work correctly
+	go func(c *echo.Echo) {
+		e.Logger.Fatal(e.Start(":80"))
+	}(e)
 	e.Logger.Fatal(e.StartAutoTLS(":443"))
 }
 
