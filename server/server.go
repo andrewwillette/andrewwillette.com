@@ -37,7 +37,6 @@ func StartHttpServer() {
 
 // StartHttpsServer starts the web server with https certificate
 // provided by letsencrypt
-// TODO: make this work
 func StartHttpsServer() {
 	e := echo.New()
 	e.Pre(middleware.HTTPSRedirect())
@@ -49,7 +48,6 @@ func StartHttpsServer() {
 	e.GET(keyOfDayEndpoint, handleKeyOfDay)
 	e.File(cssEndpoint, "static/main.css")
 	e.Renderer = getTemplateRenderer()
-	// hoping this will allow httpsredirect to work correctly
 	go func(c *echo.Echo) {
 		e.Logger.Fatal(e.Start(":80"))
 	}(e)

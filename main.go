@@ -11,9 +11,7 @@ func main() {
 	logging.GlobalLogger.Info().Msg("Starting application.")
 	env := os.Getenv("ENV")
 	if env == "PROD" {
-		server.StartHttpServer()
-		// TODO: Someday
-		// server.StartHttpsServer()
+		server.StartHttpsServer()
 	} else {
 		server.StartHttpServer()
 	}
