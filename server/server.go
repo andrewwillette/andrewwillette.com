@@ -26,12 +26,7 @@ const (
 // StartHttpServer starts the web server with http
 func StartHttpServer() {
 	e := echo.New()
-	e.GET(homeEndpoint, handleHomePage)
-	e.GET(resumeEndpoint, handleResumePage)
-	e.GET(musicEndpoint, handleMusicPage)
-	e.GET(keyOfDayEndpoint, handleKeyOfDay)
-	e.File(cssEndpoint, "static/main.css")
-	e.Renderer = getTemplateRenderer()
+	addRoutes(e)
 	e.Logger.Fatal(e.Start(":80"))
 }
 
@@ -42,16 +37,21 @@ func StartHttpsServer() {
 	e.Pre(middleware.HTTPSRedirect())
 	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
 	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+	addRoutes(e)
+	go func(c *echo.Echo) {
+		e.Logger.Fatal(e.Start(":80"))
+	}(e)
+	e.Logger.Fatal(e.StartAutoTLS(":443"))
+}
+
+// addRoutes adds routes to the echo webserver
+func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleMusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDay)
 	e.File(cssEndpoint, "static/main.css")
 	e.Renderer = getTemplateRenderer()
-	go func(c *echo.Echo) {
-		e.Logger.Fatal(e.Start(":80"))
-	}(e)
-	e.Logger.Fatal(e.StartAutoTLS(":443"))
 }
 
 // handleHomePage handles returning the homepage template
