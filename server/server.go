@@ -20,7 +20,9 @@ const (
 	musicEndpoint    = "/music"
 	resumeEndpoint   = "/resume"
 	cssEndpoint      = "/static/main.css"
+	cssResource      = "static/main.css"
 	keyOfDayEndpoint = "/kod"
+	resumeResource   = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
 // StartHttpServer starts the web server with http
@@ -50,7 +52,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleMusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDay)
-	e.File(cssEndpoint, "static/main.css")
+	e.File(cssEndpoint, cssResource)
 	e.Renderer = getTemplateRenderer()
 }
 
@@ -65,7 +67,7 @@ func handleHomePage(c echo.Context) error {
 
 // handleResumePage handles returning the resume template
 func handleResumePage(c echo.Context) error {
-	err := c.Redirect(http.StatusPermanentRedirect, "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf")
+	err := c.Redirect(http.StatusPermanentRedirect, resumeResource)
 	if err != nil {
 		log.Println(err)
 		return err
