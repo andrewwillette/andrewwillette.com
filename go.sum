@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.0.0 h1:dtDWrepsVPfW9H/4y7dDgFc2MBUSeJhlaDtK13CxFlU=
 github.com/BurntSushi/toml v1.0.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544 h1:lzpuNzARvn7CWnCSAL0NDKqDK66HGqbKghd+XYgkkbU=
-github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544/go.mod h1:r8/OSxdKD7usPltCPFnTpWQM7i2C5kXVUC5ObryDd8A=
+github.com/andrewwillette/keyOfDay v0.0.0-20221210231438-b8346cf6682a h1:BBONrJGtj0S+BEV0OB3noXPT7Dx2FJrbVTwUwAQLkiE=
+github.com/andrewwillette/keyOfDay v0.0.0-20221210231438-b8346cf6682a/go.mod h1:r8/OSxdKD7usPltCPFnTpWQM7i2C5kXVUC5ObryDd8A=
 github.com/coreos/go-systemd/v22 v22.3.3-0.20220203105225-a9a7ef127534/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

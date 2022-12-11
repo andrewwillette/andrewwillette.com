@@ -3,7 +3,7 @@ module github.com/andrewwillette/willette_api
 go 1.19
 
 require (
-	github.com/andrewwillette/keyOfDay v0.0.0-20220713194107-206c288e9544
+	github.com/andrewwillette/keyOfDay v0.0.0-20221210231438-b8346cf6682a
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/rs/zerolog v1.28.0
 	github.com/stretchr/testify v1.7.0
