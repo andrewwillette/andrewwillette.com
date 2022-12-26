@@ -51,7 +51,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleMusicPage)
-	e.GET(keyOfDayEndpoint, handleKeyOfDay)
+	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.File(cssEndpoint, cssResource)
 	e.Renderer = getTemplateRenderer()
 }
@@ -85,8 +85,8 @@ func handleMusicPage(c echo.Context) error {
 	return nil
 }
 
-// handleKeyOfDay handles returning the key of the day
-func handleKeyOfDay(c echo.Context) error {
+// handleKeyOfDayPage handles returning the key of the day
+func handleKeyOfDayPage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
 	if err != nil {
 		log.Println(err)
