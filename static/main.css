@@ -57,6 +57,10 @@ a:hover {
 	padding: 0;
 }
 
+#music-page #copyright-clause {
+	font-size: .8rem;
+}
+
 #home-page {
     width: 100%;
 }
