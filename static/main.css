@@ -1,12 +1,12 @@
 p {
-	font-size: 28px;
+    font-size: 28px;
 }
 
 .navbar {
     list-style:none;
     padding-left: 0;
     padding-bottom: 1rem;
-	font-size: 1.5rem;
+    font-size: 1.5rem;
 }
 
 .navbar li {
@@ -15,26 +15,26 @@ p {
 }
 
 #keyofday-page {
-	font-size: 4rem;
+    font-size: 4rem;
 }
 
 #personalImage {
-	text-align: center;
-	height: auto;
-	width: 20%;
+    text-align: center;
+    height: auto;
+    width: 20%;
 }
 @media only screen and (max-device-width: 400px) {
-	#personalImage {
-		text-align: center;
-		height: auto;
-		width: 40%;
-	}
+    #personalImage {
+        text-align: center;
+        height: auto;
+        width: 40%;
+    }
 }
 
 .center {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     text-align: center;
 }
 
@@ -48,16 +48,16 @@ a:hover {
 }
 
 #music-page ul iframe {
-	width: 80%;
-	height: 5rem;
+    width: 80%;
+    height: 5rem;
 }
 
 #music-page ul {
-	padding: 0;
+    padding: 0;
 }
 
 #music-page #copyright-clause {
-	font-size: 1rem;
+    font-size: 1rem;
 }
 
 #home-page {
@@ -66,7 +66,7 @@ a:hover {
 
 #home-page p {
     width: 100%;
-	font-size: 1.5rem;
+    font-size: 1.5rem;
 }
 
 main {
