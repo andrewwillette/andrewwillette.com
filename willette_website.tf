@@ -24,13 +24,15 @@ resource "aws_key_pair" "willette_key" {
 resource "aws_instance" "willette_website" {
   ami           = "ami-04347cf5004fed072"
   instance_type = "t3.small"
-
   tags = {
     Name = "AndrewWilletteDotCom"
   }
   key_name               = aws_key_pair.willette_key.key_name
   vpc_security_group_ids = [aws_security_group.main.id]
-
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+  }
 }
 
 resource "aws_security_group" "main" {
@@ -60,7 +62,7 @@ resource "aws_security_group" "main" {
       to_port          = 22
     },
     {
-      description      = "http ingress for frontend"
+      description      = "http ingress"
       self             = false
       from_port        = 80
       to_port          = 80
@@ -71,10 +73,10 @@ resource "aws_security_group" "main" {
       ipv6_cidr_blocks = []
     },
     {
-      description      = "http ingress for backend"
+      description      = "https ingress"
       self             = false
-      from_port        = 9099
-      to_port          = 9099
+      from_port        = 443
+      to_port          = 443
       protocol         = "tcp"
       prefix_list_ids  = []
       security_groups  = []
