@@ -1,5 +1,5 @@
 #!/bin/sh
 docker context use andrewwilletteWebsiteAws
-docker-compose -f prod.yml down
-docker-compose build
-docker-compose -f prod.yml up -d
+docker-compose -f docker-compose-prod.yml down
+docker-compose -f docker-compose-prod.yml build
+docker-compose -f docker-compose-prod.yml up -d
