@@ -1,0 +1,4 @@
+distros = [
+	{Url = "Arch Linux", Color = "pacman"},
+	{Url = "Arch Linux", Color = "pacman"},
+]
