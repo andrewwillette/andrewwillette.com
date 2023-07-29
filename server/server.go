@@ -25,25 +25,21 @@ const (
 	resumeResource   = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
-// StartHttpServer starts the web server with http
-func StartHttpServer() {
+// StartServer start the server with https certificate configurable
+func StartServer(isHttps bool) {
 	e := echo.New()
 	addRoutes(e)
-	e.Logger.Fatal(e.Start(":80"))
-}
-
-// StartHttpsServer starts the web server with https certificate
-// provided by letsencrypt
-func StartHttpsServer() {
-	e := echo.New()
-	e.Pre(middleware.HTTPSRedirect())
-	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
-	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
-	addRoutes(e)
-	go func(c *echo.Echo) {
+	if isHttps {
+		e.Pre(middleware.HTTPSRedirect())
+		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
+		e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+		go func(c *echo.Echo) {
+			e.Logger.Fatal(e.Start(":80"))
+		}(e)
+		e.Logger.Fatal(e.StartAutoTLS(":443"))
+	} else {
 		e.Logger.Fatal(e.Start(":80"))
-	}(e)
-	e.Logger.Fatal(e.StartAutoTLS(":443"))
+	}
 }
 
 // addRoutes adds routes to the echo webserver
