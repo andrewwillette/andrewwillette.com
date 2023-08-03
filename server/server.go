@@ -16,14 +16,14 @@ import (
 )
 
 const (
-	homeEndpoint           = "/"
-	musicEndpoint          = "/music"
-	resumeEndpoint         = "/resume"
-	transcriptionsEndpoint = "/transcriptions"
-	cssEndpoint            = "/static/main.css"
-	cssResource            = "static/main.css"
-	keyOfDayEndpoint       = "/kod"
-	resumeResource         = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
+	homeEndpoint       = "/"
+	musicEndpoint      = "/music"
+	resumeEndpoint     = "/resume"
+	sheetmusicEndpoint = "/sheet-music"
+	cssEndpoint        = "/static/main.css"
+	cssResource        = "static/main.css"
+	keyOfDayEndpoint   = "/kod"
+	resumeResource     = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
 var (
@@ -117,7 +117,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleMusicPage)
-	e.GET(transcriptionsEndpoint, handleTranscriptionsPage)
+	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.File(cssEndpoint, cssResource)
 	e.Renderer = getTemplateRenderer()
@@ -152,9 +152,9 @@ func handleMusicPage(c echo.Context) error {
 	return nil
 }
 
-// handleTranscriptionsPage handles returning the transcription template
-func handleTranscriptionsPage(c echo.Context) error {
-	err := c.Render(http.StatusOK, "transcriptionpage", transcriptionData)
+// handleSheetmusicPage handles returning the transcription template
+func handleSheetmusicPage(c echo.Context) error {
+	err := c.Render(http.StatusOK, "sheetmusicpage", transcriptionData)
 	if err != nil {
 		log.Println(err)
 		return err
