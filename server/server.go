@@ -16,13 +16,14 @@ import (
 )
 
 const (
-	homeEndpoint     = "/"
-	musicEndpoint    = "/music"
-	resumeEndpoint   = "/resume"
-	cssEndpoint      = "/static/main.css"
-	cssResource      = "static/main.css"
-	keyOfDayEndpoint = "/kod"
-	resumeResource   = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
+	homeEndpoint           = "/"
+	musicEndpoint          = "/music"
+	resumeEndpoint         = "/resume"
+	transcriptionsEndpoint = "/transcriptions"
+	cssEndpoint            = "/static/main.css"
+	cssResource            = "static/main.css"
+	keyOfDayEndpoint       = "/kod"
+	resumeResource         = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
 var (
@@ -84,6 +85,14 @@ var (
 			},
 		},
 	}
+	transcriptionData = TranscriptionPageData{
+		Transcriptions: []Transcription{
+			{
+				Name: "Benton's Dream",
+				URL:  "https://www.dropbox.com/scl/fi/i4c0x7z8i8eis0gvyxqrl/Benton-s-Dream.pdf?dl=0&rlkey=ra3i5gf5kyu6ulup5uqezpzr9",
+			},
+		},
+	}
 )
 
 // StartServer start the server with https certificate configurable
@@ -108,6 +117,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleMusicPage)
+	e.GET(transcriptionsEndpoint, handleTranscriptionsPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.File(cssEndpoint, cssResource)
 	e.Renderer = getTemplateRenderer()
@@ -142,6 +152,16 @@ func handleMusicPage(c echo.Context) error {
 	return nil
 }
 
+// handleTranscriptionsPage handles returning the transcription template
+func handleTranscriptionsPage(c echo.Context) error {
+	err := c.Render(http.StatusOK, "transcriptionpage", transcriptionData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
 // handleKeyOfDayPage handles returning the key of the day
 func handleKeyOfDayPage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
@@ -168,6 +188,14 @@ type Song struct {
 }
 type MusicPageData struct {
 	Songs []Song
+}
+
+type Transcription struct {
+	Name string
+	URL  string
+}
+type TranscriptionPageData struct {
+	Transcriptions []Transcription
 }
 
 // getTemplateRenderer returns a template renderer for my echo webserver
