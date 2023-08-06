@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"sort"
+	"strings"
 
 	"github.com/andrewwillette/keyofday/key"
 	"github.com/labstack/echo/v4"
@@ -85,8 +87,12 @@ var (
 			},
 		},
 	}
-	transcriptionData = TranscriptionPageData{
-		Transcriptions: []Transcription{
+	sheetmusicData = SheetMusicPageData{
+		Sheets: []DropboxReference{
+			{
+				Name: "Cumberland Gap",
+				URL:  "https://www.dropbox.com/scl/fi/9vnjhsojyefsutz4yzt00/Cumberland-Gap.pdf?rlkey=i8ueptsmvhfmi59ww7h3q9dij&dl=0",
+			},
 			{
 				Name: "Benton's Dream",
 				URL:  "https://www.dropbox.com/scl/fi/i4c0x7z8i8eis0gvyxqrl/Benton-s-Dream.pdf?dl=0&rlkey=ra3i5gf5kyu6ulup5uqezpzr9",
@@ -94,6 +100,11 @@ var (
 		},
 	}
 )
+
+// sortByName sorts the dropbox references by name
+func sortByName(a []DropboxReference) {
+	// sort.Slice(a, func(i, j DropboxReference) bool { return true })
+}
 
 // StartServer start the server with https certificate configurable
 func StartServer(isHttps bool) {
@@ -154,7 +165,8 @@ func handleMusicPage(c echo.Context) error {
 
 // handleSheetmusicPage handles returning the transcription template
 func handleSheetmusicPage(c echo.Context) error {
-	err := c.Render(http.StatusOK, "sheetmusicpage", transcriptionData)
+	sort.Sort(sheetmusicData.Sheets)
+	err := c.Render(http.StatusOK, "sheetmusicpage", sheetmusicData)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -190,12 +202,15 @@ type MusicPageData struct {
 	Songs []Song
 }
 
-type Transcription struct {
+type DropboxReference struct {
 	Name string
 	URL  string
 }
-type TranscriptionPageData struct {
-	Transcriptions []Transcription
+
+type Sheets []DropboxReference
+
+type SheetMusicPageData struct {
+	Sheets Sheets
 }
 
 // getTemplateRenderer returns a template renderer for my echo webserver
@@ -204,4 +219,28 @@ func getTemplateRenderer() *Template {
 		templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
 	}
 	return t
+}
+
+// Len to implement sort.Interface
+func (sheets Sheets) Len() int {
+	return len(sheets)
+}
+
+// Swap to implement sort.Interface
+func (sheets Sheets) Swap(i, j int) {
+	sheets[i], sheets[j] = sheets[j], sheets[i]
+}
+
+// Less to implement sort.Interface
+func (sheets Sheets) Less(i, j int) bool {
+	switch strings.Compare(sheets[i].Name, sheets[j].Name) {
+	case -1:
+		return true
+	case 0:
+		return false
+	case 1:
+		return false
+	default:
+		return false
+	}
 }
