@@ -33,7 +33,7 @@ var (
 			},
 			{
 				Name: "Big Mon",
-				URL:  "https://www.dropbox.com/scl/fi/w19gqbg7upm7yfrzcjlm1/Big-Mon.pdf?rlkey=k196uepmzyn3rffopnlmf4eyz&dl=0",
+				URL:  "https://www.dropbox.com/scl/fi/hqufi023ghk18v6f3ww5q/Big-Mon.pdf?rlkey=aly0ph2tjf671oz4n4glswena&dl=0",
 			},
 			{
 				Name: "Flop Eared Mule",
