@@ -1,6 +1,6 @@
 module github.com/andrewwillette/willette_api
 
-go 1.20
+go 1.21.1
 
 require (
 	github.com/andrewwillette/keyofday v0.0.0-20221211003701-cfeaf1ddb191

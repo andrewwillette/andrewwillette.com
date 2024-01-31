@@ -33,11 +33,6 @@ var (
 	basepath   = filepath.Dir(b)
 )
 
-// sortByName sorts the dropbox references by name
-func sortByName(a []DropboxReference) {
-	// sort.Slice(a, func(i, j DropboxReference) bool { return true })
-}
-
 // StartServer start the server with https certificate configurable
 func StartServer(isHttps bool) {
 	e := echo.New()
@@ -45,7 +40,9 @@ func StartServer(isHttps bool) {
 	if isHttps {
 		e.Pre(middleware.HTTPSRedirect())
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
-		e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+		// getSSLCacheDir return directory for ssl cache
+		const sslCacheDir = "/var/www/.cache"
+		e.AutoTLSManager.Cache = autocert.DirCache(sslCacheDir)
 		go func(c *echo.Echo) {
 			e.Logger.Fatal(e.Start(":80"))
 		}(e)

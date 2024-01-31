@@ -1,6 +1,6 @@
-FROM alpine:3.16.2
+FROM alpine:3.19.1
 RUN apk update && apk upgrade
-RUN apk add --no-cache go
+RUN apk add --no-cache go=1.21.6-r0
 EXPOSE 80
 EXPOSE 443
 

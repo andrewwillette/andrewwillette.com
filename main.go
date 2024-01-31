@@ -11,8 +11,10 @@ func main() {
 	logging.GlobalLogger.Info().Msg("Starting application.")
 	env := os.Getenv("ENV")
 	if env == "PROD" {
-		server.StartServer(true)
+		sslEnabled := true
+		server.StartServer(sslEnabled)
 	} else {
-		server.StartServer(false)
+		sslEnabled := false
+		server.StartServer(sslEnabled)
 	}
 }
