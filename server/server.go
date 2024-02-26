@@ -1,17 +1,23 @@
 package server
 
 import (
-	"fmt"
+	"context"
+	"embed"
+	_ "embed"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
 
 	"github.com/andrewwillette/keyofday/key"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/crypto/acme/autocert"
@@ -36,6 +42,7 @@ var (
 // StartServer start the server with https certificate configurable
 func StartServer(isHttps bool) {
 	e := echo.New()
+	e.Renderer = getTemplateRenderer()
 	addRoutes(e)
 	if isHttps {
 		e.Pre(middleware.HTTPSRedirect())
@@ -48,8 +55,80 @@ func StartServer(isHttps bool) {
 		}(e)
 		e.Logger.Fatal(e.StartAutoTLS(":443"))
 	} else {
-		e.Logger.Fatal(e.Start(":80"))
+		server := wrapRouter(e)
+		lambda.Start(server)
+		// e.Logger.Fatal(e.Start(":80"))
 	}
+}
+
+func wrapRouter(e *echo.Echo) func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+		body := strings.NewReader(request.Body)
+		req := httptest.NewRequest(request.HTTPMethod, request.Path, body)
+		for k, v := range request.Headers {
+			req.Header.Add(k, v)
+		}
+
+		q := req.URL.Query()
+		for k, v := range request.QueryStringParameters {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+
+		res := rec.Result()
+		responseBody, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return formatAPIErrorResponse(http.StatusInternalServerError, res.Header, err.Error())
+		}
+
+		return formatAPIResponse(res.StatusCode, res.Header, string(responseBody))
+	}
+}
+func formatAPIResponse(statusCode int, headers http.Header, responseData string) (events.APIGatewayProxyResponse, error) {
+	responseHeaders := make(map[string]string)
+
+	responseHeaders["Content-Type"] = "application/json"
+	for key, value := range headers {
+		responseHeaders[key] = ""
+
+		if len(value) > 0 {
+			responseHeaders[key] = value[0]
+		}
+	}
+
+	responseHeaders["Access-Control-Allow-Origin"] = "*"
+	responseHeaders["Access-Control-Allow-Headers"] = "origin,Accept,Authorization,Content-Type"
+
+	return events.APIGatewayProxyResponse{
+		Body:       responseData,
+		Headers:    responseHeaders,
+		StatusCode: statusCode,
+	}, nil
+}
+
+func formatAPIErrorResponse(statusCode int, headers http.Header, err string) (events.APIGatewayProxyResponse, error) {
+	responseHeaders := make(map[string]string)
+
+	responseHeaders["Content-Type"] = "application/json"
+	for key, value := range headers {
+		responseHeaders[key] = ""
+
+		if len(value) > 0 {
+			responseHeaders[key] = value[0]
+		}
+	}
+
+	responseHeaders["Access-Control-Allow-Origin"] = "*"
+	responseHeaders["Access-Control-Allow-Headers"] = "origin,Accept,Authorization,Content-Type"
+
+	return events.APIGatewayProxyResponse{
+		Body:       err,
+		Headers:    responseHeaders,
+		StatusCode: statusCode,
+	}, nil
 }
 
 // addRoutes adds routes to the echo webserver
@@ -59,9 +138,13 @@ func addRoutes(e *echo.Echo) {
 	e.GET(musicEndpoint, handleMusicPage)
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
-	e.File(cssEndpoint, cssResource)
-	e.Renderer = getTemplateRenderer()
+	e.GET(cssEndpoint, contentHandler)
 }
+
+//go:embed static/*
+var content embed.FS
+
+var contentHandler = echo.WrapHandler(http.FileServer(http.FS(content)))
 
 // handleHomePage handles returning the homepage template
 func handleHomePage(c echo.Context) error {
@@ -142,10 +225,15 @@ type SheetMusicPageData struct {
 	Sheets Sheets
 }
 
+//go:embed templates/*.tmpl
+var templates embed.FS
+
 // getTemplateRenderer returns a template renderer for my echo webserver
 func getTemplateRenderer() *Template {
 	t := &Template{
-		templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
+		// templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
+		// retrieve templates from embedded filesystem
+		template.Must(template.ParseFS(templates, "templates/*.tmpl")),
 	}
 	return t
 }

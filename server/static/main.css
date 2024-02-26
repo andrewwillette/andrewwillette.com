@@ -1,0 +1,156 @@
+p {
+    font-size: 28px;
+}
+
+.navbar {
+    list-style:none;
+    padding-left: 0;
+    padding-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.navbar li {
+    display: inline;
+    padding: .7rem;
+}
+
+#keyofday-page {
+    font-size: 4rem;
+}
+
+#personalImage {
+    text-align: center;
+    height: auto;
+    width: 20%;
+}
+@media only screen and (max-device-width: 400px) {
+    #personalImage {
+        text-align: center;
+        height: auto;
+        width: 40%;
+    }
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+a {
+    color: black;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #5F5B1A;
+}
+
+#music-page ul iframe {
+    width: 80%;
+    height: 5rem;
+}
+
+#music-page ul {
+    padding: 0;
+}
+
+#music-page #copyright-clause {
+    font-size: 1rem;
+}
+
+#sheet-music-page li {
+    font-size: 2rem;
+    padding: 1rem;
+}
+
+#sheet-music-page ul {
+    text-align: left;
+    list-style-type: none;
+    padding: 1rem;
+}
+
+#home-page {
+    width: 100%;
+}
+
+#home-page p {
+    width: 100%;
+    font-size: 1.5rem;
+}
+
+main {
+  font-family: monospace, monospace;
+  max-width: 38rem;
+  padding: 2rem;
+  margin: auto;
+}
+
+@media only screen and (max-device-width: 736px) {
+  main {
+    padding: 0rem;
+  }
+}
+
+::selection {
+  background: #d3869b;
+}
+
+body {
+  background: #282828;
+  color:      #ebdbb2;
+}
+
+pre {
+  background-color: #3c3836;
+  padding: 1em;
+  border: 0;
+}
+
+a, a:active, a:visited {
+  color: #b16286;
+  background-color: #1d2021;
+}
+
+h1, h2, h3, h4, h5 {
+  margin-bottom: .1rem;
+}
+
+blockquote {
+  border-left: 1px solid #bdae93;
+  margin: 0.5em 10px;
+  padding: 0.5em 10px;
+}
+
+footer {
+  align: center;
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        background: #fbf1c7;
+        color:      #3c3836;
+    }
+
+    pre {
+        background-color: #ebdbb2;
+        padding: 1em;
+        border: 0;
+    }
+
+    a, a:active, a:visited {
+        color: #b16286;
+        background-color: #f9f5d7;
+    }
+
+    h1, h2, h3, h4, h5 {
+        margin-bottom: .1rem;
+    }
+
+    blockquote {
+        border-left: 1px solid #655c54;
+        margin: 0.5em 10px;
+        padding: 0.5em 10px;
+    }
+}
