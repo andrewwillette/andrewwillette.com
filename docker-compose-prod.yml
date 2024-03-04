@@ -14,3 +14,6 @@ services:
       - type: bind
         source: /var/www/.cache
         target: /var/www/.cache
+      - type: bind 
+        target: /awillettebackend/logging
+        source: /home/ubuntu

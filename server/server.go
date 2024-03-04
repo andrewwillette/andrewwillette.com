@@ -84,6 +84,7 @@ func handleResumePage(c echo.Context) error {
 
 // handleMusicPage handles returning the music template
 func handleMusicPage(c echo.Context) error {
+	// zapLogger.Info("Handling music page")
 	err := c.Render(http.StatusOK, "musicpage", musicData)
 	if err != nil {
 		log.Println(err)

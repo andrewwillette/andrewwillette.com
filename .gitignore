@@ -3,5 +3,6 @@
 **/terraform.tfstate.backup
 **/terraform.tfstate
 logging/server.log
+server.log
 willette_api
 tmp
