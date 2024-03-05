@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"path/filepath"
 	"runtime"
@@ -14,6 +13,7 @@ import (
 	"github.com/andrewwillette/keyofday/key"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -76,7 +76,6 @@ func handleHomePage(c echo.Context) error {
 func handleResumePage(c echo.Context) error {
 	err := c.Redirect(http.StatusPermanentRedirect, resumeResource)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 	return nil
@@ -84,10 +83,9 @@ func handleResumePage(c echo.Context) error {
 
 // handleMusicPage handles returning the music template
 func handleMusicPage(c echo.Context) error {
-	// zapLogger.Info("Handling music page")
+	log.Info().Msg("Music page requested")
 	err := c.Render(http.StatusOK, "musicpage", musicData)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 	return nil
@@ -98,7 +96,6 @@ func handleSheetmusicPage(c echo.Context) error {
 	sort.Sort(sheetmusicData.Sheets)
 	err := c.Render(http.StatusOK, "sheetmusicpage", sheetmusicData)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 	return nil
@@ -108,7 +105,6 @@ func handleSheetmusicPage(c echo.Context) error {
 func handleKeyOfDayPage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 	return nil

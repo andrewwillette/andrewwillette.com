@@ -11,9 +11,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # for persistening SSL cert across deploys
       - type: bind
-        source: /var/www/.cache
         target: /var/www/.cache
+        source: /var/www/.cache
+      # for persisting logs across deploys
       - type: bind 
+        # see WORKDIR call in Dockerfile for target placement
         target: /awillettebackend/logging
         source: /home/ubuntu

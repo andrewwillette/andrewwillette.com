@@ -4,6 +4,8 @@ services:
       context: .
     image: andrewwillette-dot-com:1.0
     environment:
-      ENV: "LOCAL"
+      # ENV: "LOCAL"
+      ENV: "SSL_BABY"
     ports:
       - "80:80"
+      - "443:443"
