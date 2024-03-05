@@ -1,12 +1,13 @@
 package logging
 
 import (
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
 	"path"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func init() {
@@ -55,7 +56,6 @@ func configure() {
 	zerolog.SetGlobalLevel(globalLogConfig.logLevel)
 	logger := zerolog.New(mw).With().Timestamp().Logger()
 	log.Logger = logger
-	log.Info().Msg("Logging configured")
 }
 
 // newRollingFile return new Writer value for use with zerolog logging writers

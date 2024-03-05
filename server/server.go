@@ -37,6 +37,9 @@ var (
 func StartServer(isHttps bool) {
 	e := echo.New()
 	addRoutes(e)
+	addMiddleware(e)
+	e.Renderer = getTemplateRenderer()
+
 	if isHttps {
 		e.Pre(middleware.HTTPSRedirect())
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
@@ -60,7 +63,10 @@ func addRoutes(e *echo.Echo) {
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.File(cssEndpoint, cssResource)
-	e.Renderer = getTemplateRenderer()
+}
+
+func addMiddleware(e *echo.Echo) {
+	e.Use(logmiddleware)
 }
 
 // handleHomePage handles returning the homepage template
@@ -83,7 +89,6 @@ func handleResumePage(c echo.Context) error {
 
 // handleMusicPage handles returning the music template
 func handleMusicPage(c echo.Context) error {
-	log.Info().Msg("Music page requested")
 	err := c.Render(http.StatusOK, "musicpage", musicData)
 	if err != nil {
 		return err
@@ -168,5 +173,15 @@ func (sheets Sheets) Less(i, j int) bool {
 		return false
 	default:
 		return false
+	}
+}
+
+func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Info().Msgf("Request to %s with ip %s", c.Path(), c.RealIP())
+		if err := next(c); err != nil {
+			c.Error(err)
+		}
+		return nil
 	}
 }
