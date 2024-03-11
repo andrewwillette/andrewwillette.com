@@ -56,7 +56,7 @@ func TestHandleKeyOfDayPage(t *testing.T) {
 	c := e.NewContext(req, rec)
 	err := handleKeyOfDayPage(c)
 	require.NoError(t, err)
-	require.Contains(t, rec.Body.String(), key.GetKeyOfDay())
+	require.Contains(t, rec.Body.String(), key.TodaysKey())
 }
 
 func BenchmarkHandleHomePage(b *testing.B) {

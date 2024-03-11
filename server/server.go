@@ -108,7 +108,7 @@ func handleSheetmusicPage(c echo.Context) error {
 
 // handleKeyOfDayPage handles returning the key of the day
 func handleKeyOfDayPage(c echo.Context) error {
-	err := c.Render(http.StatusOK, "keyofdaypage", key.GetKeyOfDay())
+	err := c.Render(http.StatusOK, "keyofdaypage", key.TodaysKey())
 	if err != nil {
 		return err
 	}
