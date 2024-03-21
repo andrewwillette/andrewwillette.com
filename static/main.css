@@ -130,30 +130,32 @@ footer {
   align: center;
 }
 
-@media (prefers-color-scheme: light) {
-    body {
-        background: #fbf1c7;
-        color:      #3c3836;
-    }
+/* for light mode support, commenting out because not crazy about colorscheme */
 
-    pre {
-        background-color: #ebdbb2;
-        padding: 1em;
-        border: 0;
-    }
+/* @media (prefers-color-scheme: light) { */
+/*     body { */
+/*         background: #fbf1c7; */
+/*         color:      #3c3836; */
+/*     } */
 
-    a, a:active, a:visited {
-        color: #b16286;
-        background-color: #f9f5d7;
-    }
+/*     pre { */
+/*         background-color: #ebdbb2; */
+/*         padding: 1em; */
+/*         border: 0; */
+/*     } */
 
-    h1, h2, h3, h4, h5 {
-        margin-bottom: .1rem;
-    }
+/*     a, a:active, a:visited { */
+/*         color: #b16286; */
+/*         background-color: #f9f5d7; */
+/*     } */
 
-    blockquote {
-        border-left: 1px solid #655c54;
-        margin: 0.5em 10px;
-        padding: 0.5em 10px;
-    }
-}
+/*     h1, h2, h3, h4, h5 { */
+/*         margin-bottom: .1rem; */
+/*     } */
+
+/*     blockquote { */
+/*         border-left: 1px solid #655c54; */
+/*         margin: 0.5em 10px; */
+/*         padding: 0.5em 10px; */
+/*     } */
+/* } */
