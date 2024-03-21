@@ -22,6 +22,7 @@ func TestHandleMusicPage(t *testing.T) {
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Contains(t, rec.Body.String(), "Andrew Willette")
 	require.Contains(t, rec.Body.String(), "© 2024 Andrew Willette. All rights reserved.")
+	require.Equal(t, true, false)
 }
 
 func TestHandleHomePage(t *testing.T) {

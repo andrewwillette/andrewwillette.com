@@ -1,0 +1,16 @@
+{{define "blogspage"}}
+{{template "header" -}}
+<div class="container">
+	<div id="blog-page" class="center">
+		<ul>
+		{{range .BlogPosts}}
+			<li>
+				<h2>{{.Title}}</h2>
+				<p>{{.Created}}</p>
+			</li>
+		{{end}}
+		</ul>
+	</div>
+</div>
+{{template "footer" -}}
+{{end}}

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/andrewwillette/keyofday/key"
+	"github.com/andrewwillette/willette_api/server/blog"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
@@ -22,6 +23,7 @@ const (
 	musicEndpoint      = "/music"
 	resumeEndpoint     = "/resume"
 	sheetmusicEndpoint = "/sheet-music"
+	blogEndpoint       = "/blog"
 	cssEndpoint        = "/static/main.css"
 	cssResource        = "static/main.css"
 	keyOfDayEndpoint   = "/kod"
@@ -36,6 +38,7 @@ var (
 // StartServer start the server with https certificate configurable
 func StartServer(isHttps bool) {
 	e := echo.New()
+	e.HideBanner = true
 	addRoutes(e)
 	addMiddleware(e)
 	e.Renderer = getTemplateRenderer()
@@ -62,7 +65,18 @@ func addRoutes(e *echo.Echo) {
 	e.GET(musicEndpoint, handleMusicPage)
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
+	e.GET(blogEndpoint, handleBlogPage)
 	e.File(cssEndpoint, cssResource)
+}
+
+func handleBlogPage(c echo.Context) error {
+	log.Info().Msg("Handling blog page")
+	err := c.Render(http.StatusOK, "blogspage", blog.GetBlogPageData())
+	if err != nil {
+		log.Error().Msgf("Error rendering blog page: %s", err.Error())
+		return err
+	}
+	return nil
 }
 
 func addMiddleware(e *echo.Echo) {
@@ -146,8 +160,22 @@ type SheetMusicPageData struct {
 
 // getTemplateRenderer returns a template renderer for my echo webserver
 func getTemplateRenderer() *Template {
+	templateBuilder := template.New("")
+	if t, _ := templateBuilder.ParseGlob(fmt.Sprintf("%s/templates/blogs/*.tmpl", basepath)); t != nil {
+		templateBuilder = t
+	}
+	if t, _ := templateBuilder.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath)); t != nil {
+		templateBuilder = t
+	}
+	// if t, _ := templateBuilder.ParseGlob("/*/*/*.tmpl"); t != nil {
+	// 	templateBuilder = t
+	// }
+	// if t, _ := templateBuilder.ParseGlob("/*/*.tmpl"); t != nil {
+	// 	templateBuilder = t
+	// }
+	// return templateBuilder.ParseGlob("/*.tmpl")
 	t := &Template{
-		templates: template.Must(template.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath))),
+		templates: templateBuilder,
 	}
 	return t
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	log.Info().Msg("Starting server")
+	log.Info().Msg("starting andrewillette.com server")
 	env := os.Getenv("ENV")
 	if env == "PROD" {
 		sslEnabled := true
