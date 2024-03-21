@@ -56,7 +56,10 @@ a:hover {
     padding: 0;
 }
 
-#music-page #copyright-clause {
+#copyright-clause {
+    position: fixed; 
+    bottom:0%;
+    right:0%;
     font-size: 1rem;
 }
 
