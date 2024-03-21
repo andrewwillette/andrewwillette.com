@@ -1,7 +1,5 @@
 package blog
 
-import "github.com/rs/zerolog/log"
-
 type Blog struct {
 	Title   string
 	Content string
@@ -16,7 +14,6 @@ type BlogPageData struct {
 // TODO: This should read a group of markdown files
 // from a directory and return them as a list of blogs
 func GetBlogPageData() BlogPageData {
-	log.Info().Msg("Getting blogs")
 	blogs := []Blog{
 		{
 			Title:   "First Blog",

@@ -70,10 +70,8 @@ func addRoutes(e *echo.Echo) {
 }
 
 func handleBlogPage(c echo.Context) error {
-	log.Info().Msg("Handling blog page")
 	err := c.Render(http.StatusOK, "blogspage", blog.GetBlogPageData())
 	if err != nil {
-		log.Error().Msgf("Error rendering blog page: %s", err.Error())
 		return err
 	}
 	return nil
