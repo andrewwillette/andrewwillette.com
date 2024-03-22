@@ -66,7 +66,18 @@ func addRoutes(e *echo.Echo) {
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.GET(blogEndpoint, handleBlogPage)
+	e.GET("/blog/:blog", handleIndividualBlogPage)
 	e.File(cssEndpoint, cssResource)
+}
+
+func handleIndividualBlogPage(c echo.Context) error {
+	requestedblog := blog.GetBlog(c.Param("blog"))
+	err := c.Render(http.StatusOK, "singleblogpage", requestedblog)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func handleBlogPage(c echo.Context) error {

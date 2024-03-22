@@ -1,11 +1,11 @@
 {{define "blogspage"}}
 {{template "header" -}}
 <div class="container">
-	<div id="blog-page" class="center">
+	<div id="blog-page">
 		<ul>
 		{{range .BlogPosts}}
-			<li>
-				<h2>{{.Title}}</h2>
+			<li class="blog-entry-li">
+				<h2><a href="/blog/{{.URLVal}}">{{.Title}}</a></h2>
 				<p>{{.Created}}</p>
 			</li>
 		{{end}}
