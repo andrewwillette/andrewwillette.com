@@ -70,16 +70,17 @@ func addRoutes(e *echo.Echo) {
 	e.File(cssEndpoint, cssResource)
 }
 
+// handleIndividualBlogPage handles returning the individual blog page
 func handleIndividualBlogPage(c echo.Context) error {
 	requestedblog := blog.GetBlog(c.Param("blog"))
 	err := c.Render(http.StatusOK, "singleblogpage", requestedblog)
-
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+// handleBlogPage handles returning the blog page displaying all blogs
 func handleBlogPage(c echo.Context) error {
 	err := c.Render(http.StatusOK, "blogspage", blog.GetBlogPageData())
 	if err != nil {
@@ -169,24 +170,17 @@ type SheetMusicPageData struct {
 
 // getTemplateRenderer returns a template renderer for my echo webserver
 func getTemplateRenderer() *Template {
-	templateBuilder := template.New("")
-	if t, _ := templateBuilder.ParseGlob(fmt.Sprintf("%s/templates/blogs/*.tmpl", basepath)); t != nil {
-		templateBuilder = t
+	templates := template.New("")
+	if t, _ := templates.ParseGlob(fmt.Sprintf("%s/templates/blogs/*.tmpl", basepath)); t != nil {
+		templates = t
 	}
-	if t, _ := templateBuilder.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath)); t != nil {
-		templateBuilder = t
+	if t, _ := templates.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath)); t != nil {
+		templates = t
 	}
-	// if t, _ := templateBuilder.ParseGlob("/*/*/*.tmpl"); t != nil {
-	// 	templateBuilder = t
-	// }
-	// if t, _ := templateBuilder.ParseGlob("/*/*.tmpl"); t != nil {
-	// 	templateBuilder = t
-	// }
-	// return templateBuilder.ParseGlob("/*.tmpl")
-	t := &Template{
-		templates: templateBuilder,
+	return &Template{
+		templates: templates,
 	}
-	return t
+
 }
 
 // Len to implement sort.Interface
