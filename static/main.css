@@ -146,9 +146,16 @@ footer {
     padding: 1rem;
 }
 
+#single-blog-page{
+    padding: 2rem;
+    padding-top: 0;
+}
+
+#single-blog-page p{
+    line-height: 3rem;
+}
 
 /* for light mode support, commenting out because not crazy about colorscheme */
-
 /* @media (prefers-color-scheme: light) { */
 /*     body { */
 /*         background: #fbf1c7; */
@@ -176,12 +183,3 @@ footer {
 /*         padding: 0.5em 10px; */
 /*     } */
 /* } */
-
-#single-blog-page{
-    padding: 2rem;
-    padding-top: 0;
-}
-
-#single-blog-page p{
-    line-height: 3rem;
-}
