@@ -113,6 +113,8 @@ func handleResumePage(c echo.Context) error {
 
 // handleMusicPage handles returning the music template
 func handleMusicPage(c echo.Context) error {
+	fmt.Println("Music Page")
+
 	err := c.Render(http.StatusOK, "musicpage", musicData)
 	if err != nil {
 		return err

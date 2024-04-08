@@ -4,6 +4,14 @@ var (
 	musicData = MusicPageData{
 		Songs: []Song{
 			{
+				Title: "Redeemed",
+				URL:   "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1795512334&color=%2390a419&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true",
+			},
+			{
+				Title: "Bach Double Excerpt",
+				URL:   "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1795509106&color=%238da734&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true",
+			},
+			{
 				Title: "Swallowtail Jig",
 				URL:   "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1511471356&color=%23b0a472&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true",
 			},
