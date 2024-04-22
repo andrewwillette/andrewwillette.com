@@ -11,11 +11,14 @@ import (
 	"strings"
 
 	"github.com/andrewwillette/keyofday/key"
-	"github.com/andrewwillette/willette_api/server/blog"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
+
+	cfg "github.com/andrewwillette/willette_api/cfg"
+	"github.com/andrewwillette/willette_api/server/blog"
+	"github.com/andrewwillette/willette_api/server/echopprof"
 )
 
 const (
@@ -41,6 +44,9 @@ func StartServer(isHttps bool) {
 	e.HideBanner = true
 	addRoutes(e)
 	addMiddleware(e)
+	if cfg.C.PProfEnabled {
+		echopprof.Wrap(e)
+	}
 	e.Renderer = getTemplateRenderer()
 
 	if isHttps {
@@ -113,8 +119,6 @@ func handleResumePage(c echo.Context) error {
 
 // handleMusicPage handles returning the music template
 func handleMusicPage(c echo.Context) error {
-	fmt.Println("Music Page")
-
 	err := c.Render(http.StatusOK, "musicpage", musicData)
 	if err != nil {
 		return err
