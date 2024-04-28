@@ -4,6 +4,10 @@ var (
 	musicData = MusicPageData{
 		Songs: []Song{
 			{
+				Title: "Northern White Clouds",
+				URL:   "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1809928065&color=%23bfd4d7&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true",
+			},
+			{
 				Title: "Redeemed",
 				URL:   "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1795512334&color=%2390a419&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true",
 			},
