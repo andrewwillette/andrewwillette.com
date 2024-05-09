@@ -42,6 +42,12 @@ var initializedBlogs = []Blog{}
 
 var uninitializedBlogs = []Blog{
 	{
+		Title:    "Simple Docker Deploys",
+		Created:  "May 8, 2024",
+		FileName: "simpledockerdeploys.md",
+		URLVal:   "simpledockerdeploys",
+	},
+	{
 		Title:    "Thinking About What",
 		Created:  "March 20, 2024",
 		FileName: "thinkingaboutwhat.md",
