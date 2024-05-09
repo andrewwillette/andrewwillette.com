@@ -1,5 +1,5 @@
 # Simple Docker Deploys
-I'd like to take some time here to describe how I deploy my personal website, `andrewwillette.com`. For a non-production application maintained solely by myself, I think it's a great solution. All the technologies I use are standard pieces of a modern cloud stack. I've found that maintaining my website is a nice exercise in keeping up-to-date with popular pieces of the cloud pipeline.
+I'd like to take some time to describe how I deploy my personal website, `andrewwillette.com`. For a non-production application maintained solely by myself, I think it's a great solution. All the technologies I use are standard pieces of a modern cloud stack. I've found that maintaining my website is a nice exercise in keeping up-to-date with popular pieces of the cloud pipeline.
 
 ## EC2 Instance
 My website runs on an [EC2 instance](https://aws.amazon.com/ec2/) in AWS. I use [packer CLI](https://www.packer.io/) to build an AMI with docker installed and running. Below is the [hcl2 script](https://developer.hashicorp.com/packer/guides/hcl) for my website.
