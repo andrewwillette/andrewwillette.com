@@ -141,7 +141,7 @@ resource "aws_security_group" "main" {
 }
 ```
 
-The terraform script also includes details for an ssh key. This is a public-key associated with a private-key on my local machine; this SSH connection comes into play later. Port ingress/egress rules are also declared for ssh, http, and https.
+The terraform script also includes details for an ssh key. This is a public-key associated with a private-key on my local machine, the SSH connection comes into play later. Port ingress/egress rules are also declared for ssh, http, and https.
 
 Executing `terraform plan` and `terraform apply` with the above script defined in the current directory as `website.tf` will deploy the EC2 instance into AWS.
 
