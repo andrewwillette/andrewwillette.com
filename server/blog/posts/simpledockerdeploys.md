@@ -2,7 +2,7 @@
 I'd like to take some time to describe how I deploy my personal website, `andrewwillette.com`. For a non-production application maintained solely by myself, I think it's a great solution. All the technologies I use are standard pieces of a modern cloud stack. I've found that maintaining my website is a nice exercise in keeping up-to-date with popular pieces of the cloud pipeline.
 
 ## Echo HTTPS Server
-I use the `go` [echo framework](https://github.com/labstack/echo) to run my server. I use go templating for frontend support, so the entire website is deployed as the single go binary. The echo frameworkgives me an API for [management of TLS certifications](https://echo.labstack.com/docs/cookbook/auto-tls#server). This is one of the primary reasons I haven't switched to the stdlib server yet.
+I use the `go` [echo framework](https://github.com/labstack/echo) to run my server. I use [go templating](https://pkg.go.dev/html/template) for frontend support so the entire website is deployed as the single go binary. The echo frameworkgives me an API for [management of TLS certifications](https://echo.labstack.com/docs/cookbook/auto-tls#server). This is one of the primary reasons I haven't switched to the stdlib server yet.
 
 ```go
 func startServer() {
