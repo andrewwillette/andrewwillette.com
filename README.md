@@ -1,2 +1,2 @@
 # andrewwillette.com
-My personal website which hosts my resume and some music recordings.
+My personal website hosted at `http://andrewwillette.com`.
