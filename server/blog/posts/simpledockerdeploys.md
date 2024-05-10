@@ -1,8 +1,8 @@
 # Simple Docker Deploys
-I'd like to take some time to describe how I deploy my personal website, `andrewwillette.com`. For a non-production application maintained solely by myself, I think it's a great solution. All the technologies I use are standard pieces of a modern cloud stack. I've found that maintaining my website is a nice exercise in keeping up-to-date with popular pieces of the cloud pipeline.
+I'd like to take some time to describe how I deploy my personal website, `andrewwillette.com`. For a non-production application maintained by one person (me), I think it's a great solution. All the technologies I use are standard pieces of a modern cloud stack. I've found that maintaining the website is a nice exercise in keeping up-to-date with popular pieces of the cloud pipeline.
 
 ## Echo HTTPS Server
-I use the `go` [echo framework](https://github.com/labstack/echo) to run my server. I use [go templating](https://pkg.go.dev/html/template) for frontend support so the entire website is deployed as the single go binary. The echo framework provides an API for [management of TLS certifications](https://echo.labstack.com/docs/cookbook/auto-tls#server). This is one of the primary reasons I haven't switched to the [stdlib webserver](https://pkg.go.dev/net/http) yet.
+I use the `go` [echo framework](https://github.com/labstack/echo) to run my server. I use [go templating](https://pkg.go.dev/html/template) for frontend requirements so the entire website is deployed as a single go binary; there's no frontend/backend complexity. The echo framework [provides an API](https://echo.labstack.com/docs/cookbook/auto-tls#server) for management of TLS certifications. This is one of the primary reasons I haven't switched to the [stdlib webserver](https://pkg.go.dev/net/http) yet.
 
 ```go
 func startServer() {
@@ -20,7 +20,7 @@ func startServer() {
 }
 ```
 
-After running into issues where I couldn't access my website post-redeploy, I persisted the docker container's `/var/www/.cache` directory across docker deploys as a volume. If this is not done, the SSL certificate updates each deploy. Clients (browsers) consequentially don't trust the newly-deployed service with its changed certificate. My docker compose file, `docker-compose-prod.yml` is below. It shows how the certificate directory is configured as a container "volume" on the host-machine.
+After running into issues where I couldn't access my website post-redeploy, I persisted the docker container's `/var/www/.cache` directory across docker deploys as a [docker volume](https://docs.docker.com/storage/volumes/). If this is not done, the SSL certificate updates each deploy. Clients (browsers) consequentially don't trust the newly-deployed service with its changed certificate. My docker compose file, `docker-compose-prod.yml` is below. It shows how the certificate directory is configured as a container "volume" on the host-machine.
 
 ```
 version: '3'
@@ -42,7 +42,6 @@ services:
         source: /var/www/.cache
       # for persisting logs across deploys
       - type: bind
-        # see WORKDIR call in Dockerfile for target placement
         target: /awillettebackend/logging
         source: /home/ubuntu
 ```
@@ -191,6 +190,9 @@ The terraform script also includes details for an ssh key. This is a public-key 
 
 Executing `terraform plan` and `terraform apply` with the above script defined in the current directory as `website.tf` (*.tf is valid) will deploy the EC2 instance into AWS.
 
+## NoIP DNS Registration
+I use [noip.com](https://www.noip.com/) to register an `A Record` for `*.andrewwillette.com`. The record points to public IP of my now-deployed EC2 instance. Anytime the EC2 instance is re-deployed, this does have to be updated. This is seldom done though because redeploys are at the docker-container level not the EC2 level.
+
 ## Docker over SSH
 
 I package and deploy my website as a docker container. Below is the `Dockerfile`.
@@ -207,7 +209,7 @@ RUN go build .
 CMD ["./willette_api"]
 ```
 
-The final key step is to configure docker commands on my local machine to execute on the docker-daemon of the recently-deployed EC2 instance. A [docker context](https://docs.docker.com/engine/context/working-with-contexts/) on my personal machine creates a connection to my EC2 instance's daemon via SSH using the command `docker context create --docker host=ssh://ubuntu@<aws_public_ip> personalwebsite`. This is where the ssh-key from the terraform comes in!
+The final key step is to configure docker commands on my local machine to execute on the docker-daemon of the recently-deployed EC2 instance. A [docker context](https://docs.docker.com/engine/context/working-with-contexts/) on my personal machine creates a connection to my EC2 instance's docker-daemon via SSH using the command `docker context create --docker host=ssh://ubuntu@<aws_public_ip> personalwebsite`. This is where the ssh-key from the terraform comes in!
 
 I now have a single bash script I execute locally which will build the website's docker container from my local machine's code and deploy it to AWS.
 
