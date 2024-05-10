@@ -191,7 +191,7 @@ The terraform script also includes details for an ssh key. This is a public-key 
 Executing `terraform plan` and `terraform apply` with the above script defined in the current directory as `website.tf` (*.tf is valid) will deploy the EC2 instance into AWS.
 
 ## NoIP DNS Registration
-I use [noip.com](https://www.noip.com/) to register an `A Record` for `*.andrewwillette.com`. The record points to public IP of my now-deployed EC2 instance. Anytime the EC2 instance is re-deployed, this does have to be updated. This is seldom done though because redeploys are at the docker-container level not the EC2 level.
+I use [noip.com](https://www.noip.com/) to register an `A Record` for `*.andrewwillette.com`. The record points to the public IP of my now-deployed EC2 instance. Anytime the EC2 instance is re-deployed, this does have to be updated. This is seldom done though because redeploys are at the docker-container level not the EC2 level.
 
 ## Docker over SSH
 
@@ -209,7 +209,7 @@ RUN go build .
 CMD ["./willette_api"]
 ```
 
-The final key step is to configure docker commands on my local machine to execute on the docker-daemon of the recently-deployed EC2 instance. A [docker context](https://docs.docker.com/engine/context/working-with-contexts/) on my personal machine creates a connection to my EC2 instance's docker-daemon via SSH using the command `docker context create --docker host=ssh://ubuntu@<aws_public_ip> personalwebsite`. This is where the ssh-key from the terraform comes in!
+The final key step is to configure docker commands on my local machine to execute on the docker-daemon of the recently-deployed EC2 instance. A [docker context](https://docs.docker.com/engine/context/working-with-contexts/) on my personal machine creates a connection to my EC2 instance's docker-daemon via SSH using the command `docker context create --docker host=ssh://ubuntu@<aws_public_ip> personalwebsite`. This is where the ssh-key from the terraform comes in! If that is configured correctly, this command should "just work". It really is a great piece of docker I wasn't aware of prior to this effort.
 
 I now have a single bash script I execute locally which will build the website's docker container from my local machine's code and deploy it to AWS.
 
