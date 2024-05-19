@@ -6,12 +6,10 @@ import "github.com/rs/zerolog/log"
 var C Config
 
 func init() {
-	log.Info().Msg("cfg init")
 	res, err := LoadConfig(".")
 	if err != nil {
 		log.Error().Msgf("Error loading config: %v", err)
 	}
-	log.Info().Msgf("Config: %v", res)
 	C = res
 }
 

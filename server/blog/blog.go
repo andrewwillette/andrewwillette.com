@@ -65,7 +65,6 @@ func GetBlog(urlval string) Blog {
 			output := blackfriday.Run([]byte(blog.Content), blackfriday.WithExtensions(blackfriday.CommonExtensions))
 			blog.Content = string(output)
 			blog.ContentHTML = template.HTML(blog.Content)
-			log.Info().Str("title", blog.Title).Str("content", blog.Content).Msg("found blog")
 			return blog
 		}
 	}
