@@ -1,8 +1,8 @@
 # Simple Docker Deploys
-I'd like to take some time to describe how I deploy my personal website, `andrewwillette.com`. For a non-production application maintained by one person (me), I think it's a great solution. All the technologies I use are standard pieces of a modern cloud stack. I've found that maintaining the website is a nice exercise in keeping up-to-date with popular pieces of the cloud pipeline. [Here is the soure code](https://github.com/andrewwillette/andrewwillette.com).
+I'd like to take some time to describe how I build and deploy my personal website, `andrewwillette.com`. The website is a non-critical web application maintained by one person, me. With those "requirements", I think I have a nice solution. It uses a lot of the popular cloud technologies. That makes maintaining it more interesting and rewarding.
 
 ## Echo HTTPS Server
-I use the `go` [echo framework](https://github.com/labstack/echo) to run my server. [Go templating](https://pkg.go.dev/html/template) is used for frontend requirements so the entire website is deployed as a single go binary; there's no frontend/backend complexity. The echo framework [provides an API](https://echo.labstack.com/docs/cookbook/auto-tls#server) for management of TLS certificates. This is one of the primary reasons I haven't switched to the [stdlib webserver](https://pkg.go.dev/net/http) yet.
+The webserver is implemented using the `go` [echo framework](https://github.com/labstack/echo). [Go templating](https://pkg.go.dev/html/template) is used for frontend requirements and as a result the entire website can be deployed as a single go binary; there's no frontend/backend complexity. The echo framework [provides an API](https://echo.labstack.com/docs/cookbook/auto-tls#server) for management of TLS certificates. This is one of the primary reasons I haven't switched to the [stdlib webserver](https://pkg.go.dev/net/http) yet.
 
 ```go
 func startServer() {
@@ -191,7 +191,7 @@ The terraform script also includes details for an ssh key. This is a public-key 
 In the shell, executing `terraform plan && terraform apply` with the above script defined in the current directory as `website.tf` (\*.tf is valid) will deploy the EC2 instance into AWS.
 
 ## NoIP DNS Registration
-I use [noip.com](https://www.noip.com/) to register an `A Record` for `*.andrewwillette.com`. The record points to the public IP of my now-deployed EC2 instance. Anytime the EC2 instance is re-deployed, this does have to be updated. This is seldom done though because redeploys are at the docker-container level not the EC2 level.
+[noip.com](https://www.noip.com/) is used to register an [A Record](https://en.wikipedia.org/wiki/List_of_DNS_record_types) for `*.andrewwillette.com`. The record points to the public IPv4 address of my now-deployed EC2 instance. Anytime the EC2 instance is re-deployed, this does have to be updated. This is seldom done though because redeploys are at the docker-container level not the EC2 level.
 
 ## Docker over SSH
 

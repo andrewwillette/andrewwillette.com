@@ -1,10 +1,8 @@
-FROM alpine:latest
-RUN apk add --no-cache go
-RUN apk update && apk upgrade
+FROM golang:latest
 EXPOSE 80
 EXPOSE 443
 WORKDIR /awillettebackend
 COPY . .
-ENV CGO_ENABLED=1
+ENV CGO_ENABLED=0
 RUN go build .
 CMD ["./willette_api"]
