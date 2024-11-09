@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/andrewwillette/keyofday/key"
 	"github.com/labstack/echo/v4"
@@ -24,6 +26,7 @@ import (
 const (
 	homeEndpoint       = "/"
 	musicEndpoint      = "/music"
+	musicNewEndpoint   = "/music-new"
 	resumeEndpoint     = "/resume"
 	sheetmusicEndpoint = "/sheet-music"
 	blogEndpoint       = "/blog"
@@ -40,6 +43,7 @@ var (
 
 // StartServer start the server with https certificate configurable
 func StartServer(isHttps bool) {
+	s3Client = initS3Session()
 	e := echo.New()
 	e.HideBanner = true
 	addRoutes(e)
@@ -68,7 +72,8 @@ func StartServer(isHttps bool) {
 func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
-	e.GET(musicEndpoint, handleMusicPage)
+	e.GET(musicEndpoint, handleMusicPageNew)
+	e.GET(musicNewEndpoint, handleMusicPageNew)
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.GET(blogEndpoint, handleBlogPage)
@@ -97,6 +102,7 @@ func handleBlogPage(c echo.Context) error {
 
 func addMiddleware(e *echo.Echo) {
 	e.Use(logmiddleware)
+	// e.Use(otelecho.Middleware("willette-api"))
 }
 
 // handleHomePage handles returning the homepage template
@@ -221,4 +227,18 @@ func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		return nil
 	}
+}
+
+func initOtelTracer() {
+	tracer, err := initTracer()
+	if err != nil {
+		log.Fatal().Msgf("failed to initialize tracer: %v", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := tracer.Shutdown(ctx); err != nil {
+			log.Fatal().Msgf("failed to shutdown tracer: %v", err)
+		}
+	}()
 }
