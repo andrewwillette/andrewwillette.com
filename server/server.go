@@ -26,7 +26,6 @@ import (
 const (
 	homeEndpoint       = "/"
 	musicEndpoint      = "/music"
-	musicNewEndpoint   = "/music-new"
 	resumeEndpoint     = "/resume"
 	sheetmusicEndpoint = "/sheet-music"
 	blogEndpoint       = "/blog"
@@ -43,7 +42,6 @@ var (
 
 // StartServer start the server with https certificate configurable
 func StartServer(isHttps bool) {
-	s3Client = initS3Session()
 	e := echo.New()
 	e.HideBanner = true
 	addRoutes(e)
@@ -72,8 +70,7 @@ func StartServer(isHttps bool) {
 func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
-	e.GET(musicEndpoint, handleMusicPageNew)
-	e.GET(musicNewEndpoint, handleMusicPageNew)
+	e.GET(musicEndpoint, handleRecordingsPage)
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.GET(blogEndpoint, handleBlogPage)
@@ -101,8 +98,10 @@ func handleBlogPage(c echo.Context) error {
 }
 
 func addMiddleware(e *echo.Echo) {
-	e.Use(logmiddleware)
+	// disabling otel
 	// e.Use(otelecho.Middleware("willette-api"))
+
+	e.Use(logmiddleware)
 }
 
 // handleHomePage handles returning the homepage template
@@ -117,15 +116,6 @@ func handleHomePage(c echo.Context) error {
 // handleResumePage handles returning the resume template
 func handleResumePage(c echo.Context) error {
 	err := c.Redirect(http.StatusPermanentRedirect, resumeResource)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// handleMusicPage handles returning the music template
-func handleMusicPage(c echo.Context) error {
-	err := c.Render(http.StatusOK, "musicpage", musicData)
 	if err != nil {
 		return err
 	}

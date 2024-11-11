@@ -17,6 +17,13 @@ import (
 
 var s3Client *s3.S3
 
+func getS3Client() *s3.S3 {
+	if s3Client == nil {
+		s3Client = initS3Session()
+	}
+	return s3Client
+}
+
 func initS3Session() *s3.S3 {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(region),
@@ -27,7 +34,7 @@ func initS3Session() *s3.S3 {
 	return s3.New(sess)
 }
 
-func handleMusicPageNew(c echo.Context) error {
+func handleRecordingsPage(c echo.Context) error {
 	// time the listSongsWithRandomImage function and log the duration
 	start := time.Now()
 	songs, err := listSongsWithRandomImage()
@@ -58,47 +65,6 @@ const (
 	imagePrefix = "audioimages/"
 )
 
-func listImages(svc *s3.S3) ([]string, error) {
-	input := &s3.ListObjectsV2Input{
-		Bucket: aws.String(bucketName),
-		Prefix: aws.String(imagePrefix),
-	}
-
-	result, err := svc.ListObjectsV2(input)
-	if err != nil {
-		return nil, err
-	}
-
-	imageURLs := []string{}
-	for _, item := range result.Contents {
-		if *item.Key == imagePrefix {
-			continue // skip the folder itself
-		}
-
-		url, err := getPresignedURL(svc, *item.Key)
-		if err != nil {
-			log.Printf("Failed to get URL for %s: %v", *item.Key, err)
-			continue
-		}
-		imageURLs = append(imageURLs, url)
-	}
-	return imageURLs, nil
-}
-
-// getAudioImageS3Data []S3Song
-// func getAudioImageS3Data() (map[string][]S3Song, error) {
-// 	input := &s3.ListObjectsV2Input{
-// 		Bucket: aws.String(bucketName),
-// 		Prefix: aws.String(audioPrefix),
-// 	}
-// 	songs := make(map[string][]S3Song)
-// 	s3Data, err := s3Client.ListObjectsV2(input)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return songs
-// }
-
 func listSongsWithRandomImage() ([]S3Song, error) {
 	log.Debug().Msg("listing songs with random image")
 	input := &s3.ListObjectsV2Input{
@@ -106,12 +72,11 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 		Prefix: aws.String(audioPrefix),
 	}
 	now := time.Now()
-	audioImageData, err := s3Client.ListObjectsV2(input)
+	audioImageData, err := getS3Client().ListObjectsV2(input)
 	if err != nil {
 		return nil, err
 	}
 	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(now))
-	// songs := make(map[string]S3Song)
 	wavs := make(map[string]string)
 	imgs := make(map[string]string)
 	for _, item := range audioImageData.Contents {
@@ -129,7 +94,7 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 		filetype := wavorpng(*item.Key)
 		mapsKey := formatAudioTitle(*item.Key)
 		log.Debug().Msgf("item.Key: %s", *item.Key)
-		itemUrl, err := getPresignedURL(s3Client, *item.Key)
+		itemUrl, err := getPresignedURL(getS3Client(), *item.Key)
 		if err != nil {
 			log.Error().Msgf("Failed to get URL for %s: %v", *item.Key, err)
 		}
@@ -140,7 +105,7 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 		}
 	}
 	toReturn := []S3Song{}
-	backupImageURL, err := getPresignedURL(s3Client, "audio/unknown.png")
+	backupImageURL, err := getPresignedURL(getS3Client(), "audio/unknown.png")
 	if err != nil {
 		log.Error().Msgf("Failed to get URL for unknown.png: %v", err)
 	}
@@ -155,12 +120,14 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 	return toReturn, nil
 }
 
+// getPresignedURL returns a presigned URL for the given key
+// used by the browser client to download the file
 func getPresignedURL(svc *s3.S3, key string) (string, error) {
 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
 	})
-	urlStr, err := req.Presign(15 * time.Minute) // URL expires in 15 minutes
+	urlStr, err := req.Presign(30 * time.Minute) // URL expires in 15 minutes
 	if err != nil {
 		return "", err
 	}
@@ -168,8 +135,6 @@ func getPresignedURL(svc *s3.S3, key string) (string, error) {
 }
 
 func formatAudioTitle(filePath string) string {
-
-	// key := formatAudioTitle((*item.Key)[len(audioPrefix):])
 	base := filepath.Base(filePath)
 	name := strings.TrimSuffix(base, filepath.Ext(base))
 	name = strings.ReplaceAll(name, "_", " ")

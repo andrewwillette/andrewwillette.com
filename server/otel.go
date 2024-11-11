@@ -11,13 +11,11 @@ import (
 )
 
 func initTracer() (*sdktrace.TracerProvider, error) {
-	// Create an OTLP exporter for sending traces
 	exporter, err := otlptracehttp.New(context.Background(), otlptracehttp.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
 
-	// Set up the tracer provider with the exporter and default options
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(exporter),
@@ -28,7 +26,6 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 		)),
 	)
 
-	// Register the global tracer provider
 	otel.SetTracerProvider(tp)
 	return tp, nil
 }

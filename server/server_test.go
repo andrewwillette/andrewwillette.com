@@ -11,19 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestHandleMusicPage(t *testing.T) {
-	e := echo.New()
-	e.Renderer = getTemplateRenderer()
-	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	err := handleMusicPage(c)
-	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, rec.Code)
-	require.Contains(t, rec.Body.String(), "Andrew Willette")
-	require.Contains(t, rec.Body.String(), "© 2024 Andrew Willette. All rights reserved.")
-}
-
 func TestHandleHomePage(t *testing.T) {
 	e := echo.New()
 	e.Renderer = getTemplateRenderer()
