@@ -31,7 +31,7 @@ const (
 	blogEndpoint       = "/blog"
 	cssEndpoint        = "/static/main.css"
 	cssResource        = "static/main.css"
-	keyOfDayEndpoint   = "/kod"
+	keyOfDayEndpoint   = "/key-of-the-day"
 	resumeResource     = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
