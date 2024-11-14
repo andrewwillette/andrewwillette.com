@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -35,12 +36,10 @@ func initS3Session() *s3.S3 {
 }
 
 func handleRecordingsPage(c echo.Context) error {
-	// time the listSongsWithRandomImage function and log the duration
 	start := time.Now()
 	songs, err := listSongsWithRandomImage()
 	log.Debug().Msgf("listSongsWithRandomImage took %v", time.Since(start))
 	if err != nil {
-		// http.Error(w, "Unable to list songs", http.StatusInternalServerError)
 		log.Error().Msgf("Unable to list songs: %v", err)
 		return err
 	}
@@ -56,6 +55,7 @@ type S3Song struct {
 	Name     string
 	AudioURL string
 	ImageURL string
+	Uploaded time.Time
 }
 
 const (
@@ -77,7 +77,7 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 		return nil, err
 	}
 	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(now))
-	wavs := make(map[string]string)
+	wavs := make(map[string]S3Song)
 	imgs := make(map[string]string)
 	for _, item := range audioImageData.Contents {
 		if *item.Key == audioPrefix { // skip the folder itself
@@ -92,16 +92,20 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 			return ""
 		}
 		filetype := wavorpng(*item.Key)
-		mapsKey := formatAudioTitle(*item.Key)
+		audioTitle := formatAudioTitle(*item.Key)
 		log.Debug().Msgf("item.Key: %s", *item.Key)
 		itemUrl, err := getPresignedURL(getS3Client(), *item.Key)
 		if err != nil {
 			log.Error().Msgf("Failed to get URL for %s: %v", *item.Key, err)
 		}
 		if filetype == "wav" {
-			wavs[mapsKey] = itemUrl
+			wavs[audioTitle] = S3Song{
+				Name:     audioTitle,
+				AudioURL: itemUrl,
+				Uploaded: *item.LastModified,
+			}
 		} else if filetype == "png" {
-			imgs[mapsKey] = itemUrl
+			imgs[audioTitle] = itemUrl
 		}
 	}
 	toReturn := []S3Song{}
@@ -109,14 +113,15 @@ func listSongsWithRandomImage() ([]S3Song, error) {
 	if err != nil {
 		log.Error().Msgf("Failed to get URL for unknown.png: %v", err)
 	}
-	for key, songURL := range wavs {
-		song := S3Song{AudioURL: songURL, ImageURL: imgs[key], Name: key}
-		if song.ImageURL == "" {
-			log.Warn().Msgf("No image found for %s", song.Name)
-			song.ImageURL = backupImageURL
+	for key, s3Song := range wavs {
+		s3Song.ImageURL = imgs[key]
+		if s3Song.ImageURL == "" {
+			log.Warn().Msgf("No image found for %s", s3Song.Name)
+			s3Song.ImageURL = backupImageURL
 		}
-		toReturn = append(toReturn, song)
+		toReturn = append(toReturn, s3Song)
 	}
+	sortS3SongsByRecent(toReturn)
 	return toReturn, nil
 }
 
@@ -141,4 +146,10 @@ func formatAudioTitle(filePath string) string {
 	titleCaser := cases.Title(language.English)
 	name = titleCaser.String(name)
 	return name
+}
+
+func sortS3SongsByRecent(songs []S3Song) {
+	sort.Slice(songs, func(i, j int) bool {
+		return songs[i].Uploaded.After(songs[j].Uploaded)
+	})
 }
