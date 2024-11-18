@@ -22,8 +22,10 @@ const (
 )
 
 var (
-	s3Client *s3.S3
-	cache    songCache
+	s3Client        *s3.S3
+	cache           songCache
+	presignedURLTTL = 30 * time.Minute
+	cacheTTL        = presignedURLTTL - 1*time.Minute
 )
 
 type S3Song struct {
@@ -39,7 +41,8 @@ type songCache struct {
 }
 
 func init() {
-	cache.updateCache()
+	go cache.updateCache()
+	go cache.startAutoUpdate()
 }
 
 func GetSongs() ([]S3Song, error) {
@@ -57,6 +60,18 @@ func (*songCache) updateCache() {
 	} else {
 		cache.songs = songs
 		cache.mu.Unlock()
+	}
+}
+
+func (*songCache) startAutoUpdate() {
+	ticker := time.NewTicker(cacheTTL)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			log.Debug().Msg("Updating song cache with auto-update")
+			cache.updateCache()
+		}
 	}
 }
 
