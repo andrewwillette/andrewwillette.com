@@ -6,7 +6,7 @@ import (
 )
 
 func TestListSongsWithRandomImage(t *testing.T) {
-	songs, err := ListSongsWithRandomImage()
+	songs, err := GetSongs()
 	if err != nil {
 		t.Errorf("listSongs() failed: %v", err)
 	}

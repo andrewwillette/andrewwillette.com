@@ -15,19 +15,127 @@ import (
 )
 
 const (
-	bucketName  = "andrewwillette"
-	region      = "us-east-2" // adjust based on your S3 region
-	audioPrefix = "audio/"    // Prefix for audio files
-	imagePrefix = "audioimages/"
+	bucketName        = "andrewwillette"
+	region            = "us-east-2"
+	audioBucketPrefix = "audio/"
 )
 
-var s3Client *s3.S3
+var (
+	s3Client  *s3.S3
+	songCache []S3Song
+)
 
 type S3Song struct {
-	Name     string
-	AudioURL string
-	ImageURL string
-	Uploaded time.Time
+	Name         string
+	AudioURL     string
+	ImageURL     string
+	LastModified time.Time
+}
+
+func init() {
+	updateSongCache()
+}
+
+func GetSongs() ([]S3Song, error) {
+	go updateSongCache()
+	return songCache, nil
+}
+
+func updateSongCache() {
+	songs, err := getS3Songs()
+	if err != nil {
+		log.Error().Msgf("Unable to get songs from S3: %v", err)
+		return
+	}
+	songCache = songs
+}
+
+func getS3Songs() ([]S3Song, error) {
+	log.Debug().Msg("GetS3Songs()")
+	input := &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+		Prefix: aws.String(audioBucketPrefix),
+	}
+	now := time.Now()
+	audioImageData, err := getS3Client().ListObjectsV2(input)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(now))
+	wavs := make(map[string]S3Song)
+	imgs := make(map[string]string)
+	for _, item := range audioImageData.Contents {
+		if *item.Key == audioBucketPrefix { // skip the folder itself
+			continue
+		}
+		filetype := wavOrPng(*item.Key)
+		audioTitle := formatAudioTitle(*item.Key)
+		log.Debug().Msgf("item.Key: %s, audioTitle: %s", *item.Key, audioTitle)
+		itemUrl, err := getPresignedURL(*item.Key)
+		if err != nil {
+			log.Error().Msgf("Failed to get URL for %s: %v", *item.Key, err)
+		}
+		if filetype == "wav" {
+			wavs[audioTitle] = S3Song{
+				Name:         audioTitle,
+				AudioURL:     itemUrl,
+				LastModified: *item.LastModified,
+			}
+		} else if filetype == "png" {
+			imgs[audioTitle] = itemUrl
+		}
+	}
+	toReturn := []S3Song{}
+	backupImageURL, err := getPresignedURL("audio/unknown.png")
+	if err != nil {
+		log.Error().Msgf("Failed to get URL for unknown.png: %v", err)
+	}
+	for key, s3Song := range wavs {
+		s3Song.ImageURL = imgs[key]
+		if s3Song.ImageURL == "" {
+			log.Warn().Msgf("No image found for %s", s3Song.Name)
+			s3Song.ImageURL = backupImageURL
+		}
+		toReturn = append(toReturn, s3Song)
+	}
+	sortS3SongsByRecent(toReturn)
+	return toReturn, nil
+}
+
+func wavOrPng(key string) string {
+	if strings.HasSuffix(key, ".wav") {
+		return "wav"
+	} else if strings.HasSuffix(key, ".png") {
+		return "png"
+	}
+	return ""
+}
+
+func formatAudioTitle(filePath string) string {
+	base := filepath.Base(filePath)
+	name := strings.TrimSuffix(base, filepath.Ext(base))
+	name = strings.ReplaceAll(name, "_", " ")
+	titleCaser := cases.Title(language.English)
+	name = titleCaser.String(name)
+	return name
+}
+
+func sortS3SongsByRecent(songs []S3Song) {
+	sort.Slice(songs, func(i, j int) bool {
+		return songs[i].LastModified.After(songs[j].LastModified)
+	})
+}
+
+func getPresignedURL(key string) (string, error) {
+	req, _ := getS3Client().GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	})
+	urlStr, err := req.Presign(30 * time.Minute) // URL expires in 15 minutes
+	if err != nil {
+		return "", err
+	}
+	return urlStr, nil
 }
 
 func getS3Client() *s3.S3 {
@@ -45,91 +153,4 @@ func initS3Session() *s3.S3 {
 		log.Fatal().Msgf("Failed to create S3 session: %v", err)
 	}
 	return s3.New(sess)
-}
-
-func ListSongsWithRandomImage() ([]S3Song, error) {
-	log.Debug().Msg("listing songs with random image")
-	input := &s3.ListObjectsV2Input{
-		Bucket: aws.String(bucketName),
-		Prefix: aws.String(audioPrefix),
-	}
-	now := time.Now()
-	audioImageData, err := getS3Client().ListObjectsV2(input)
-	if err != nil {
-		return nil, err
-	}
-	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(now))
-	wavs := make(map[string]S3Song)
-	imgs := make(map[string]string)
-	for _, item := range audioImageData.Contents {
-		if *item.Key == audioPrefix { // skip the folder itself
-			continue
-		}
-		wavorpng := func(key string) string { // returns "wav" or "png"
-			if strings.HasSuffix(key, ".wav") {
-				return "wav"
-			} else if strings.HasSuffix(key, ".png") {
-				return "png"
-			}
-			return ""
-		}
-		filetype := wavorpng(*item.Key)
-		audioTitle := formatAudioTitle(*item.Key)
-		log.Debug().Msgf("item.Key: %s", *item.Key)
-		itemUrl, err := getPresignedURL(getS3Client(), *item.Key)
-		if err != nil {
-			log.Error().Msgf("Failed to get URL for %s: %v", *item.Key, err)
-		}
-		if filetype == "wav" {
-			wavs[audioTitle] = S3Song{
-				Name:     audioTitle,
-				AudioURL: itemUrl,
-				Uploaded: *item.LastModified,
-			}
-		} else if filetype == "png" {
-			imgs[audioTitle] = itemUrl
-		}
-	}
-	toReturn := []S3Song{}
-	backupImageURL, err := getPresignedURL(getS3Client(), "audio/unknown.png")
-	if err != nil {
-		log.Error().Msgf("Failed to get URL for unknown.png: %v", err)
-	}
-	for key, s3Song := range wavs {
-		s3Song.ImageURL = imgs[key]
-		if s3Song.ImageURL == "" {
-			log.Warn().Msgf("No image found for %s", s3Song.Name)
-			s3Song.ImageURL = backupImageURL
-		}
-		toReturn = append(toReturn, s3Song)
-	}
-	sortS3SongsByRecent(toReturn)
-	return toReturn, nil
-}
-
-func formatAudioTitle(filePath string) string {
-	base := filepath.Base(filePath)
-	name := strings.TrimSuffix(base, filepath.Ext(base))
-	name = strings.ReplaceAll(name, "_", " ")
-	titleCaser := cases.Title(language.English)
-	name = titleCaser.String(name)
-	return name
-}
-
-func sortS3SongsByRecent(songs []S3Song) {
-	sort.Slice(songs, func(i, j int) bool {
-		return songs[i].Uploaded.After(songs[j].Uploaded)
-	})
-}
-
-func getPresignedURL(svc *s3.S3, key string) (string, error) {
-	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(key),
-	})
-	urlStr, err := req.Presign(30 * time.Minute) // URL expires in 15 minutes
-	if err != nil {
-		return "", err
-	}
-	return urlStr, nil
 }
