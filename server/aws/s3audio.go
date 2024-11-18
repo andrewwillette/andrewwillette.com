@@ -39,24 +39,25 @@ type songCache struct {
 }
 
 func init() {
-	updateSongCache()
+	cache.updateCache()
 }
 
 func GetSongs() ([]S3Song, error) {
-	go updateSongCache()
+	go cache.updateCache()
 	return cache.songs, nil
 }
 
-func updateSongCache() {
+func (*songCache) updateCache() {
 	cache.mu.Lock()
 	songs, err := getS3Songs()
 	if err != nil {
 		log.Error().Msgf("Unable to get songs from S3: %v", err)
 		cache.mu.Unlock()
 		return
+	} else {
+		cache.songs = songs
+		cache.mu.Unlock()
 	}
-	cache.songs = songs
-	cache.mu.Unlock()
 }
 
 func getS3Songs() ([]S3Song, error) {
