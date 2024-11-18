@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -21,8 +22,8 @@ const (
 )
 
 var (
-	s3Client  *s3.S3
-	songCache []S3Song
+	s3Client *s3.S3
+	cache    songCache
 )
 
 type S3Song struct {
@@ -32,22 +33,29 @@ type S3Song struct {
 	LastModified time.Time
 }
 
+type songCache struct {
+	songs []S3Song
+	mu    sync.Mutex
+}
+
 func init() {
 	updateSongCache()
 }
 
 func GetSongs() ([]S3Song, error) {
 	go updateSongCache()
-	return songCache, nil
+	return cache.songs, nil
 }
 
 func updateSongCache() {
+	cache.mu.Lock()
 	songs, err := getS3Songs()
 	if err != nil {
 		log.Error().Msgf("Unable to get songs from S3: %v", err)
 		return
 	}
-	songCache = songs
+	cache.songs = songs
+	cache.mu.Unlock()
 }
 
 func getS3Songs() ([]S3Song, error) {
