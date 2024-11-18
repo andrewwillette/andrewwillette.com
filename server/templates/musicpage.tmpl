@@ -1,13 +1,46 @@
 {{define "musicpage"}}
 {{template "header" -}}
-<div class="container">
-	<div id="music-page" class="center">
-		<ul>
-		{{range .Songs}}
-			<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src={{.URL}}></iframe><div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/user-434601011" title="Andrew Willette" target="_blank" style="color: #cccccc; text-decoration: none;">Andrew Willette</a> · <a href="https://soundcloud.com/user-434601011/swallowtail-jig" title={{.Title}} target="_blank" style="color: #cccccc; text-decoration: none;">{{.Title}}</a></div>
-		{{end}}
-		</ul>
+<div class="music-container">
+	<div id="music-page-new">
+    {{ if . }}
+        {{ range . }}
+            <!-- Accent Image -->
+            <div class="accent-image">
+                <img src="{{ .ImageURL }}" alt="Audio Accent Image">
+            </div>
+
+            <!-- Audio Player Container -->
+            <div class="audio-player-container">
+                <h2 class="audio-title">{{ .Name }}</h2>
+
+                <!-- Audio Element with Native Controls -->
+                <audio controls class="audio-player">
+                    <source src="{{ .AudioURL }}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        {{ end }}
+    {{ else }}
+        <p>No songs available.</p>
+    {{ end }}
 	</div>
 </div>
+<script>
+// JavaScript to ensure only one audio player plays at a time
+document.addEventListener("DOMContentLoaded", function() {
+	const audioPlayers = document.querySelectorAll(".audio-player");
+
+	audioPlayers.forEach((player) => {
+		player.addEventListener("play", function() {
+			// Pause all other audio players
+			audioPlayers.forEach((otherPlayer) => {
+				if (otherPlayer !== player) {
+					otherPlayer.pause();
+				}
+			});
+		});
+	});
+});
+</script>
 {{template "footer" -}}
 {{end}}

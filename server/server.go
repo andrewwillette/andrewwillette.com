@@ -41,7 +41,7 @@ var (
 )
 
 // StartServer start the server with https certificate configurable
-func StartServer(isHttps bool) {
+func StartServer(sslEnabled bool) {
 	e := echo.New()
 	e.HideBanner = true
 	addRoutes(e)
@@ -50,8 +50,7 @@ func StartServer(isHttps bool) {
 		echopprof.Wrap(e)
 	}
 	e.Renderer = getTemplateRenderer()
-
-	if isHttps {
+	if sslEnabled {
 		e.Pre(middleware.HTTPSRedirect())
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
 		// getSSLCacheDir return directory for ssl cache
@@ -149,14 +148,6 @@ type Template struct {
 // Render renders the template
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
-}
-
-type Song struct {
-	Title string
-	URL   string
-}
-type MusicPageData struct {
-	Songs []Song
 }
 
 type DropboxReference struct {

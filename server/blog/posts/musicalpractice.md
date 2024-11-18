@@ -2,6 +2,10 @@
 
 I approach practicing violin with the hope of the highest payout for the least effort. I have opinions on how to do this, I'd like to share them here.
 
+The core method is practicing scales and arpeggios, on all 7 scale degrees, chromatically by day, with consistent use of a metronome. As you get more comfortable with this, you can branch from just scales and arpeggios to playing phrases / songs in different keys.
+
+For example, today you play everything in A. Tomorrow, you play everything in B flat. The day after, B. So on and so on. Every 12 days you'll arrive back to where you started, in this example A.
+
 I read that [Charlie Parker](https://en.wikipedia.org/wiki/Charlie_Parker) could hear a melody and play it in all 12 keys, on the spot! From that, I take that he approached music in a way where melody and harmony were seen as a "relative" construct. The key was what set the tonic for the relative intervals. I had practiced scales and arpeggios semi-regularly up to that point, but learning about Charlie Parker's musical approach, I began doing something I think is novel and I now evangelize to anyone that will listen. Every day, practice for 5 or 10 minutes and play scales, arpeggios, licks, full melodies, in a given key, lets say A. The following day, do a similar practice routine of playing scales, arpeggios, licks, etc, but in the key of B flat, a half step up. The following day, same thing, but in B. And so on and so on.
 
 Instrumental music is composed primarily of just three things; melody, harmony, and rhythm. The various items I play in the "key of the day" are intended to increase my ability to execute on these three areas. I'll list some here, but I don't want to set out what one should do. The important thing is to develop musical ideas in all 12 keys. You will begin to understand music at a much deeper level. A relative level.

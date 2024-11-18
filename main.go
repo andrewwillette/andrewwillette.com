@@ -11,11 +11,11 @@ import (
 func main() {
 	log.Info().Msg("starting andrewillette.com server")
 	env := os.Getenv("ENV")
+	var sslEnabled bool
 	if env == "PROD" {
-		sslEnabled := true
-		server.StartServer(sslEnabled)
+		sslEnabled = true
 	} else {
-		sslEnabled := false
-		server.StartServer(sslEnabled)
+		sslEnabled = false
 	}
+	server.StartServer(sslEnabled)
 }
