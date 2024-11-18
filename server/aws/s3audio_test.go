@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestListSongsWithRandomImage(t *testing.T) {
-	songs, err := GetSongs()
+func TestGetS3Songs(t *testing.T) {
+	songs, err := getS3Songs()
 	if err != nil {
 		t.Errorf("listSongs() failed: %v", err)
 	}
