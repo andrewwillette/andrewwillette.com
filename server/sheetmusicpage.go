@@ -1,5 +1,13 @@
 package server
 
+import (
+	"net/http"
+	"sort"
+	"strings"
+
+	"github.com/labstack/echo/v4"
+)
+
 var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxReference{
@@ -62,3 +70,48 @@ var (
 		},
 	}
 )
+
+type DropboxReference struct {
+	Name string
+	URL  string
+}
+
+type Sheets []DropboxReference
+
+type SheetMusicPageData struct {
+	Sheets Sheets
+}
+
+// Len to implement sort.Interface
+func (sheets Sheets) Len() int {
+	return len(sheets)
+}
+
+// Swap to implement sort.Interface
+func (sheets Sheets) Swap(i, j int) {
+	sheets[i], sheets[j] = sheets[j], sheets[i]
+}
+
+// handleSheetmusicPage handles returning the transcription template
+func handleSheetmusicPage(c echo.Context) error {
+	sort.Sort(sheetmusicData.Sheets)
+	err := c.Render(http.StatusOK, "sheetmusicpage", sheetmusicData)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Less to implement sort.Interface
+func (sheets Sheets) Less(i, j int) bool {
+	switch strings.Compare(sheets[i].Name, sheets[j].Name) {
+	case -1:
+		return true
+	case 0:
+		return false
+	case 1:
+		return false
+	default:
+		return false
+	}
+}

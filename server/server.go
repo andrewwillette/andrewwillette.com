@@ -97,9 +97,6 @@ func handleBlogPage(c echo.Context) error {
 }
 
 func addMiddleware(e *echo.Echo) {
-	// disabling otel
-	// e.Use(otelecho.Middleware("willette-api"))
-
 	e.Use(logmiddleware)
 }
 
@@ -115,16 +112,6 @@ func handleHomePage(c echo.Context) error {
 // handleResumePage handles returning the resume template
 func handleResumePage(c echo.Context) error {
 	err := c.Redirect(http.StatusPermanentRedirect, resumeResource)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// handleSheetmusicPage handles returning the transcription template
-func handleSheetmusicPage(c echo.Context) error {
-	sort.Sort(sheetmusicData.Sheets)
-	err := c.Render(http.StatusOK, "sheetmusicpage", sheetmusicData)
 	if err != nil {
 		return err
 	}
@@ -150,17 +137,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-type DropboxReference struct {
-	Name string
-	URL  string
-}
-
-type Sheets []DropboxReference
-
-type SheetMusicPageData struct {
-	Sheets Sheets
-}
-
 // getTemplateRenderer returns a template renderer for my echo webserver
 func getTemplateRenderer() *Template {
 	templates := template.New("")
@@ -174,30 +150,6 @@ func getTemplateRenderer() *Template {
 		templates: templates,
 	}
 
-}
-
-// Len to implement sort.Interface
-func (sheets Sheets) Len() int {
-	return len(sheets)
-}
-
-// Swap to implement sort.Interface
-func (sheets Sheets) Swap(i, j int) {
-	sheets[i], sheets[j] = sheets[j], sheets[i]
-}
-
-// Less to implement sort.Interface
-func (sheets Sheets) Less(i, j int) bool {
-	switch strings.Compare(sheets[i].Name, sheets[j].Name) {
-	case -1:
-		return true
-	case 0:
-		return false
-	case 1:
-		return false
-	default:
-		return false
-	}
 }
 
 func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
