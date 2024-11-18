@@ -1,4 +1,4 @@
-package server
+package aws
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestListSongsWithRandomImage(t *testing.T) {
-	songs, err := listSongsWithRandomImage()
+	songs, err := ListSongsWithRandomImage()
 	if err != nil {
 		t.Errorf("listSongs() failed: %v", err)
 	}
