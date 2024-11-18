@@ -52,6 +52,7 @@ func updateSongCache() {
 	songs, err := getS3Songs()
 	if err != nil {
 		log.Error().Msgf("Unable to get songs from S3: %v", err)
+		cache.mu.Unlock()
 		return
 	}
 	cache.songs = songs
