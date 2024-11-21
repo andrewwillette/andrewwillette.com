@@ -118,7 +118,7 @@ func getS3Songs() ([]s3Song, error) {
 	for key, s3Song := range wavs {
 		s3Song.ImageURL = imgs[key]
 		if s3Song.ImageURL == "" {
-			log.Warn().Msgf("No image found for %s", s3Song.Name)
+			log.Debug().Msgf("No image found for %s", s3Song.Name)
 			s3Song.ImageURL = backupImageURL
 		}
 		toReturn = append(toReturn, s3Song)

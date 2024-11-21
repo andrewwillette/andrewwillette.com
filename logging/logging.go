@@ -35,7 +35,7 @@ var globalLogConfig = logConfig{
 	maxSizeMB:             200,
 	maxBackups:            2,
 	maxAge:                31,
-	logLevel:              zerolog.DebugLevel,
+	logLevel:              zerolog.InfoLevel,
 }
 
 // configure return a zerolog logger with provided behavior based off
