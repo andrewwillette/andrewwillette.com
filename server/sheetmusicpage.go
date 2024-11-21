@@ -8,20 +8,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type DropboxSong struct {
+type DropboxSheetMusic struct {
 	Name string
 	URL  string
 }
 
-type Songs []DropboxSong
+type Sheets []DropboxSheetMusic
 
 type SheetMusicPageData struct {
-	Sheets Songs
+	Sheets Sheets
 }
 
 var (
 	sheetmusicData = SheetMusicPageData{
-		Sheets: []DropboxSong{
+		Sheets: []DropboxSheetMusic{
 			{
 				Name: "Cumberland Gap",
 				URL:  "https://www.dropbox.com/scl/fi/9vnjhsojyefsutz4yzt00/Cumberland-Gap.pdf?rlkey=i8ueptsmvhfmi59ww7h3q9dij&dl=0",
@@ -83,12 +83,12 @@ var (
 )
 
 // Len to implement sort.Interface
-func (sheets Songs) Len() int {
+func (sheets Sheets) Len() int {
 	return len(sheets)
 }
 
 // Swap to implement sort.Interface
-func (sheets Songs) Swap(i, j int) {
+func (sheets Sheets) Swap(i, j int) {
 	sheets[i], sheets[j] = sheets[j], sheets[i]
 }
 
@@ -103,7 +103,7 @@ func handleSheetmusicPage(c echo.Context) error {
 }
 
 // Less to implement sort.Interface
-func (sheets Songs) Less(i, j int) bool {
+func (sheets Sheets) Less(i, j int) bool {
 	switch strings.Compare(sheets[i].Name, sheets[j].Name) {
 	case -1:
 		return true
