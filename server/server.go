@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/andrewwillette/keyofday/key"
