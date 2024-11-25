@@ -47,10 +47,9 @@ func HandleRssFeed(c echo.Context) error {
 		Description: "Latest updates from my blog.",
 		Created:     now,
 	}
-
 	var feedItems []*feeds.Item
 	for _, blog := range initializedBlogs {
-		created, err := time.Parse(blog.Created, "January 2, 2006")
+		created, err := time.Parse("January 2, 2006", blog.Created)
 		if err != nil {
 			log.Error().Err(err).Msg("error parsing blog created date")
 		}
