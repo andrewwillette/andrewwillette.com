@@ -27,6 +27,7 @@ const (
 	resumeEndpoint     = "/resume"
 	sheetmusicEndpoint = "/sheet-music"
 	blogEndpoint       = "/blog"
+	blogRssEndpoint    = "/blog/rss"
 	cssEndpoint        = "/static/main.css"
 	cssResource        = "static/main.css"
 	keyOfDayEndpoint   = "/key-of-the-day"
@@ -70,28 +71,10 @@ func addRoutes(e *echo.Echo) {
 	e.GET(musicEndpoint, handleRecordingsPage)
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
-	e.GET(blogEndpoint, handleBlogPage)
-	e.GET("/blog/:blog", handleIndividualBlogPage)
+	e.GET(blogEndpoint, blog.HandleBlogPage)
+	e.GET(blogRssEndpoint, blog.HandleRssFeed)
+	e.GET("/blog/:blog", blog.HandleIndividualBlogPage)
 	e.File(cssEndpoint, cssResource)
-}
-
-// handleIndividualBlogPage handles returning the individual blog page
-func handleIndividualBlogPage(c echo.Context) error {
-	requestedblog := blog.GetBlog(c.Param("blog"))
-	err := c.Render(http.StatusOK, "singleblogpage", requestedblog)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// handleBlogPage handles returning the blog page displaying all blogs
-func handleBlogPage(c echo.Context) error {
-	err := c.Render(http.StatusOK, "blogspage", blog.GetBlogPageData())
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func addMiddleware(e *echo.Echo) {

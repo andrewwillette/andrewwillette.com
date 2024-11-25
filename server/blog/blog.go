@@ -2,10 +2,14 @@ package blog
 
 import (
 	"html/template"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
+	"github.com/gorilla/feeds"
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/russross/blackfriday/v2"
 )
@@ -25,6 +29,55 @@ func init() {
 	initializedBlogs = blogsposts
 }
 
+// HandleIndividualBlogPage handles returning the individual blog page
+func HandleIndividualBlogPage(c echo.Context) error {
+	requestedblog := GetBlog(c.Param("blog"))
+	err := c.Render(http.StatusOK, "singleblogpage", requestedblog)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func HandleRssFeed(c echo.Context) error {
+	now := time.Now()
+	feed := &feeds.Feed{
+		Title:       "Andrew Willette's Blog",
+		Link:        &feeds.Link{Href: "https://andrewwillette.com/blog"},
+		Description: "Latest updates from my blog.",
+		Created:     now,
+	}
+
+	var feedItems []*feeds.Item
+	for _, blog := range initializedBlogs {
+		created, err := time.Parse(blog.Created, "January 2, 2006")
+		if err != nil {
+			log.Error().Err(err).Msg("error parsing blog created date")
+		}
+		feedItems = append(feedItems, &feeds.Item{
+			Title:   blog.Title,
+			Link:    &feeds.Link{Href: "https://andrewwillette.com/blog/" + blog.URLVal},
+			Content: blog.Content,
+			Created: created,
+		})
+	}
+	feed.Items = feedItems
+	rss, err := feed.ToRss()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Unable to generate RSS feed")
+	}
+	return c.Blob(http.StatusOK, "application/rss+xml", []byte(rss))
+}
+
+// HandleBlogPage handles returning the blog page displaying all blogs
+func HandleBlogPage(c echo.Context) error {
+	err := c.Render(http.StatusOK, "blogspage", GetBlogPageData())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type Blog struct {
 	Title       string
 	Content     string
@@ -36,6 +89,7 @@ type Blog struct {
 
 type BlogPageData struct {
 	BlogPosts []Blog
+	RssLink   string
 }
 
 var initializedBlogs = []Blog{}
@@ -43,19 +97,19 @@ var initializedBlogs = []Blog{}
 var uninitializedBlogs = []Blog{
 	{
 		Title:    "Key of the Day",
-		Created:  "November 24, 2024",
+		Created:  time.Date(2024, time.November, 24, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 		FileName: "keyoftheday.md",
 		URLVal:   "keyoftheday",
 	},
 	{
 		Title:    "Simple Docker Deploys",
-		Created:  "May 8, 2024",
+		Created:  time.Date(2024, time.May, 8, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 		FileName: "simpledockerdeploys.md",
 		URLVal:   "simpledockerdeploys",
 	},
 	{
 		Title:    "Thinking About What",
-		Created:  "March 20, 2024",
+		Created:  time.Date(2024, time.March, 20, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 		FileName: "thinkingaboutwhat.md",
 		URLVal:   "thinkingaboutwhat",
 	},
@@ -79,5 +133,8 @@ func GetBlog(urlval string) Blog {
 
 // GetBlogs returns blog data for rendering in template
 func GetBlogPageData() BlogPageData {
-	return BlogPageData{BlogPosts: uninitializedBlogs}
+	return BlogPageData{
+		BlogPosts: uninitializedBlogs,
+		RssLink:   "/blog/rss",
+	}
 }
