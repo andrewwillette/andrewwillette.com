@@ -58,6 +58,7 @@ func HandleRssFeed(c echo.Context) error {
 			Link:    &feeds.Link{Href: "https://andrewwillette.com/blog/" + blog.URLVal},
 			Content: blog.Content,
 			Created: created,
+			Updated: created,
 		})
 	}
 	feed.Items = feedItems
