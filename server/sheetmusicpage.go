@@ -35,6 +35,14 @@ var (
 				URL:  "https://www.dropbox.com/scl/fi/i4c0x7z8i8eis0gvyxqrl/Benton-s-Dream.pdf?dl=0&rlkey=ra3i5gf5kyu6ulup5uqezpzr9",
 			},
 			{
+				Name: "Tangle Weed",
+				URL:  "https://www.dropbox.com/scl/fi/evg8lz6gtllvk3hxodw19/Tangle-Weed.pdf?rlkey=dwpxnc9q3trzumo6ay01roc91&st=qnpwtith&dl=0",
+			},
+			{
+				Name: "Cherokee Shuffle",
+				URL:  "https://www.dropbox.com/scl/fi/lymfxdun2j66pmdyrcvr7/Cherokee-Shuffle.pdf?rlkey=9p1tkuvnv2i84tj1gswaqh8r0&st=tgfnuhou&dl=0",
+			},
+			{
 				Name: "Polecat Blues",
 				URL:  "https://www.dropbox.com/scl/fi/vbujvvahgnm2x42r8ynls/Polecat-Blues.pdf?rlkey=4kdf38nmotl55mkdbk915xm86&dl=0",
 			},
