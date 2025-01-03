@@ -23,6 +23,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Angel's Waltz",
+				URL:  "https://www.dropbox.com/scl/fi/2si0g763f5z3uvki6holf/Angel-s-Waltz.pdf?rlkey=lubz1chtt8rp0hj4jrxbkj4f9&st=ul78jqqb&dl=0",
+			},
+			{
 				Name: "Cumberland Gap",
 				URL:  "https://www.dropbox.com/scl/fi/9vnjhsojyefsutz4yzt00/Cumberland-Gap.pdf?rlkey=i8ueptsmvhfmi59ww7h3q9dij&dl=0",
 			},
