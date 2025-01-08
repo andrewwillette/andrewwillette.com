@@ -90,7 +90,6 @@ type Blog struct {
 
 type BlogPageData struct {
 	BlogPosts   []Blog
-	RssLink     string
 	CurrentYear int
 }
 
@@ -139,7 +138,6 @@ func GetBlogPageData() BlogPageData {
 	currentYear := time.Now().Year()
 	return BlogPageData{
 		BlogPosts:   uninitializedBlogs,
-		RssLink:     "/blog/rss",
 		CurrentYear: currentYear,
 	}
 }
