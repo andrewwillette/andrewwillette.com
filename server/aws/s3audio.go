@@ -28,7 +28,7 @@ var (
 	cacheTTL        = presignedURLTTL - 1*time.Minute
 )
 
-type s3Song struct {
+type S3Song struct {
 	Name         string
 	AudioURL     string
 	ImageURL     string
@@ -36,7 +36,7 @@ type s3Song struct {
 }
 
 type songCache struct {
-	songs []s3Song
+	songs []S3Song
 	mu    sync.Mutex
 }
 
@@ -45,7 +45,7 @@ func init() {
 	go cache.startAutoUpdate()
 }
 
-func GetSongs() ([]s3Song, error) {
+func GetSongs() ([]S3Song, error) {
 	go cache.updateCache()
 	return cache.songs, nil
 }
@@ -75,7 +75,7 @@ func (*songCache) startAutoUpdate() {
 	}
 }
 
-func getS3Songs() ([]s3Song, error) {
+func getS3Songs() ([]S3Song, error) {
 	log.Debug().Msg("GetS3Songs()")
 	input := &s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
@@ -87,7 +87,7 @@ func getS3Songs() ([]s3Song, error) {
 		return nil, err
 	}
 	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(now))
-	wavs := make(map[string]s3Song)
+	wavs := make(map[string]S3Song)
 	imgs := make(map[string]string)
 	for _, item := range audioImageData.Contents {
 		if *item.Key == audioBucketPrefix { // skip the folder itself
@@ -101,7 +101,7 @@ func getS3Songs() ([]s3Song, error) {
 			log.Error().Msgf("Failed to get URL for %s: %v", *item.Key, err)
 		}
 		if filetype == "wav" {
-			wavs[audioTitle] = s3Song{
+			wavs[audioTitle] = S3Song{
 				Name:         audioTitle,
 				AudioURL:     itemUrl,
 				LastModified: *item.LastModified,
@@ -110,7 +110,7 @@ func getS3Songs() ([]s3Song, error) {
 			imgs[audioTitle] = itemUrl
 		}
 	}
-	toReturn := []s3Song{}
+	toReturn := []S3Song{}
 	backupImageURL, err := getPresignedURL("audio/unknown.png")
 	if err != nil {
 		log.Error().Msgf("Failed to get URL for unknown.png: %v", err)
@@ -145,7 +145,7 @@ func formatAudioTitle(filePath string) string {
 	return name
 }
 
-func sortS3SongsByRecent(songs []s3Song) {
+func sortS3SongsByRecent(songs []S3Song) {
 	sort.Slice(songs, func(i, j int) bool {
 		return songs[i].LastModified.After(songs[j].LastModified)
 	})

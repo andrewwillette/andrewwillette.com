@@ -81,9 +81,16 @@ func addMiddleware(e *echo.Echo) {
 	e.Use(logmiddleware)
 }
 
+type HomePageData struct {
+	CurrentYear int
+}
+
 // handleHomePage handles returning the homepage template
 func handleHomePage(c echo.Context) error {
-	err := c.Render(http.StatusOK, "homepage", nil)
+	data := HomePageData{
+		CurrentYear: time.Now().Year(),
+	}
+	err := c.Render(http.StatusOK, "homepage", data)
 	if err != nil {
 		return err
 	}
@@ -101,6 +108,7 @@ func handleResumePage(c echo.Context) error {
 
 // handleKeyOfDayPage handles returning the key of the day
 func handleKeyOfDayPage(c echo.Context) error {
+
 	err := c.Render(http.StatusOK, "keyofdaypage", key.TodaysKey())
 	if err != nil {
 		return err

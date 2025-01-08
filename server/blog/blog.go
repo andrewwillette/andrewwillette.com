@@ -85,11 +85,13 @@ type Blog struct {
 	URLVal      string
 	FileName    string
 	ContentHTML template.HTML
+	CurrentYear int
 }
 
 type BlogPageData struct {
-	BlogPosts []Blog
-	RssLink   string
+	BlogPosts   []Blog
+	RssLink     string
+	CurrentYear int
 }
 
 var initializedBlogs = []Blog{}
@@ -125,6 +127,7 @@ func GetBlog(urlval string) Blog {
 			output := blackfriday.Run([]byte(blog.Content), blackfriday.WithExtensions(blackfriday.CommonExtensions))
 			blog.Content = string(output)
 			blog.ContentHTML = template.HTML(blog.Content)
+			blog.CurrentYear = time.Now().Year()
 			return blog
 		}
 	}
@@ -133,8 +136,10 @@ func GetBlog(urlval string) Blog {
 
 // GetBlogs returns blog data for rendering in template
 func GetBlogPageData() BlogPageData {
+	currentYear := time.Now().Year()
 	return BlogPageData{
-		BlogPosts: uninitializedBlogs,
-		RssLink:   "/blog/rss",
+		BlogPosts:   uninitializedBlogs,
+		RssLink:     "/blog/rss",
+		CurrentYear: currentYear,
 	}
 }

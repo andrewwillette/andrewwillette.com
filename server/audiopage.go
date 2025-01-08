@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/andrewwillette/willette_api/server/aws"
 
@@ -9,13 +10,22 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type AudioPageData struct {
+	Songs       []aws.S3Song
+	CurrentYear int
+}
+
 func handleRecordingsPage(c echo.Context) error {
 	songs, err := aws.GetSongs()
 	if err != nil {
 		log.Error().Msgf("Unable to list songs: %v", err)
 		return err
 	}
-	err = c.Render(http.StatusOK, "musicpage", songs)
+	data := AudioPageData{
+		Songs:       songs,
+		CurrentYear: time.Now().Year(),
+	}
+	err = c.Render(http.StatusOK, "musicpage", data)
 	if err != nil {
 		log.Error().Msgf("Unable to render musicpagenew: %v", err)
 		return err

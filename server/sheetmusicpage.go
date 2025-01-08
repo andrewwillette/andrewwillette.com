@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,7 +17,8 @@ type DropboxSheetMusic struct {
 type Sheets []DropboxSheetMusic
 
 type SheetMusicPageData struct {
-	Sheets Sheets
+	Sheets      Sheets
+	CurrentYear int
 }
 
 var (
@@ -107,6 +109,7 @@ func (sheets Sheets) Swap(i, j int) {
 // handleSheetmusicPage handles returning the transcription template
 func handleSheetmusicPage(c echo.Context) error {
 	sort.Sort(sheetmusicData.Sheets)
+	sheetmusicData.CurrentYear = time.Now().Year()
 	err := c.Render(http.StatusOK, "sheetmusicpage", sheetmusicData)
 	if err != nil {
 		return err

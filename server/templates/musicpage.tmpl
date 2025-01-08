@@ -3,7 +3,7 @@
 <div class="music-container">
 	<div id="music-page-new">
     {{ if . }}
-        {{ range . }}
+        {{ range .Songs }}
             <!-- Accent Image -->
             <div class="accent-image">
                 <img src="{{ .ImageURL }}" alt="Audio Accent Image">
@@ -42,5 +42,5 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 </script>
-{{template "footer" -}}
+{{template "footer" .}}
 {{end}}
