@@ -29,3 +29,17 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 	otel.SetTracerProvider(tp)
 	return tp, nil
 }
+
+func initOtelTracer() {
+	tracer, err := initTracer()
+	if err != nil {
+		log.Fatal().Msgf("failed to initialize tracer: %v", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := tracer.Shutdown(ctx); err != nil {
+			log.Fatal().Msgf("failed to shutdown tracer: %v", err)
+		}
+	}()
+}
