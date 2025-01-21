@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"fmt"
 	"html/template"
 	"io"
@@ -106,11 +105,20 @@ func handleResumePage(c echo.Context) error {
 	return nil
 }
 
+type KeyOfDayPage struct {
+	CurrentYear int
+	KeyOfDay    string
+}
+
 // handleKeyOfDayPage handles returning the key of the day
 func handleKeyOfDayPage(c echo.Context) error {
-
-	err := c.Render(http.StatusOK, "keyofdaypage", key.TodaysKey())
+	data := KeyOfDayPage{
+		KeyOfDay:    key.TodaysKey(),
+		CurrentYear: time.Now().Year(),
+	}
+	err := c.Render(http.StatusOK, "keyofdaypage", data)
 	if err != nil {
+		log.Error().Msgf("handleKeyOfDyPage error: %v", err)
 		return err
 	}
 	return nil
@@ -122,7 +130,7 @@ type Template struct {
 }
 
 // Render renders the template
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
