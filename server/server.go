@@ -106,8 +106,8 @@ func handleResumePage(c echo.Context) error {
 }
 
 type KeyOfDayPage struct {
-	CurrentYear int
 	KeyOfDay    string
+	CurrentYear int
 }
 
 // handleKeyOfDayPage handles returning the key of the day
