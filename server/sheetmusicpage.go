@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Bluegrass in the Backwoods",
+				URL:  "https://www.dropbox.com/s/dg1zizywum455vy/Bluegrass%20in%20the%20Backwoods.pdf?st=wf1pmsda&dl=0",
+			},
+			{
 				Name: "Huckleberry Hornpipe",
 				URL:  "https://www.dropbox.com/scl/fi/8p594n4u9ag78n3ozswy5/Huckleberry-Hornpipe.pdf?rlkey=m6hc9lwjh51fur3a9os5dx9cw&st=cp9i8u0t&dl=0",
 			},
