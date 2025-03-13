@@ -25,8 +25,12 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Pass Me Not",
+				URL:  "https://www.dropbox.com/scl/fi/4p3rciczj1ruhh21alklk/Pass-Me-Not.pdf?rlkey=px9c50sv85uzqtj42yjvgk0xz&st=pnz0k9zf&dl=0",
+			},
+			{
 				Name: "Bluegrass in the Backwoods",
-				URL:  "https://www.dropbox.com/s/dg1zizywum455vy/Bluegrass%20in%20the%20Backwoods.pdf?st=wf1pmsda&dl=0",
+				URL:  "https://www.dropbox.com/s/2ihcmsfff560qdn/Bluegrass%20in%20the%20Backwoods.pdf?st=kf7g4fvn&dl=0",
 			},
 			{
 				Name: "Huckleberry Hornpipe",
