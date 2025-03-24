@@ -21,17 +21,27 @@ import (
 )
 
 const (
-	homeEndpoint       = "/"
-	musicEndpoint      = "/music"
-	resumeEndpoint     = "/resume"
+	homeEndpoint = "/"
+
+	musicEndpoint = "/music"
+
+	resumeEndpoint = "/resume"
+
 	sheetmusicEndpoint = "/sheet-music"
-	blogsEndpoint      = "/blog"
-	blogEndpoint       = "/blog/:blog"
-	blogRssEndpoint    = "/blog/rss"
-	cssEndpoint        = "/static/main.css"
-	cssResource        = "static/main.css"
-	keyOfDayEndpoint   = "/key-of-the-day"
-	resumeResource     = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
+
+	blogsEndpoint   = "/blog"
+	blogEndpoint    = "/blog/:blog"
+	blogRssEndpoint = "/blog/rss"
+
+	cssEndpoint = "/static/main.css"
+	cssResource = "static/main.css"
+
+	robotsEndpoint    = "/robots.txt"
+	robotsTxtResource = "static/robots.txt"
+
+	keyOfDayEndpoint = "/key-of-the-day"
+
+	resumeResource = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
 var (
@@ -74,6 +84,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(blogRssEndpoint, blog.HandleRssFeed)
 	e.GET(blogEndpoint, blog.HandleIndividualBlogPage)
 	e.File(cssEndpoint, cssResource)
+	e.File(robotsEndpoint, robotsTxtResource)
 }
 
 func addMiddleware(e *echo.Echo) {
@@ -151,7 +162,7 @@ func getTemplateRenderer() *Template {
 
 func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Info().Msgf("Request to %s with ip %s", c.Path(), c.RealIP())
+		log.Info().Msgf("Request to registerd path %s with ip %s", c.Path(), c.RealIP())
 		if err := next(c); err != nil {
 			c.Error(err)
 		}
