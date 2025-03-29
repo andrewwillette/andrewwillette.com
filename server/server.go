@@ -162,7 +162,7 @@ func getTemplateRenderer() *Template {
 
 func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Info().Msgf("Request to registerd path %s with ip %s", c.Path(), c.RealIP())
+		log.Info().Msgf("Request to registered path %s with ip %s", c.Path(), c.RealIP())
 		if err := next(c); err != nil {
 			c.Error(err)
 		}
