@@ -4,7 +4,7 @@ Growing up I loved smoking and drinking. And I still do! But I've gradually cut 
 
 I believe living in the USA in 2025 requires extreme discipline to keep a steady mind.
 
-Before I dive into some of the new-age requirements for discipline that we face, I want to highlight something. I don't believe the majority of people can exercise sufficient discipline across this wide variety of very addictive domains, we are not orthodox monks, and as a result things are going to continue to get stranger. I myself grapple with many of these issues, it's why I care to write this post. This nagging feeling of something going sideways that I sense so many people are feeling, it is not going to go away when Trump is gone, it may even continue to grow. It feels cyberpunk to me, things are getting stranger and much of it is downstream of what technology is making possible. In many ways it feels like the walk towards [wire-heading](https://en.wikipedia.org/wiki/Wirehead_(science_fiction\)).
+Before I dive into some of the new-age requirements for discipline that we face, I want to highlight something. I don't think it's reasonable to expect the majority of people to be able to exercise sufficient discipline across this wide variety of very addictive domains, we are not orthodox monks, and as a result things are going to continue to get stranger. I myself grapple with many of these issues, it's why I care to write this post. This nagging feeling of something going sideways that I sense so many people are feeling, it is not going to go away when Trump is gone, it may even continue to grow. It feels cyberpunk to me, things are getting stranger and much of it is downstream of what technology is making possible. In many ways it feels like the walk towards [wire-heading](https://en.wikipedia.org/wiki/Wirehead_(science_fiction\)).
 
 New items that increase the "discipline requirements" of modern USA:
 
@@ -19,7 +19,7 @@ New items that increase the "discipline requirements" of modern USA:
 - online shopping
 - remote work
 
-The smart phone is clearly the biggest new phenomenon that increases the need for discipline. You know the reasons. Doom-scrolling, opening reddit every 5 minutes even though you don't care what's posted, tik-tok, the list goes on for negative aspects of that addictive distraction that sits in our pocket all day.
+The smart phone is clearly the biggest new phenomenon that increases the need for discipline. You know the reasons. Doom-scrolling, opening reddit every 5 minutes even though you don't care what's posted, tik-tok, the list goes on for negative aspects of that addictive distraction that sits in our pocket all day. I'd guess that a large portion of the US population is spending at least 30 minutes at both ends of sleep cycle (going to bed and waking up) consuming content that only harms their mental health. I struggle with that unless I charge my phone away from my bedside. "But it's my alarm!".
 
 The topic of social media being addictive has been beaten to death. We all know. Nonetheless myself and many others waste hours every week reading through timelines we don't really need to be viewing so often. It leaves me feeling hollow.
 
