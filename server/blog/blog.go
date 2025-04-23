@@ -97,6 +97,12 @@ var initializedBlogs = []Blog{}
 
 var uninitializedBlogs = []Blog{
 	{
+		Title:    "The Need for Discipline In 2025 USA",
+		Created:  time.Date(2025, time.April, 22, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+		FileName: "discipline.md",
+		URLVal:   "theneedfordiscipline",
+	},
+	{
 		Title:    "Key of the Day",
 		Created:  time.Date(2024, time.November, 24, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 		FileName: "keyoftheday.md",
