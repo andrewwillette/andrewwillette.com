@@ -19,7 +19,7 @@ New items that increase the "discipline requirements" of modern USA:
 - online shopping
 - remote work
 
-The smart phone is clearly the biggest new phenomenon that increases the need for discipline. You know the reasons. Doom-scrolling, opening reddit every 5 minutes even though you don't care what's posted, tik-tok, the list goes on for distractions that sit in our pocket all day. I'd guess that a large portion of the US population is spending at least 30 minutes at both ends of sleep cycle (going to bed and waking up) consuming content that only harms their quality of sleep and therefore mental clarity. I struggle with that unless I charge my phone away from my bedside. "But it's my alarm!".
+The smart phone is clearly the biggest new phenomenon that increases the need for discipline. You know the reasons. Doom-scrolling, opening reddit every 5 minutes even though you don't care what's posted, tik-tok, the list goes on for distractions that sit in our pocket all day. I'd guess that a large portion of the US population is spending at least 30 minutes at both ends of their sleep cycle (going to bed and waking up) consuming content that only harms their quality of sleep and therefore mental clarity. I struggle with that unless I charge my phone away from my bedside. "But it's my alarm!".
 
 The topic of social media being addictive has been beaten to death. We all know. Nonetheless myself and many others waste hours every week reading through timelines we don't really need to be viewing so often. It leaves me feeling hollow.
 
