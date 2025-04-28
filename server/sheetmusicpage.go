@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Come All Ye Fair and Tender Ladies",
+				URL:  "https://www.dropbox.com/scl/fi/y0y9bfb0sfq1ri95gg3es/Come-All-Ye-Fair-and-Tender-Ladies.pdf?rlkey=evyk6evqhrr5dgf6cr56rln46&st=8ep67jcp&dl=0",
+			},
+			{
 				Name: "Pass Me Not",
 				URL:  "https://www.dropbox.com/scl/fi/4p3rciczj1ruhh21alklk/Pass-Me-Not.pdf?rlkey=px9c50sv85uzqtj42yjvgk0xz&st=pnz0k9zf&dl=0",
 			},
