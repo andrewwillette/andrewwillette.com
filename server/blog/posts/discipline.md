@@ -2,7 +2,7 @@
 
 I've cut back on a bit on drinking and smoking over the years. I still do both sometimes! But I've exercised some discipline to do it less than I used to. It's got me thinking about discipline more generally.
 
-I believe living in the USA in 2025 requires a significant amount of discipline to keep a steady head. There's a lot of distractions and not-great-for-you activies to do. It feels kind of cyberpunk to me. A lot of it is is technology-based.
+I believe living in the USA in 2025 requires a significant amount of discipline to keep a steady head. There's a lot of distractions and not-great-for-you activies to do. It feels kind of cyberpunk to me. A lot of it is technology-based.
 
 New items that increase the "discipline requirements" of modern USA:
 
