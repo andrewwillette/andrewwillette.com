@@ -2,7 +2,7 @@
 
 I've cut back on a bit on drinking and smoking over the years. I still do both sometimes! But I've exercised some discipline to do it less than I used to. It's got me thinking about discipline more generally.
 
-I believe living in the USA in 2025 requires a significant amount of discipline to keep a steady head. There's a lot of distractions and not-great-for-you activies to do. It feels kind of cyberpunk to me. A lot of it is technology-based.
+I believe living in the USA in 2025 requires a significant amount of discipline to keep a steady head. There's a lot of distractions and not-great-for-you activities to do. It feels kind of cyberpunk to me. A lot of it is technology-based.
 
 New items that increase the "discipline requirements" of modern USA:
 
@@ -20,7 +20,7 @@ The smart phone has to be the most important new phenomenon that increases the n
 
 The topic of social media being addictive has been beaten to death. We all know, certainly I do. Nonetheless I spend hours every week reading through timelines I don't really need to be viewing so often. It leaves me feeling hollow.
 
-If you play video games for any significant amount of time, I urge you to stop! I quit video games cold turkey around 2020 and I think I'm much better for it. Many hours instead went to socializing, working that extra 20 minutes occasionally, reading a book, playing violin, working out, sitting on the couch think about life. Video games take up a lot of time, even if it's just an hour every other day or so. I think it's a big dopamine hit and can be very addictive. Like cigarettes. And we should try to avoid cigarettes, too. And where cigarettes will likely take off some of the remaining years in old age, frequent video game use without question takes off some of the best years of your life when you could be experiencing the world and developing yourself. I acknowledge many people disagree with me on this. I understand. And I smoke cigarettes occasionally!
+If you play video games for any significant amount of time, I urge you to stop! I quit video games cold turkey around 2020 and I think I'm much better for it. Many hours instead went to socializing, working that extra 20 minutes occasionally, reading a book, playing violin, working out, sitting on the couch thinking about life. Video games take up a lot of time, even if it's just an hour every other day or so. I think it's a big dopamine hit and can be very addictive. Like cigarettes. And we should try to avoid cigarettes, too. And where cigarettes will likely take off some of the remaining years in old age, frequent video game use without question takes off some of the best years of your life when you could be experiencing the world and developing yourself. I acknowledge many people disagree with me on this. I understand. And I smoke cigarettes occasionally!
 
 Pot is legal now. Cool. As someone who has enjoyed weed most his young-adult life, I've always been concerned about the need to be disciplined if I'm going to be smoking it. I'm confident some of that concern came from it being illegal. We now, legally and culturally, say it's A-OK to be smoking dope. I don't think it is. If you're going to do it, be careful. It's the same issue with alcohol but I'm trying to limit this post to new phenomena that require discipline.
 
