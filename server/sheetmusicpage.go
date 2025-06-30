@@ -42,7 +42,7 @@ var (
 			},
 			{
 				Name: "Angel's Waltz",
-				URL:  "https://www.dropbox.com/scl/fi/2si0g763f5z3uvki6holf/Angel-s-Waltz.pdf?rlkey=lubz1chtt8rp0hj4jrxbkj4f9&st=ul78jqqb&dl=0",
+				URL:  "https://www.dropbox.com/scl/fi/mggzgy6r0mlneufybz55v/Angel-s-Waltz.pdf?rlkey=po24evmirkr7596fz655k961h&st=e4gmdr70&dl=0",
 			},
 			{
 				Name: "Cumberland Gap",
