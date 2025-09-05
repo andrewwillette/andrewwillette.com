@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/andrewwillette/andrewwillettedotcom/server/aws"
+	"github.com/andrewwillette/andrewwillettedotcom/aws"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"

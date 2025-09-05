@@ -1,3 +1,5 @@
+github.com/andrewwillette/gofzf v0.1.0 h1:9/WvGt50eDncnzg3u4sY7oj/mxttfHPS6g31kw/U0Uo=
+github.com/andrewwillette/gofzf v0.1.0/go.mod h1:4rVKPI+aUHaRZpf3Q8/+PxKbvcYZfhHU+Ia51framgU=
 github.com/andrewwillette/keyofday v1.0.0 h1:/c/tt3nnT+Vd8L5ale57xSVxCRGtKnrHzCdvRBcexlg=
 github.com/andrewwillette/keyofday v1.0.0/go.mod h1:JI7My7DMqKDUuI5cvUS1fD4KRj0RSQN3hbASkKi3hyM=
 github.com/aws/aws-sdk-go-v2 v1.38.3 h1:B6cV4oxnMs45fql4yRH+/Po/YU+597zgWqvDpYMturk=

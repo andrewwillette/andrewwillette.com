@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/andrewwillette/andrewwillettedotcom/server/aws"
+	"github.com/andrewwillette/andrewwillettedotcom/aws"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
@@ -16,7 +16,7 @@ type AudioPageData struct {
 }
 
 func handleRecordingsPage(c echo.Context) error {
-	songs, err := aws.GetSongs()
+	songs, err := aws.GetSongsFromCache()
 	if err != nil {
 		log.Error().Msgf("Unable to list songs: %v", err)
 		return err

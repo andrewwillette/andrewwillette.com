@@ -39,6 +39,7 @@ type S3Song struct {
 	AudioURL     string
 	ImageURL     string
 	LastModified time.Time
+	Key          string
 }
 
 type songCache struct {
@@ -86,7 +87,7 @@ func UploadAudioToS3(filePath string) error {
 	return nil
 }
 
-func GetSongs() ([]S3Song, error) {
+func GetSongsFromCache() ([]S3Song, error) {
 	go cache.updateCache()
 	return cache.songs, nil
 }
@@ -94,7 +95,7 @@ func GetSongs() ([]S3Song, error) {
 func (*songCache) updateCache() {
 	log.Debug().Msg("updating the S3 cache")
 	cache.mu.Lock()
-	songs, err := getS3Songs()
+	songs, err := GetAudioFromS3()
 	if err != nil {
 		log.Error().Msgf("Unable to get songs from S3: %v", err)
 		cache.mu.Unlock()
@@ -117,7 +118,7 @@ func (*songCache) startAutoUpdate() {
 	}
 }
 
-func getS3Songs() ([]S3Song, error) {
+func GetAudioFromS3() ([]S3Song, error) {
 	log.Debug().Msg("GetS3Songs()")
 
 	input := &s3.ListObjectsV2Input{
@@ -156,6 +157,7 @@ func getS3Songs() ([]S3Song, error) {
 				Name:         audioTitle,
 				AudioURL:     itemUrl,
 				LastModified: aws.ToTime(item.LastModified),
+				Key:          *item.Key,
 			}
 		case "png":
 			imgs[audioTitle] = itemUrl
@@ -176,6 +178,29 @@ func getS3Songs() ([]S3Song, error) {
 
 	sortS3SongsByRecent(songs)
 	return songs, nil
+}
+
+func DeleteAudioFromS3(key string) error {
+	log.Info().Msgf("Deleting audio file %s from S3...", key)
+
+	client := getS3Client()
+
+	if !strings.HasPrefix(key, audioBucketPrefix) {
+		key = filepath.Join(audioBucketPrefix, key)
+	}
+
+	_, err := client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to delete object %s from S3: %w", key, err)
+	}
+
+	log.Info().Msgf("Successfully deleted %s from S3 bucket %s", key, bucketName)
+
+	go cache.updateCache()
+	return nil
 }
 
 func wavOrPng(key string) string {
