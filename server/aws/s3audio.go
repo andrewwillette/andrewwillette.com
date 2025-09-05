@@ -51,6 +51,7 @@ func GetSongs() ([]S3Song, error) {
 }
 
 func (*songCache) updateCache() {
+	log.Debug().Msg("updating the S3 cache")
 	cache.mu.Lock()
 	songs, err := getS3Songs()
 	if err != nil {

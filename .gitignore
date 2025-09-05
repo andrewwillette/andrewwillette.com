@@ -5,6 +5,7 @@
 logging/server.log
 server.log
 willette_api
+andrewwillettedotcom
 tmp
 # creating traces, see https://go.dev/blog/execution-traces-2024
 trace.out

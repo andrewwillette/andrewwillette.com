@@ -15,9 +15,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 
-	cfg "github.com/andrewwillette/willette_api/cfg"
-	"github.com/andrewwillette/willette_api/server/blog"
-	"github.com/andrewwillette/willette_api/server/echopprof"
+	cfg "github.com/andrewwillette/andrewwillettedotcom/cfg"
+	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
+	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
 )
 
 const (

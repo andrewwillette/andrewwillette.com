@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/andrewwillette/willette_api/server/aws"
+	"github.com/andrewwillette/andrewwillettedotcom/server/aws"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"

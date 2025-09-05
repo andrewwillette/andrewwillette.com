@@ -206,7 +206,7 @@ WORKDIR /awillettebackend
 COPY . .
 ENV CGO_ENABLED=1
 RUN go build .
-CMD ["./willette_api"]
+CMD ["./andrewwillettedotcom"]
 ```
 
 The final key step is to configure docker commands on my local machine to execute on the docker-daemon of the recently-deployed EC2 instance. A [docker context](https://docs.docker.com/engine/context/working-with-contexts/) on my personal machine creates a connection to my EC2 instance's docker-daemon via SSH using the command `docker context create --docker host=ssh://ubuntu@<aws_public_ip> personalwebsite`. This is where the ssh-key from the terraform comes in! If that is configured correctly this command should "just work". It really is a great piece of docker I wasn't aware of prior to this effort.
