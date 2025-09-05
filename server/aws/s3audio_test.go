@@ -2,6 +2,7 @@ package aws
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -26,4 +27,10 @@ func TestFormatAudioTitle(t *testing.T) {
 			t.Errorf("formatAudioTitle(%q) = %q, want %q", test.input, got, test.expected)
 		}
 	}
+}
+
+func TestUploadAudioToS3(t *testing.T) {
+	userHome := os.Getenv("HOME")
+	file := fmt.Sprintf("%s/recordings/wasted_words_kick.wav", userHome)
+	UploadAudioToS3(file)
 }

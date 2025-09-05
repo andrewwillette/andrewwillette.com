@@ -1,6 +1,8 @@
 package aws
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -43,6 +45,41 @@ type songCache struct {
 func init() {
 	go cache.updateCache()
 	go cache.startAutoUpdate()
+}
+
+func UploadAudioToS3(filePath string) error {
+	log.Info().Msgf("Uploading audio file %s to S3...", filePath)
+
+	client := getS3Client()
+
+	// Open the local file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	// Extract the file name (e.g., fair_ladies.wav)
+	key := filepath.Join(audioBucketPrefix, filepath.Base(filePath))
+
+	// Upload to S3
+	_, err = client.PutObject(&s3.PutObjectInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(key),
+		Body:        file,
+		ContentType: aws.String("audio/wav"),
+		ACL:         aws.String("public-read"), // or "private" if preferred
+	})
+	if err != nil {
+		return fmt.Errorf("failed to upload to S3: %w", err)
+	}
+
+	log.Info().Msgf("Successfully uploaded %s to s3://%s/%s", filePath, bucketName, key)
+
+	// Optionally update the cache immediately
+	go cache.updateCache()
+
+	return nil
 }
 
 func GetSongs() ([]S3Song, error) {

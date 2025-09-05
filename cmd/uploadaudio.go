@@ -2,6 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/andrewwillette/andrewwillettedotcom/server/aws"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -29,8 +34,18 @@ func init() {
 	rootCmd.AddCommand(uploadAudioCmd)
 }
 
-func uploadAudioToS3(filePath string) error {
-	// TODO: your actual S3 upload logic goes here
-	fmt.Println("Uploading file:", filePath)
-	return nil
+func uploadAudioToS3(audioFile string) error {
+	if !isValidAudioFile(audioFile) {
+		return fmt.Errorf("invalid audio file: %s", audioFile)
+	}
+	return aws.UploadAudioToS3(audioFile)
+}
+
+func isValidAudioFile(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil || info.IsDir() {
+		return false
+	}
+	ext := strings.ToLower(filepath.Ext(path))
+	return ext == ".wav" || ext == ".mp3"
 }
