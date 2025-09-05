@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,9 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -24,7 +28,7 @@ const (
 )
 
 var (
-	s3Client        *s3.S3
+	s3Client        *s3.Client
 	cache           songCache
 	presignedURLTTL = 30 * time.Minute
 	cacheTTL        = presignedURLTTL - 1*time.Minute
@@ -48,37 +52,37 @@ func init() {
 }
 
 func UploadAudioToS3(filePath string) error {
-	log.Info().Msgf("Uploading audio file %s to S3...", filePath)
+	log.Debug().Msgf("Uploading audio file %s to S3...", filePath)
 
 	client := getS3Client()
 
-	// Open the local file
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
-	// Extract the file name (e.g., fair_ladies.wav)
 	key := filepath.Join(audioBucketPrefix, filepath.Base(filePath))
+	contentType := "audio/mpeg"
+	if strings.HasSuffix(filePath, ".wav") {
+		contentType = "audio/wav"
+	}
 
-	// Upload to S3
-	_, err = client.PutObject(&s3.PutObjectInput{
+	uploader := manager.NewUploader(client)
+
+	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
 		Key:         aws.String(key),
 		Body:        file,
-		ContentType: aws.String("audio/wav"),
-		ACL:         aws.String("public-read"), // or "private" if preferred
+		ContentType: aws.String(contentType),
+		ACL:         types.ObjectCannedACLPublicRead,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload to S3: %w", err)
 	}
 
 	log.Info().Msgf("Successfully uploaded %s to s3://%s/%s", filePath, bucketName, key)
-
-	// Optionally update the cache immediately
 	go cache.updateCache()
-
 	return nil
 }
 
@@ -115,54 +119,63 @@ func (*songCache) startAutoUpdate() {
 
 func getS3Songs() ([]S3Song, error) {
 	log.Debug().Msg("GetS3Songs()")
+
 	input := &s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 		Prefix: aws.String(audioBucketPrefix),
 	}
-	now := time.Now()
-	audioImageData, err := getS3Client().ListObjectsV2(input)
+
+	start := time.Now()
+	output, err := getS3Client().ListObjectsV2(context.TODO(), input)
 	if err != nil {
 		return nil, err
 	}
-	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(now))
+	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(start))
+
 	wavs := make(map[string]S3Song)
 	imgs := make(map[string]string)
-	for _, item := range audioImageData.Contents {
-		if *item.Key == audioBucketPrefix { // skip the folder itself
+
+	for _, item := range output.Contents {
+		if item.Key == nil || *item.Key == audioBucketPrefix {
 			continue
 		}
-		filetype := wavOrPng(*item.Key)
-		audioTitle := formatAudioTitle(*item.Key)
-		log.Debug().Msgf("item.Key: %s, audioTitle: %s", *item.Key, audioTitle)
-		itemUrl, err := getPresignedURL(*item.Key)
+		key := *item.Key
+		filetype := wavOrPng(key)
+		audioTitle := formatAudioTitle(key)
+		log.Debug().Msgf("item.Key: %s, audioTitle: %s", key, audioTitle)
+
+		itemUrl, err := getPresignedURL(key)
 		if err != nil {
-			log.Error().Msgf("Failed to get URL for %s: %v", *item.Key, err)
+			log.Error().Msgf("Failed to get URL for %s: %v", key, err)
+			continue
 		}
-		if filetype == "wav" {
+
+		switch filetype {
+		case "wav":
 			wavs[audioTitle] = S3Song{
 				Name:         audioTitle,
 				AudioURL:     itemUrl,
-				LastModified: *item.LastModified,
+				LastModified: aws.ToTime(item.LastModified),
 			}
-		} else if filetype == "png" {
+		case "png":
 			imgs[audioTitle] = itemUrl
 		}
 	}
-	toReturn := []S3Song{}
-	backupImageURL, err := getPresignedURL("audio/unknown.png")
-	if err != nil {
-		log.Error().Msgf("Failed to get URL for unknown.png: %v", err)
-	}
+
+	var songs []S3Song
+	backupImageURL, _ := getPresignedURL("audio/unknown.png")
+
 	for key, s3Song := range wavs {
 		s3Song.ImageURL = imgs[key]
 		if s3Song.ImageURL == "" {
 			log.Debug().Msgf("No image found for %s", s3Song.Name)
 			s3Song.ImageURL = backupImageURL
 		}
-		toReturn = append(toReturn, s3Song)
+		songs = append(songs, s3Song)
 	}
-	sortS3SongsByRecent(toReturn)
-	return toReturn, nil
+
+	sortS3SongsByRecent(songs)
+	return songs, nil
 }
 
 func wavOrPng(key string) string {
@@ -190,30 +203,32 @@ func sortS3SongsByRecent(songs []S3Song) {
 }
 
 func getPresignedURL(key string) (string, error) {
-	req, _ := getS3Client().GetObjectRequest(&s3.GetObjectInput{
+	presigner := s3.NewPresignClient(getS3Client())
+
+	resp, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
-	})
-	urlStr, err := req.Presign(30 * time.Minute) // URL expires in 15 minutes
+	}, s3.WithPresignExpires(30*time.Minute))
 	if err != nil {
 		return "", err
 	}
-	return urlStr, nil
+
+	return resp.URL, nil
 }
 
-func getS3Client() *s3.S3 {
+func getS3Client() *s3.Client {
 	if s3Client == nil {
 		s3Client = initS3Session()
 	}
 	return s3Client
 }
 
-func initS3Session() *s3.S3 {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region),
-	})
+func initS3Session() *s3.Client {
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
-		log.Fatal().Msgf("Failed to create S3 session: %v", err)
+		log.Fatal().Msgf("Failed to load AWS config: %v", err)
 	}
-	return s3.New(sess)
+	client := s3.NewFromConfig(cfg)
+	s3Client = client
+	return client
 }
