@@ -27,7 +27,7 @@ type logConfig struct {
 }
 
 var globalLogConfig = logConfig{
-	consoleLoggingEnabled: true,
+	consoleLoggingEnabled: false,
 	encodeLogsAsJson:      true,
 	fileLoggingEnabled:    true,
 	directory:             "./logging",
@@ -35,7 +35,7 @@ var globalLogConfig = logConfig{
 	maxSizeMB:             200,
 	maxBackups:            2,
 	maxAge:                31,
-	logLevel:              zerolog.InfoLevel,
+	logLevel:              zerolog.WarnLevel,
 }
 
 // configure return a zerolog logger with provided behavior based off

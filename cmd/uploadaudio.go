@@ -7,19 +7,25 @@ import (
 	"strings"
 
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
+	"github.com/andrewwillette/gofzf"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 var audioFilePath string
+var audioFileDir string
 
 var uploadAudioCmd = &cobra.Command{
 	Use:   "upload-audio",
 	Short: "Upload audio file to S3",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info().Msg("Uploading audio file to S3...")
-		if audioFilePath == "" {
+		log.Debug().Msg("Uploading audio file to S3...")
+		if audioFileDir != "" {
+			if err := uploadAudioFileFromDir(audioFileDir); err != nil {
+				log.Fatal().Err(err).Msg("Failed to upload audio from directory")
+			}
+		} else if audioFilePath == "" {
 			log.Fatal().Msg("Please provide a path using --file")
 		}
 		if err := uploadAudioToS3(audioFilePath); err != nil {
@@ -31,7 +37,32 @@ var uploadAudioCmd = &cobra.Command{
 
 func init() {
 	uploadAudioCmd.Flags().StringVarP(&audioFilePath, "file", "f", "", "Path to audio file")
+	uploadAudioCmd.Flags().StringVarP(&audioFileDir, "dir", "d", "", "Directory that contains audio file")
 	rootCmd.AddCommand(uploadAudioCmd)
+}
+
+func uploadAudioFileFromDir(dir string) error {
+	info, err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		return fmt.Errorf("invalid directory: %s", dir)
+	}
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return fmt.Errorf("failed to read directory: %w", err)
+	}
+	fileList := []string{}
+	for _, file := range files {
+		if !file.IsDir() {
+			if isValidAudioFile(filepath.Join(dir, file.Name())) {
+				fileList = append(fileList, filepath.Join(dir, file.Name()))
+			}
+		}
+	}
+	selected, err := gofzf.Select(fileList)
+	if err != nil {
+		return fmt.Errorf("failed to select file: %w", err)
+	}
+	return aws.UploadAudioToS3(selected)
 }
 
 func uploadAudioToS3(audioFile string) error {
