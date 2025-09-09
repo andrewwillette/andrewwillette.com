@@ -29,7 +29,7 @@ type logConfig struct {
 var globalLogConfig = logConfig{
 	consoleLoggingEnabled: false,
 	encodeLogsAsJson:      true,
-	fileLoggingEnabled:    true,
+	fileLoggingEnabled:    false,
 	directory:             "./logging",
 	filename:              "server.log",
 	maxSizeMB:             200,
