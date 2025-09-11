@@ -28,8 +28,10 @@ const (
 )
 
 var (
+	// a cache managed so that pageloads don't rely on S3 access wait times
+	cache songCache
+
 	s3Client        *s3.Client
-	cache           songCache
 	presignedURLTTL = 30 * time.Minute
 	cacheTTL        = presignedURLTTL - 1*time.Minute
 )
@@ -49,7 +51,6 @@ type songCache struct {
 
 func init() {
 	go cache.updateCache()
-	go cache.startAutoUpdate()
 }
 
 func UploadAudioToS3(filePath string) error {
@@ -103,18 +104,6 @@ func (*songCache) updateCache() {
 	} else {
 		cache.songs = songs
 		cache.mu.Unlock()
-	}
-}
-
-func (*songCache) startAutoUpdate() {
-	ticker := time.NewTicker(cacheTTL)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			log.Debug().Msg("Updating song cache with auto-update")
-			cache.updateCache()
-		}
 	}
 }
 

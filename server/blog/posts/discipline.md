@@ -21,4 +21,4 @@ I go on the computer outside work for software / music / learning stuff, though 
 
 Negatively, I think the addictive parts of this are going to have big effects downstream. What are the those? I'll give an example. People I speak with often don't read books stating something like "I don't have the attention span". Maybe not a big deal, but could be important long term.
 
-There's a lot of positives too with sharing of knowledge! What are the odds on Packers to win superbowl pre-week 1 vs Detroit Lions? lol (it's +1400, 14x your money if we take the Lombardi home in February 2026)
+There's a lot of positives too with sharing of knowledge! What are the odds on Packers to win superbowl pre-week 1 vs Detroit Lions? lol (it's 14:1 we take the Lombardi home in February 2026)
