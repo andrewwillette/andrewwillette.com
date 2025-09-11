@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// We listen to an SQS queue which receives events when audio files are added or removed from S3
+// We listen to an SQS queue which receives events when audio files are added or removed from S3 bucket
 // and update our local cache accordingly.
 
 var (
