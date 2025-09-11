@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetS3Songs(t *testing.T) {
-	songs, err := getS3Songs()
+	songs, err := GetAudioFromS3()
 	if err != nil {
 		t.Errorf("listSongs() failed: %v", err)
 	}

@@ -15,7 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 
-	cfg "github.com/andrewwillette/andrewwillettedotcom/cfg"
+	"github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
 	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
 )
@@ -55,7 +55,7 @@ func StartServer(sslEnabled bool) {
 	e.HideBanner = true
 	addRoutes(e)
 	addMiddleware(e)
-	if cfg.C.PProfEnabled {
+	if config.C.PProfEnabled {
 		echopprof.Wrap(e)
 	}
 	e.Renderer = getTemplateRenderer()
