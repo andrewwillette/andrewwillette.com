@@ -16,5 +16,5 @@ services:
       # for persisting logs across deploys
       - type: bind
         # see WORKDIR call in Dockerfile for target placement
-        target: /awillettebackend/logging
+        target: /app/logging
         source: /home/ubuntu

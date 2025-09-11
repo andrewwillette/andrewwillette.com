@@ -30,7 +30,7 @@ var globalLogConfig = logConfig{
 	consoleLoggingEnabled: true,
 	logLevel:              zerolog.InfoLevel,
 	encodeLogsAsJson:      true,
-	fileLoggingEnabled:    false,
+	fileLoggingEnabled:    true,
 	directory:             "./logging",
 	filename:              "server.log",
 	maxSizeMB:             200,

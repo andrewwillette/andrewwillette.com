@@ -25,13 +25,15 @@ var uploadAudioCmd = &cobra.Command{
 			if err := uploadAudioFileFromDir(audioFileDir); err != nil {
 				log.Fatal().Err(err).Msg("Failed to upload audio from directory")
 			}
-		} else if audioFilePath == "" {
-			log.Fatal().Msg("Please provide a path using --file")
+		} else if audioFilePath != "" { // other
+			if err := uploadAudioToS3(audioFilePath); err != nil {
+				log.Fatal().Err(err).Msg("Failed to upload audio")
+			}
+			log.Info().Msg("Upload complete!")
+		} else {
+			// print help
+			_ = cmd.Help()
 		}
-		if err := uploadAudioToS3(audioFilePath); err != nil {
-			log.Fatal().Err(err).Msg("Failed to upload audio")
-		}
-		log.Info().Msg("Upload complete!")
 	},
 }
 
@@ -66,6 +68,7 @@ func uploadAudioFileFromDir(dir string) error {
 }
 
 func uploadAudioToS3(audioFile string) error {
+	log.Info().Msgf("Uploading audio file %s to S3...", audioFile)
 	if !isValidAudioFile(audioFile) {
 		return fmt.Errorf("invalid audio file: %s", audioFile)
 	}
