@@ -45,7 +45,8 @@ func configure() {
 	if globalLogConfig.consoleLoggingEnabled {
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr})
 	}
-	if globalLogConfig.fileLoggingEnabled {
+	prodEnv := os.Getenv("ENV") == "PROD"
+	if globalLogConfig.fileLoggingEnabled && prodEnv {
 		logWriter, err := newRollingFile(globalLogConfig)
 		if err != nil {
 			panic(err)
