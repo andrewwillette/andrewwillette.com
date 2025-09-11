@@ -31,8 +31,8 @@ var uploadAudioCmd = &cobra.Command{
 			}
 			log.Info().Msg("Upload complete!")
 		} else {
-			// print help
 			_ = cmd.Help()
+			os.Exit(1)
 		}
 	},
 }

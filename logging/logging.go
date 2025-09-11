@@ -68,8 +68,8 @@ func newRollingFile(config logConfig) (io.Writer, error) {
 
 	return &lumberjack.Logger{
 		Filename:   path.Join(config.directory, config.filename),
-		MaxBackups: config.maxBackups, // files
-		MaxSize:    config.maxSizeMB,  // megabytes
-		MaxAge:     config.maxAge,     // days
+		MaxBackups: config.maxBackups,
+		MaxSize:    config.maxSizeMB,
+		MaxAge:     config.maxAge,
 	}, nil
 }
