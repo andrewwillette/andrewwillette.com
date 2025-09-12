@@ -15,6 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 
+	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	"github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
 	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
@@ -59,6 +60,9 @@ func StartServer(sslEnabled bool) {
 		echopprof.Wrap(e)
 	}
 	e.Renderer = getTemplateRenderer()
+	blog.InitializeBlogs()
+	aws.UpdateAudioCache()
+	go aws.StartSQSPoller()
 	if sslEnabled {
 		e.Pre(middleware.HTTPSRedirect())
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")

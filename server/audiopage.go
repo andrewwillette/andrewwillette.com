@@ -16,7 +16,7 @@ type AudioPageData struct {
 }
 
 func handleRecordingsPage(c echo.Context) error {
-	songs, err := aws.GetSongsFromCache()
+	songs, err := aws.GetCachedAudio()
 	if err != nil {
 		log.Error().Msgf("Unable to list songs: %v", err)
 		return err

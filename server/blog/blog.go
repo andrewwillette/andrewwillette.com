@@ -14,7 +14,55 @@ import (
 	"github.com/russross/blackfriday/v2"
 )
 
-func init() {
+type Blog struct {
+	Title       string
+	Content     string
+	Created     string
+	URLVal      string
+	FileName    string
+	ContentHTML template.HTML
+	CurrentYear int
+}
+
+type BlogPageData struct {
+	BlogPosts   []Blog
+	CurrentYear int
+}
+
+var (
+	initializedBlogs   = []Blog{}
+	uninitializedBlogs = []Blog{
+		{
+			Title:    "Discipline In 2025 USA",
+			Created:  time.Date(2025, time.September, 4, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			FileName: "discipline.md",
+			URLVal:   "theneedfordiscipline",
+		},
+		{
+			Title:    "Key of the Day",
+			Created:  time.Date(2024, time.November, 24, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			FileName: "keyoftheday.md",
+			URLVal:   "keyoftheday",
+		},
+		{
+			Title:    "Simple Docker Deploys",
+			Created:  time.Date(2024, time.May, 8, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			FileName: "simpledockerdeploys.md",
+			URLVal:   "simpledockerdeploys",
+		},
+		{
+			Title:    "Thinking About What",
+			Created:  time.Date(2024, time.March, 20, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			FileName: "thinkingaboutwhat.md",
+			URLVal:   "thinkingaboutwhat",
+		},
+	}
+
+	_, b, _, _ = runtime.Caller(0)
+	basepath   = filepath.Dir(b)
+)
+
+func InitializeBlogs() {
 	var blogsposts []Blog
 	for _, blog := range uninitializedBlogs {
 		filepath := filepath.Join(basepath, "posts", blog.FileName)
@@ -77,54 +125,6 @@ func HandleBlogPage(c echo.Context) error {
 	}
 	return nil
 }
-
-type Blog struct {
-	Title       string
-	Content     string
-	Created     string
-	URLVal      string
-	FileName    string
-	ContentHTML template.HTML
-	CurrentYear int
-}
-
-type BlogPageData struct {
-	BlogPosts   []Blog
-	CurrentYear int
-}
-
-var initializedBlogs = []Blog{}
-
-var uninitializedBlogs = []Blog{
-	{
-		Title:    "Discipline In 2025 USA",
-		Created:  time.Date(2025, time.September, 4, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-		FileName: "discipline.md",
-		URLVal:   "theneedfordiscipline",
-	},
-	{
-		Title:    "Key of the Day",
-		Created:  time.Date(2024, time.November, 24, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-		FileName: "keyoftheday.md",
-		URLVal:   "keyoftheday",
-	},
-	{
-		Title:    "Simple Docker Deploys",
-		Created:  time.Date(2024, time.May, 8, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-		FileName: "simpledockerdeploys.md",
-		URLVal:   "simpledockerdeploys",
-	},
-	{
-		Title:    "Thinking About What",
-		Created:  time.Date(2024, time.March, 20, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-		FileName: "thinkingaboutwhat.md",
-		URLVal:   "thinkingaboutwhat",
-	},
-}
-var (
-	_, b, _, _ = runtime.Caller(0)
-	basepath   = filepath.Dir(b)
-)
 
 func GetBlog(urlval string) Blog {
 	for _, blog := range initializedBlogs {

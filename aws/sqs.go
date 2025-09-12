@@ -22,15 +22,11 @@ var (
 	sqsPollInterval = 10 * time.Second
 )
 
-func init() {
-	StartSQSPoller(sqsURL)
-}
-
-func StartSQSPoller(queueURL string) {
+func StartSQSPoller() {
 	go func() {
 		log.Info().Msg("Starting SQS poller...")
 		for {
-			msgs, err := receiveSQSMessages(queueURL)
+			msgs, err := receiveSQSMessages(sqsURL)
 			if err != nil {
 				log.Error().Msgf("Failed to receive SQS messages: %v", err)
 				time.Sleep(sqsPollInterval)
@@ -45,7 +41,7 @@ func StartSQSPoller(queueURL string) {
 			for _, msg := range msgs {
 				handled := handleSQSEvent(msg)
 				if handled {
-					deleteSQSMessage(queueURL, *msg.ReceiptHandle)
+					deleteSQSMessage(sqsURL, *msg.ReceiptHandle)
 				}
 			}
 		}
@@ -95,7 +91,7 @@ func handleSQSEvent(msg types.Message) bool {
 			(strings.HasPrefix(record.EventName, "ObjectCreated") || strings.HasPrefix(record.EventName, "ObjectRemoved")) {
 
 			log.Info().Msgf("Detected S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
-			go cache.updateCache()
+			go UpdateAudioCache()
 			return true
 		}
 	}

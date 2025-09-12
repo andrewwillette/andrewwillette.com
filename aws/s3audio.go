@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -28,9 +27,6 @@ const (
 )
 
 var (
-	// a cache managed so that pageloads don't rely on S3 access wait times
-	cache songCache
-
 	s3Client        *s3.Client
 	presignedURLTTL = 30 * time.Minute
 	cacheTTL        = presignedURLTTL - 1*time.Minute
@@ -42,15 +38,6 @@ type S3Song struct {
 	ImageURL     string
 	LastModified time.Time
 	Key          string
-}
-
-type songCache struct {
-	songs []S3Song
-	mu    sync.Mutex
-}
-
-func init() {
-	go cache.updateCache()
 }
 
 func UploadAudioToS3(filePath string) error {
@@ -84,27 +71,7 @@ func UploadAudioToS3(filePath string) error {
 	}
 
 	log.Info().Msgf("Successfully uploaded %s to s3://%s/%s", filePath, bucketName, key)
-	go cache.updateCache()
 	return nil
-}
-
-func GetSongsFromCache() ([]S3Song, error) {
-	go cache.updateCache()
-	return cache.songs, nil
-}
-
-func (*songCache) updateCache() {
-	log.Debug().Msg("updating the S3 cache")
-	cache.mu.Lock()
-	songs, err := GetAudioFromS3()
-	if err != nil {
-		log.Error().Msgf("Unable to get songs from S3: %v", err)
-		cache.mu.Unlock()
-		return
-	} else {
-		cache.songs = songs
-		cache.mu.Unlock()
-	}
 }
 
 func GetAudioFromS3() ([]S3Song, error) {
@@ -187,8 +154,6 @@ func DeleteAudioFromS3(key string) error {
 	}
 
 	log.Info().Msgf("Successfully deleted %s from S3 bucket %s", key, bucketName)
-
-	go cache.updateCache()
 	return nil
 }
 
