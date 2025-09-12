@@ -5,6 +5,7 @@ services:
     image: andrewwillette-dot-com:1.0
     environment:
       ENV: "PROD"
+      CONFIG_NAME: "prod"
     ports:
       - "80:80"
       - "443:443"
@@ -16,5 +17,5 @@ services:
       # for persisting logs across deploys
       - type: bind
         # see WORKDIR call in Dockerfile for target placement
-        target: /app/logging
+        target: /app/logs
         source: /home/ubuntu

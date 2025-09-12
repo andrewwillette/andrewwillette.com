@@ -22,7 +22,7 @@ func Configure() {
 		}
 	}
 
-	if config.C.LogFile && os.Getenv("ENV") == "PROD" {
+	if config.C.LogFile {
 		logWriter, err := newRollingFile()
 		if err != nil {
 			panic(err)

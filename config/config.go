@@ -1,7 +1,11 @@
 package config
 
-import "github.com/spf13/viper"
-import "github.com/rs/zerolog/log"
+import (
+	"os"
+
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
+)
 
 var C Config
 
@@ -24,11 +28,20 @@ type Config struct {
 	LogFileMaxMB    int    `mapstructure:"LOG_FILE_MAX_MB"`
 	LogFileMaxBacks int    `mapstructure:"LOG_FILE_MAX_BACKUPS"`
 	LogFileMaxAge   int    `mapstructure:"LOG_FILE_MAX_AGE"`
+	AudioS3Bucket   string `mapstructure:"AUDIO_S3_BUCKET"`
+	AudioS3Region   string `mapstructure:"AUDIO_S3_REGION"`
+	AudioS3URL      string `mapstructure:"AUDIO_S3_URL"`
+	AudioSQSURL     string `mapstructure:"AUDIO_SQS_URL"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
+	configName := os.Getenv("CONFIG_NAME")
+	if configName == "" {
+		configName = "app" // fallback default
+	}
+
 	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
+	viper.SetConfigName(configName)
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()

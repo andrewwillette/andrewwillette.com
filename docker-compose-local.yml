@@ -4,6 +4,7 @@ services:
       context: .
     image: andrewwillette-dot-com:1.0
     environment:
+      CONFIG_NAME: "app"
       ENV: "LOCAL"
     ports:
       - "80:80"
