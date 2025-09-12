@@ -42,6 +42,9 @@ func StartSQSPoller() {
 				handled := handleSQSEvent(msg)
 				if handled {
 					deleteSQSMessage(webCfg.C.AudioSQSURL, *msg.ReceiptHandle)
+				} else {
+					log.Info().Msg("SQS message on queue not related to audio, deleting it")
+					deleteSQSMessage(webCfg.C.AudioSQSURL, *msg.ReceiptHandle)
 				}
 			}
 		}
