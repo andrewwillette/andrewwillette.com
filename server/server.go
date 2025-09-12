@@ -35,10 +35,10 @@ const (
 	blogRssEndpoint = "/blog/rss"
 
 	cssEndpoint = "/static/main.css"
-	cssResource = "static/main.css"
+	cssResource = "server/static/main.css"
 
 	robotsEndpoint    = "/robots.txt"
-	robotsTxtResource = "static/robots.txt"
+	robotsTxtResource = "server/static/robots.txt"
 
 	keyOfDayEndpoint = "/key-of-the-day"
 )
