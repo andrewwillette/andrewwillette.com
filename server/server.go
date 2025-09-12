@@ -41,8 +41,6 @@ const (
 	robotsTxtResource = "static/robots.txt"
 
 	keyOfDayEndpoint = "/key-of-the-day"
-
-	resumeResource = "https://andrewwillette.s3.us-east-2.amazonaws.com/newdir/resume.pdf"
 )
 
 var (
@@ -113,7 +111,7 @@ func handleHomePage(c echo.Context) error {
 
 // handleResumePage handles returning the resume template
 func handleResumePage(c echo.Context) error {
-	err := c.Redirect(http.StatusPermanentRedirect, resumeResource)
+	err := c.Redirect(http.StatusPermanentRedirect, config.C.HomePageImageS3URL)
 	if err != nil {
 		return err
 	}

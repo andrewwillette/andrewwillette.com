@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -18,15 +20,13 @@ import (
 
 var (
 	sqsClient       *sqs.Client
-	sqsURL          = "https://sqs.us-east-2.amazonaws.com/981566818315/s3-audio-event-queue"
 	sqsPollInterval = 10 * time.Second
 )
 
 func StartSQSPoller() {
 	go func() {
-		log.Info().Msg("Starting SQS poller...")
 		for {
-			msgs, err := receiveSQSMessages(sqsURL)
+			msgs, err := receiveSQSMessages(webCfg.C.AudioSQSURL)
 			if err != nil {
 				log.Error().Msgf("Failed to receive SQS messages: %v", err)
 				time.Sleep(sqsPollInterval)
@@ -41,7 +41,7 @@ func StartSQSPoller() {
 			for _, msg := range msgs {
 				handled := handleSQSEvent(msg)
 				if handled {
-					deleteSQSMessage(sqsURL, *msg.ReceiptHandle)
+					deleteSQSMessage(webCfg.C.AudioSQSURL, *msg.ReceiptHandle)
 				}
 			}
 		}
@@ -50,7 +50,7 @@ func StartSQSPoller() {
 
 func receiveSQSMessages(queueURL string) ([]types.Message, error) {
 	if sqsClient == nil {
-		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
+		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(webCfg.C.AudioS3Region))
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func handleSQSEvent(msg types.Message) bool {
 	}
 
 	for _, record := range payload.Records {
-		if strings.HasPrefix(record.S3.Object.Key, audioBucketPrefix) &&
+		if strings.HasPrefix(record.S3.Object.Key, webCfg.C.AudioS3BucketPrefix) &&
 			(strings.HasPrefix(record.EventName, "ObjectCreated") || strings.HasPrefix(record.EventName, "ObjectRemoved")) {
 
 			log.Info().Msgf("Detected S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)

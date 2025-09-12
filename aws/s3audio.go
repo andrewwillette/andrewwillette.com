@@ -16,14 +16,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/rs/zerolog/log"
 
+	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
+
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-)
-
-const (
-	bucketName        = "andrewwillette"
-	region            = "us-east-2"
-	audioBucketPrefix = "audio/"
 )
 
 var (
@@ -51,7 +47,7 @@ func UploadAudioToS3(filePath string) error {
 	}
 	defer file.Close()
 
-	key := filepath.Join(audioBucketPrefix, filepath.Base(filePath))
+	key := filepath.Join(webCfg.C.AudioS3BucketPrefix, filepath.Base(filePath))
 	contentType := "audio/mpeg"
 	if strings.HasSuffix(filePath, ".wav") {
 		contentType = "audio/wav"
@@ -60,7 +56,7 @@ func UploadAudioToS3(filePath string) error {
 	uploader := manager.NewUploader(client)
 
 	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket:      aws.String(bucketName),
+		Bucket:      aws.String(webCfg.C.AudioS3BucketName),
 		Key:         aws.String(key),
 		Body:        file,
 		ContentType: aws.String(contentType),
@@ -70,7 +66,7 @@ func UploadAudioToS3(filePath string) error {
 		return fmt.Errorf("failed to upload to S3: %w", err)
 	}
 
-	log.Info().Msgf("Successfully uploaded %s to s3://%s/%s", filePath, bucketName, key)
+	log.Info().Msgf("Successfully uploaded %s to s3://%s/%s", filePath, webCfg.C.AudioS3BucketName, key)
 	return nil
 }
 
@@ -78,8 +74,8 @@ func GetAudioFromS3() ([]S3Song, error) {
 	log.Debug().Msg("GetS3Songs()")
 
 	input := &s3.ListObjectsV2Input{
-		Bucket: aws.String(bucketName),
-		Prefix: aws.String(audioBucketPrefix),
+		Bucket: aws.String(webCfg.C.AudioS3BucketName),
+		Prefix: aws.String(webCfg.C.AudioS3BucketPrefix),
 	}
 
 	start := time.Now()
@@ -93,7 +89,7 @@ func GetAudioFromS3() ([]S3Song, error) {
 	imgs := make(map[string]string)
 
 	for _, item := range output.Contents {
-		if item.Key == nil || *item.Key == audioBucketPrefix {
+		if item.Key == nil || *item.Key == webCfg.C.AudioS3BucketPrefix {
 			continue
 		}
 		key := *item.Key
@@ -141,19 +137,19 @@ func DeleteAudioFromS3(key string) error {
 
 	client := getS3Client()
 
-	if !strings.HasPrefix(key, audioBucketPrefix) {
-		key = filepath.Join(audioBucketPrefix, key)
+	if !strings.HasPrefix(key, webCfg.C.AudioS3BucketPrefix) {
+		key = filepath.Join(webCfg.C.AudioS3BucketPrefix, key)
 	}
 
 	_, err := client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: aws.String(bucketName),
+		Bucket: aws.String(webCfg.C.AudioS3BucketName),
 		Key:    aws.String(key),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to delete object %s from S3: %w", key, err)
 	}
 
-	log.Info().Msgf("Successfully deleted %s from S3 bucket %s", key, bucketName)
+	log.Info().Msgf("Successfully deleted %s from S3 bucket %s", key, webCfg.C.AudioS3BucketName)
 	return nil
 }
 
@@ -185,7 +181,7 @@ func getPresignedURL(key string) (string, error) {
 	presigner := s3.NewPresignClient(getS3Client())
 
 	resp, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
+		Bucket: aws.String(webCfg.C.AudioS3BucketName),
 		Key:    aws.String(key),
 	}, s3.WithPresignExpires(30*time.Minute))
 	if err != nil {
@@ -203,7 +199,7 @@ func getS3Client() *s3.Client {
 }
 
 func initS3Session() *s3.Client {
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(webCfg.C.AudioS3Region))
 	if err != nil {
 		log.Fatal().Msgf("Failed to load AWS config: %v", err)
 	}
