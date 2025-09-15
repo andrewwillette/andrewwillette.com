@@ -177,13 +177,15 @@ func sortS3SongsByRecent(songs []S3Song) {
 	})
 }
 
+const PresignURLExpiry = 30 * time.Minute
+
 func getPresignedURL(key string) (string, error) {
 	presigner := s3.NewPresignClient(getS3Client())
 
 	resp, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(webCfg.C.AudioS3BucketName),
 		Key:    aws.String(key),
-	}, s3.WithPresignExpires(30*time.Minute))
+	}, s3.WithPresignExpires(PresignURLExpiry))
 	if err != nil {
 		return "", err
 	}

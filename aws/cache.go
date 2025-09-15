@@ -2,6 +2,7 @@ package aws
 
 import (
 	"sync"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -17,6 +18,15 @@ func GetCachedAudio() ([]S3Song, error) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	return cache.songs, nil
+}
+
+// UpdateAudioCacheOnPresignExpiry resolves bug where presignedURLs become stale
+// if cache not updated
+func UpdateAudioCacheOnPresignExpiry() {
+	for {
+		time.Sleep(PresignURLExpiry - 1*time.Minute)
+		UpdateAudioCache()
+	}
 }
 
 func UpdateAudioCache() {
