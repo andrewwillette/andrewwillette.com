@@ -37,9 +37,9 @@ type Config struct {
 }
 
 func LoadConfig(path string) (config Config, err error) {
-	configName := os.Getenv("CONFIG_NAME")
-	if configName == "" {
-		configName = "app" // fallback default
+	configName := os.Getenv("ENV")
+	if configName != "PROD" {
+		configName = "app" // default outside of prod
 	}
 
 	viper.AddConfigPath(path)

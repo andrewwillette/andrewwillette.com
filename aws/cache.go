@@ -32,6 +32,7 @@ func UpdateAudioCacheOnPresignExpiry() {
 func UpdateAudioCache() {
 	log.Debug().Msg("Updating song cache...")
 	songs, err := GetAudioFromS3()
+	log.Debug().Msgf("Found %d songs in S3", len(songs))
 	if err != nil {
 		log.Error().Msgf("Failed to update cache: %v", err)
 		return

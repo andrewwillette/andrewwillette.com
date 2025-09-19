@@ -81,6 +81,7 @@ func GetAudioFromS3() ([]S3Song, error) {
 	start := time.Now()
 	output, err := getS3Client().ListObjectsV2(context.TODO(), input)
 	if err != nil {
+		log.Error().Msgf("Failed to list objects in S3: %v", err)
 		return nil, err
 	}
 	log.Debug().Msgf("audioImageData S3 access took %v", time.Since(start))

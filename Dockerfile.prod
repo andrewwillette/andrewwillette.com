@@ -4,7 +4,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o andrewwillettedotcom .
+ENV ENV=PROD
+
+RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 ENV=PROD go build -o andrewwillettedotcom .
 
 EXPOSE 80
 EXPOSE 443
