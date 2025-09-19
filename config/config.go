@@ -40,6 +40,8 @@ func LoadConfig(path string) (config Config, err error) {
 	configName := os.Getenv("ENV")
 	if configName != "PROD" {
 		configName = "app" // default outside of prod
+	} else {
+		configName = "prod"
 	}
 
 	viper.AddConfigPath(path)
