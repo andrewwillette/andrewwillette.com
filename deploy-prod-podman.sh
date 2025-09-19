@@ -1,4 +1,5 @@
 #!/bin/bash
+# Prevents running the rest of the script after a failed command & fail on any failure in a pipeline
 set -euo pipefail
 
 EC2_USER=ubuntu
@@ -21,21 +22,18 @@ ssh "$EC2_USER@$EC2_HOST" <<EOF
   set -euo pipefail
   cd "$REMOTE_DIR"
 
-  echo "📥 Loading image..."
   sudo podman load -i "$TAR_FILE"
 
-  echo "🧹 Deleting remote tarball..."
   rm -f "$TAR_FILE"
 
-  echo "🛑 Stopping and removing previous container if exists..."
+  echo "Stopping and removing previous container if exists..."
   sudo podman rm -f "$IMAGE_NAME" 2>/dev/null || true
 
-  echo "🧽 Pruning unused images/containers/volumes..."
   sudo podman container prune -f
   sudo podman image prune -f
   sudo podman volume prune -f
 
-  echo "🚢 Running new container..."
+  echo "Running new container..."
   # /app/logs defined in Dockerfile, server.go configs cache dir on server
   sudo podman run -d --name "$IMAGE_NAME" \
     -p 80:80 -p 443:443 \
