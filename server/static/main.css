@@ -159,11 +159,6 @@ footer {
     background-position: center;
     color: #fff;
 }
-.song-item audio {
-    display: block;
-    margin-top: 10px;
-}
-
 
 .accent-image {
     text-align: center;
@@ -178,8 +173,11 @@ footer {
     border-radius: 4px;
 }
 
-audio {
+.audio-player {
+    display: block;
+    margin-top: 10px;
     width: 100%;
+    height: 5rem;
 }
 
 .music-container{
