@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Lonesome Moonlight Waltz",
+				URL:  "https://www.dropbox.com/scl/fi/mivxvgxs2mtf3lv5syiq9/Lonesome-Moonlight-Waltz.pdf?rlkey=5o2w92cjqq5yimeqbyn38n2l1&st=gl6janvk&dl=0",
+			},
+			{
 				Name: "Come All Ye Fair and Tender Ladies",
 				URL:  "https://www.dropbox.com/scl/fi/y0y9bfb0sfq1ri95gg3es/Come-All-Ye-Fair-and-Tender-Ladies.pdf?rlkey=evyk6evqhrr5dgf6cr56rln46&st=8ep67jcp&dl=0",
 			},
