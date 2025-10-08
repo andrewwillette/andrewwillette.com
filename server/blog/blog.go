@@ -33,12 +33,6 @@ var (
 	initializedBlogs   = []Blog{}
 	uninitializedBlogs = []Blog{
 		{
-			Title:    "Discipline In 2025 USA",
-			Created:  time.Date(2025, time.September, 4, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-			FileName: "discipline.md",
-			URLVal:   "theneedfordiscipline",
-		},
-		{
 			Title:    "Key of the Day",
 			Created:  time.Date(2024, time.November, 24, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 			FileName: "keyoftheday.md",
