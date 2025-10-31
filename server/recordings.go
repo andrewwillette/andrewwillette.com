@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type AudioPageData struct {
+type RecordingPageData struct {
 	Songs       []aws.S3Song
 	CurrentYear int
 }
@@ -21,7 +21,7 @@ func handleRecordingsPage(c echo.Context) error {
 		log.Error().Msgf("Unable to list songs: %v", err)
 		return err
 	}
-	data := AudioPageData{
+	data := RecordingPageData{
 		Songs:       songs,
 		CurrentYear: time.Now().Year(),
 	}

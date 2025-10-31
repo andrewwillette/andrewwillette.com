@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Brandywine",
+				URL:  "https://www.dropbox.com/scl/fi/31t8fw0n15zuimfp20hfz/Brandywine.pdf?rlkey=k209e9ffnlg905uyjuddl92it&st=b5beln9l&dl=0",
+			},
+			{
 				Name: "Jerusalem Ridge",
 				URL:  "https://www.dropbox.com/scl/fi/dl29q5axt6senm6vdu17b/Jerusalem-Ridge.pdf?rlkey=q71yvhbsx0uk2497rku2c5a5m&st=akxxqhhs&dl=0",
 			},
