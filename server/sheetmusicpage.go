@@ -25,6 +25,14 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Jerusalem Ridge",
+				URL:  "https://www.dropbox.com/scl/fi/dl29q5axt6senm6vdu17b/Jerusalem-Ridge.pdf?rlkey=q71yvhbsx0uk2497rku2c5a5m&st=akxxqhhs&dl=0",
+			},
+			{
+				Name: "Salt Spring",
+				URL:  "https://www.dropbox.com/scl/fi/fbfi8h5smc80jl33jnxq7/Salt-Spring.pdf?rlkey=0g1oua5tmne6nnpc2a77pxr9v&st=y8aa5oln&dl=0",
+			},
+			{
 				Name: "Washington Country",
 				URL:  "https://www.dropbox.com/scl/fi/m7nk6d184ogwstp96q8y2/Washington-County.pdf?rlkey=wpdk68m4r0l2wn3a29ia0qwv3&st=bw0bz5ia&dl=0",
 			},
