@@ -39,22 +39,33 @@ type Config struct {
 func LoadConfig(path string) (config Config, err error) {
 	configName := os.Getenv("ENV")
 	if configName != "PROD" {
-		configName = "app" // default outside of prod
+		configName = "app"
 	} else {
 		configName = "prod"
 	}
 
-	viper.AddConfigPath(path)
 	viper.SetConfigName(configName)
 	viper.SetConfigType("env")
-
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
+	viper.AddConfigPath(path)
+	readErr := viper.ReadInConfig()
+
+	if readErr != nil {
+		home, herr := os.UserHomeDir()
+		if herr == nil {
+			viper.AddConfigPath(home + "/.config/andrewwillette.com")
+			readErr = viper.ReadInConfig()
+		}
 	}
 
-	err = viper.Unmarshal(&config)
-	return
+	if readErr != nil {
+		return config, readErr
+	}
+
+	if err = viper.Unmarshal(&config); err != nil {
+		return config, err
+	}
+
+	return config, nil
 }
