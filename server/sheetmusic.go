@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Indian Killed a Woodcock",
+				URL:  "https://www.dropbox.com/scl/fi/d25emkkpmnia26slgwsi5/Indian-Killed-a-Woodcock.pdf?rlkey=u00g0oqbs49axngbjlu897a42&st=qy9phemg&dl=0",
+			},
+			{
 				Name: "Sweet Bunch of Daisies",
 				URL:  "https://www.dropbox.com/scl/fi/7hbls71as3ejvfwex3ntt/Sweet-Bunch-of-Daisies.pdf?rlkey=3tblcbmpkw3kz5g0rpmyqp7hx&st=wqk82xth&dl=0",
 			},
