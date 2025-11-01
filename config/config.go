@@ -9,6 +9,8 @@ import (
 
 var C Config
 
+const defaultConfigDir = "/.config/andrewwillette.com"
+
 func init() {
 	res, err := LoadConfig(".")
 	if err != nil {
@@ -54,7 +56,7 @@ func LoadConfig(path string) (config Config, err error) {
 	if readErr != nil {
 		home, herr := os.UserHomeDir()
 		if herr == nil {
-			viper.AddConfigPath(home + "/.config/andrewwillette.com")
+			viper.AddConfigPath(home + defaultConfigDir)
 			readErr = viper.ReadInConfig()
 		}
 	}
