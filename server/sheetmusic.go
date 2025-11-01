@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Sweet Bunch of Daisies",
+				URL:  "https://www.dropbox.com/scl/fi/7hbls71as3ejvfwex3ntt/Sweet-Bunch-of-Daisies.pdf?rlkey=3tblcbmpkw3kz5g0rpmyqp7hx&st=wqk82xth&dl=0",
+			},
+			{
 				Name: "Brandywine",
 				URL:  "https://www.dropbox.com/scl/fi/31t8fw0n15zuimfp20hfz/Brandywine.pdf?rlkey=k209e9ffnlg905uyjuddl92it&st=b5beln9l&dl=0",
 			},
