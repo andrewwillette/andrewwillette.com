@@ -25,6 +25,10 @@ var (
 	sheetmusicData = SheetMusicPageData{
 		Sheets: []DropboxSheetMusic{
 			{
+				Name: "Redeemed",
+				URL:  "https://www.dropbox.com/scl/fi/74ha0hvcl5i6o2321q5bw/Redeemed.pdf?rlkey=r30wh63ubausakazqzc92f2x0&st=zlnya7me&dl=0",
+			},
+			{
 				Name: "Indian Killed a Woodcock",
 				URL:  "https://www.dropbox.com/scl/fi/d25emkkpmnia26slgwsi5/Indian-Killed-a-Woodcock.pdf?rlkey=u00g0oqbs49axngbjlu897a42&st=qy9phemg&dl=0",
 			},
