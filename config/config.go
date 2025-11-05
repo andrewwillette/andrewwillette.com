@@ -20,22 +20,25 @@ func init() {
 }
 
 type Config struct {
-	PProfEnabled        bool   `mapstructure:"PPROF_ENABLED"`
-	LogLevel            string `mapstructure:"LOG_LEVEL"`
-	LogConsole          bool   `mapstructure:"LOG_CONSOLE"`
-	LogFile             bool   `mapstructure:"LOG_FILE"`
-	LogJSON             bool   `mapstructure:"LOG_JSON"`
-	LogDir              string `mapstructure:"LOG_DIR"`
-	LogFileName         string `mapstructure:"LOG_FILE_NAME"`
-	LogFileMaxMB        int    `mapstructure:"LOG_FILE_MAX_MB"`
-	LogFileMaxBacks     int    `mapstructure:"LOG_FILE_MAX_BACKUPS"`
-	LogFileMaxAge       int    `mapstructure:"LOG_FILE_MAX_AGE"`
-	AudioS3BucketName   string `mapstructure:"AUDIO_S3_BUCKET_NAME"`
-	AudioS3BucketPrefix string `mapstructure:"AUDIO_S3_BUCKET_PREFIX"`
-	AudioS3Region       string `mapstructure:"AUDIO_S3_REGION"`
-	AudioS3URL          string `mapstructure:"AUDIO_S3_URL"`
-	AudioSQSURL         string `mapstructure:"AUDIO_SQS_URL"`
-	HomePageImageS3URL  string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
+	PProfEnabled             bool   `mapstructure:"PPROF_ENABLED"`
+	LogLevel                 string `mapstructure:"LOG_LEVEL"`
+	LogConsole               bool   `mapstructure:"LOG_CONSOLE"`
+	LogFile                  bool   `mapstructure:"LOG_FILE"`
+	LogJSON                  bool   `mapstructure:"LOG_JSON"`
+	LogDir                   string `mapstructure:"LOG_DIR"`
+	LogFileName              string `mapstructure:"LOG_FILE_NAME"`
+	LogFileMaxMB             int    `mapstructure:"LOG_FILE_MAX_MB"`
+	LogFileMaxBacks          int    `mapstructure:"LOG_FILE_MAX_BACKUPS"`
+	LogFileMaxAge            int    `mapstructure:"LOG_FILE_MAX_AGE"`
+	AudioS3BucketName        string `mapstructure:"AUDIO_S3_BUCKET_NAME"`
+	AudioS3BucketPrefix      string `mapstructure:"AUDIO_S3_BUCKET_PREFIX"`
+	AudioS3Region            string `mapstructure:"AUDIO_S3_REGION"`
+	AudioS3URL               string `mapstructure:"AUDIO_S3_URL"`
+	AudioSQSURL              string `mapstructure:"AUDIO_SQS_URL"`
+	SheetMusicS3BucketName   string `mapstructure:"SHEET_S3_BUCKET_NAME"`
+	SheetMusicS3BucketPrefix string `mapstructure:"SHEET_S3_BUCKET_PREFIX"` // e.g. "dropbox_sheetmusic/"
+	SheetMusicS3Region       string `mapstructure:"SHEET_S3_REGION"`
+	HomePageImageS3URL       string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

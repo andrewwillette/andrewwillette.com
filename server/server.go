@@ -60,6 +60,7 @@ func StartServer(sslEnabled bool) {
 	e.Renderer = getTemplateRenderer()
 	blog.InitializeBlogs()
 	aws.UpdateAudioCache()
+	aws.UpdateSheetMusicCache()
 	go aws.UpdateAudioCacheOnPresignExpiry()
 	go aws.StartSQSPoller()
 	if sslEnabled {

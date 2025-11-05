@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"encoding/json"
+	"net/url"
 	"strings"
 	"time"
 
@@ -14,9 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/rs/zerolog/log"
 )
-
-// We listen to an SQS queue which receives events when audio files are added or removed from S3 bucket
-// and update our local cache accordingly.
 
 var (
 	sqsClient       *sqs.Client
@@ -72,17 +70,19 @@ func receiveSQSMessages(queueURL string) ([]types.Message, error) {
 	return resp.Messages, nil
 }
 
+type S3Event struct {
+	Records []struct {
+		EventName string `json:"eventName"`
+		S3        struct {
+			Object struct {
+				Key string `json:"key"`
+			} `json:"object"`
+		} `json:"s3"`
+	} `json:"Records"`
+}
+
 func handleSQSEvent(msg types.Message) bool {
-	var payload struct {
-		Records []struct {
-			EventName string `json:"eventName"`
-			S3        struct {
-				Object struct {
-					Key string `json:"key"`
-				} `json:"object"`
-			} `json:"s3"`
-		} `json:"Records"`
-	}
+	var payload S3Event
 
 	if err := json.Unmarshal([]byte(*msg.Body), &payload); err != nil {
 		log.Error().Msgf("Invalid SQS message format: %v", err)
@@ -90,16 +90,20 @@ func handleSQSEvent(msg types.Message) bool {
 	}
 
 	for _, record := range payload.Records {
-		if strings.HasPrefix(record.S3.Object.Key, webCfg.C.AudioS3BucketPrefix) &&
-			(strings.HasPrefix(record.EventName, "ObjectCreated") || strings.HasPrefix(record.EventName, "ObjectRemoved")) {
-
-			log.Info().Msgf("Detected S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
+		key, _ := url.QueryUnescape(record.S3.Object.Key)
+		switch {
+		case strings.HasPrefix(key, webCfg.C.AudioS3BucketPrefix):
+			log.Info().Msgf("Detected audiodata S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
 			go UpdateAudioCache()
+			return true
+		case strings.HasPrefix(key, webCfg.C.SheetMusicS3BucketPrefix):
+			log.Info().Msgf("Detected sheetmusic S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
+			go UpdateSheetMusicCache()
 			return true
 		}
 	}
 
-	log.Debug().Msg("SQS message not relevant to audio/, ignoring.")
+	log.Debug().Msg("SQS message not relevant to audio or sheetmusic, ignoring.")
 	return false
 }
 
