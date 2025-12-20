@@ -24,7 +24,7 @@ func GetCachedAudio() ([]S3Song, error) {
 // if cache not updated
 func UpdateAudioCacheOnPresignExpiry() {
 	for {
-		time.Sleep(PresignURLExpiry - 1*time.Minute)
+		time.Sleep(PresignURLExpiry - 30*time.Minute)
 		UpdateAudioCache()
 	}
 }

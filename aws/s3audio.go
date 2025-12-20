@@ -117,7 +117,7 @@ func GetAudioFromS3() ([]S3Song, error) {
 	}
 
 	var songs []S3Song
-	backupImageURL, _ := getPresignedURL("audio/unknown.png")
+	backupImageURL, _ := getPresignedURL("audio/webpage_album_cuts_image.png")
 
 	for key, s3Song := range wavs {
 		s3Song.ImageURL = imgs[key]
@@ -177,7 +177,7 @@ func sortS3SongsByRecent(songs []S3Song) {
 	})
 }
 
-const PresignURLExpiry = 30 * time.Minute
+const PresignURLExpiry = 60 * time.Minute
 
 func getPresignedURL(key string) (string, error) {
 	presigner := s3.NewPresignClient(getS3Client())
