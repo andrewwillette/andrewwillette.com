@@ -53,10 +53,13 @@ func uploadAudioFileFromDir(dir string) error {
 		return fmt.Errorf("failed to read directory: %w", err)
 	}
 	fileList := []string{}
+	fileMap := make(map[string]string) // basename -> full path
 	for _, file := range files {
 		if !file.IsDir() {
-			if isValidAudioFile(filepath.Join(dir, file.Name())) {
-				fileList = append(fileList, filepath.Join(dir, file.Name()))
+			fullPath := filepath.Join(dir, file.Name())
+			if isValidAudioFile(fullPath) {
+				fileList = append(fileList, file.Name())
+				fileMap[file.Name()] = fullPath
 			}
 		}
 	}
@@ -64,7 +67,7 @@ func uploadAudioFileFromDir(dir string) error {
 	if err != nil {
 		return fmt.Errorf("failed to select file: %w", err)
 	}
-	return aws.UploadAudioToS3(selected)
+	return aws.UploadAudioToS3(fileMap[selected])
 }
 
 func uploadAudioToS3(audioFile string) error {
