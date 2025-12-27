@@ -9,6 +9,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 go build -o andrewwillettedotcom .
 ```
 
+## Verifying Changes
+
+Run the local integration test to verify all endpoints work:
+
+```bash
+./scripts/local-integration-test.sh
+```
+
+This script builds the app, starts the server, tests all endpoints return expected status codes, and cleans up.
+
 ## CLI Commands
 
 The application uses Cobra for CLI. Available subcommands:
@@ -31,7 +41,7 @@ Routes:
 - `/key-of-the-day` - Daily musical key feature
 - `/resume` - Redirects to S3-hosted resume
 
-Templates are in `server/templates/*.tmpl` with shared header/footer partials.
+Templates use a base layout pattern (`server/templates/base.tmpl`) with page-specific content blocks in `server/templates/*.tmpl`.
 
 ### AWS Integration
 - **S3**: Stores audio files, sheet music PDFs, and images. Uses presigned URLs with 60-minute expiry.
