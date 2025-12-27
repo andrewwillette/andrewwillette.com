@@ -1,4 +1,4 @@
-{{define "header" -}}
+{{define "base"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +15,6 @@
 		</li>
 		<li>
 			<a href="/music">Recordings</a>
-			
 		</li>
 		<li>
 			<a href="/sheet-music">Sheet Music</a>
@@ -27,4 +26,8 @@
 			<a href="/blog">Blog</a>
 		</li>
 	</ul>
+	{{block "content" .}}{{end}}
+	<div class="center" id="copyright-clause">© {{.CurrentYear}} Andrew Willette. All rights reserved.</div>
+</body>
+</html>
 {{end}}

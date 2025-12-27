@@ -1,5 +1,4 @@
-{{define "musicpage"}}
-{{template "header" -}}
+{{define "content"}}
 <div class="music-container">
 	<div id="music-page-new">
     {{ if . }}
@@ -42,5 +41,4 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 </script>
-{{template "footer" .}}
 {{end}}

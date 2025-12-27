@@ -1,12 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/andrewwillette/keyofday/key"
@@ -141,27 +141,48 @@ func handleKeyOfDayPage(c echo.Context) error {
 
 // Template is the template renderer for my echo webserver
 type Template struct {
-	templates *template.Template
+	templates map[string]*template.Template
 }
 
 // Render renders the template
 func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+	tmpl, ok := t.templates[name]
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "template not found: "+name)
+	}
+	return tmpl.ExecuteTemplate(w, "base", data)
 }
 
 // getTemplateRenderer returns a template renderer for my echo webserver
 func getTemplateRenderer() *Template {
-	templates := template.New("")
-	if t, _ := templates.ParseGlob(fmt.Sprintf("%s/templates/blogs/*.tmpl", basepath)); t != nil {
-		templates = t
-	}
-	if t, _ := templates.ParseGlob(fmt.Sprintf("%s/templates/*.tmpl", basepath)); t != nil {
-		templates = t
-	}
-	return &Template{
-		templates: templates,
+	// Parse base layout
+	base := template.Must(template.ParseFiles(
+		filepath.Join(basepath, "templates/base.tmpl"),
+	))
+
+	templates := make(map[string]*template.Template)
+
+	// Pages that use the base layout
+	pages := []string{
+		"templates/homepage.tmpl",
+		"templates/musicpage.tmpl",
+		"templates/keyofdaypage.tmpl",
+		"templates/sheetmusicpage.tmpl",
+		"templates/blogs/blogspage.tmpl",
+		"templates/blogs/singleblogpage.tmpl",
 	}
 
+	for _, page := range pages {
+		// Clone base so each page gets its own copy
+		pageTemplate := template.Must(base.Clone())
+		template.Must(pageTemplate.ParseFiles(filepath.Join(basepath, page)))
+
+		// Store with page name as key (e.g., "homepage")
+		name := strings.TrimSuffix(filepath.Base(page), ".tmpl")
+		templates[name] = pageTemplate
+	}
+
+	return &Template{templates: templates}
 }
 
 func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
