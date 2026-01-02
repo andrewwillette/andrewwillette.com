@@ -34,7 +34,7 @@ var (
 	uninitializedBlogs = []Blog{
 		{
 			Title:    "LLM Coding: A Vim User's Perspective",
-			Created:  time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			Created:  time.Date(2026, time.January, 2, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 			FileName: "llm_coding_from_vim_user.md",
 			URLVal:   "llm_coding_from_vim_user",
 		},
