@@ -33,22 +33,28 @@ var (
 	initializedBlogs   = []Blog{}
 	uninitializedBlogs = []Blog{
 		{
+			Title:    "LLM Coding: A Vim User's Perspective",
+			Created:  time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			FileName: "llm_coding_from_vim_user.md",
+			URLVal:   "llm_coding_from_vim_user",
+		},
+		{
 			Title:    "Key of the Day",
 			Created:  time.Date(2024, time.November, 24, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-			FileName: "keyoftheday.md",
-			URLVal:   "keyoftheday",
+			FileName: "key_of_the_day.md",
+			URLVal:   "key_of_the_day",
 		},
 		{
 			Title:    "Simple Docker Deploys",
 			Created:  time.Date(2024, time.May, 8, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-			FileName: "simpledockerdeploys.md",
-			URLVal:   "simpledockerdeploys",
+			FileName: "simple_docker_deploys.md",
+			URLVal:   "simple_docker_deploys",
 		},
 		{
 			Title:    "Thinking About What",
 			Created:  time.Date(2024, time.March, 20, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
-			FileName: "thinkingaboutwhat.md",
-			URLVal:   "thinkingaboutwhat",
+			FileName: "thinking_about_what.md",
+			URLVal:   "thinking_about_what",
 		},
 	}
 

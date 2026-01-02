@@ -19,6 +19,18 @@ Run the local integration test to verify all endpoints work:
 
 This script builds the app, starts the server, tests all endpoints return expected status codes, and cleans up.
 
+## Production Deploy
+
+```bash
+./scripts/deploy-prod-podman.sh
+```
+
+## Local Deploy
+
+```
+air
+```
+
 ## CLI Commands
 
 The application uses Cobra for CLI. Available subcommands:

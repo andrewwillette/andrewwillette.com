@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(git mv:*)",
+      "Bash(./scripts/deploy-prod-podman.sh:*)"
     ]
   }
 }
