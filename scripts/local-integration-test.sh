@@ -6,7 +6,7 @@ SERVER_PID=""
 
 cleanup() {
     if [ -n "$SERVER_PID" ]; then
-        echo "Stopping server (PID: $SERVER_PID)..."
+        echo "local-integration-test: Stopping server (PID: $SERVER_PID)..."
         kill "$SERVER_PID" 2>/dev/null || true
         wait "$SERVER_PID" 2>/dev/null || true
     fi
@@ -14,22 +14,27 @@ cleanup() {
 
 trap cleanup EXIT
 
-echo "Building application..."
+# prepends message with local-integration-test:
+print_integration_test_message() {
+    echo "local-integration-test: $1"
+}
+
+print_integration_test_message "Building application..."
 go build -o andrewwillettedotcom .
 
-echo "Starting server on port $PORT..."
+print_integration_test_message "Starting server on port $PORT..."
 ./andrewwillettedotcom serve &
 SERVER_PID=$!
 
 # Wait for server to be ready
-echo "Waiting for server to start..."
+print_integration_test_message "Waiting for server to start..."
 for i in $(seq 1 30); do
     if curl -s -o /dev/null -w "" "http://localhost:$PORT/" 2>/dev/null; then
-        echo "Server is ready"
+        print_integration_test_message "Server is ready"
         break
     fi
     if [ "$i" -eq 30 ]; then
-        echo "ERROR: Server failed to start within 30 seconds"
+        print_integration_test_message "ERROR: Server failed to start within 30 seconds"
         exit 1
     fi
     sleep 1
@@ -44,16 +49,16 @@ test_endpoint() {
 
     status=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$PORT$path")
     if [ "$status" -eq "$expected_status" ]; then
-        echo "✓ $description ($path) - $status"
+        print_integration_test_message "✓ $description ($path) - $status"
     else
-        echo "✗ $description ($path) - expected $expected_status, got $status"
+        print_integration_test_message "✗ $description ($path) - expected $expected_status, got $status"
         FAILED=1
     fi
 }
 
 echo ""
-echo "Testing endpoints..."
-echo "===================="
+print_integration_test_message "Testing endpoints..."
+print_integration_test_message "===================="
 
 test_endpoint "/" 200 "Homepage"
 test_endpoint "/music" 200 "Music page"
@@ -65,9 +70,9 @@ test_endpoint "/robots.txt" 200 "Robots.txt"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
-    echo "All tests passed!"
+    print_integration_test_message "All tests passed!"
     exit 0
 else
-    echo "Some tests failed!"
+    print_integration_test_message "Some tests failed!"
     exit 1
 fi
