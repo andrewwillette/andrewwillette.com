@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -12,7 +13,9 @@ import (
 	"github.com/andrewwillette/keyofday/key"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/rs/zerolog/log"
+	"github.com/labstack/gommon/log"
+	"github.com/rs/zerolog"
+	zlog "github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
@@ -53,8 +56,12 @@ var (
 
 // StartServer start the server with https certificate configurable
 func StartServer(sslEnabled bool) {
+	if err := traffic.InitDB(config.C.TrafficDBPath); err != nil {
+		zlog.Error().Err(err).Msg("failed to initialize traffic database")
+	}
 	e := echo.New()
 	e.HideBanner = true
+	e.Logger = newZerologAdapter(zlog.Logger)
 	addRoutes(e)
 	addMiddleware(e)
 	if config.C.PProfEnabled {
@@ -138,7 +145,7 @@ func handleKeyOfDayPage(c echo.Context) error {
 	}
 	err := c.Render(http.StatusOK, "keyofdaypage", data)
 	if err != nil {
-		log.Error().Msgf("handleKeyOfDyPage error: %v", err)
+		zlog.Error().Msgf("handleKeyOfDyPage error: %v", err)
 		return err
 	}
 	return nil
@@ -155,7 +162,11 @@ func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) er
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "template not found: "+name)
 	}
-	return tmpl.ExecuteTemplate(w, "base", data)
+	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
+		zlog.Error().Err(err).Str("template", name).Msg("template execution failed")
+		return err
+	}
+	return nil
 }
 
 // getTemplateRenderer returns a template renderer for my echo webserver
@@ -193,10 +204,50 @@ func getTemplateRenderer() *Template {
 
 func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log.Info().Msgf("Request to registered path %s with ip %s", c.Path(), c.RealIP())
+		zlog.Info().Msgf("Request to registered path %s with ip %s", c.Path(), c.RealIP())
 		if err := next(c); err != nil {
 			c.Error(err)
 		}
 		return nil
 	}
 }
+
+// zerologAdapter adapts zerolog to Echo's Logger interface
+type zerologAdapter struct {
+	logger zerolog.Logger
+	prefix string
+	level  log.Lvl
+}
+
+func newZerologAdapter(logger zerolog.Logger) *zerologAdapter {
+	return &zerologAdapter{logger: logger, level: log.INFO}
+}
+
+func (z *zerologAdapter) Output() io.Writer                       { return z.logger }
+func (z *zerologAdapter) SetOutput(w io.Writer)                   { z.logger = z.logger.Output(w) }
+func (z *zerologAdapter) Prefix() string                          { return z.prefix }
+func (z *zerologAdapter) SetPrefix(p string)                      { z.prefix = p }
+func (z *zerologAdapter) Level() log.Lvl                          { return z.level }
+func (z *zerologAdapter) SetLevel(l log.Lvl)                      { z.level = l }
+func (z *zerologAdapter) SetHeader(h string)                      {}
+func (z *zerologAdapter) Print(i ...interface{})                  { z.logger.Info().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Printf(format string, i ...interface{})  { z.logger.Info().Msgf(format, i...) }
+func (z *zerologAdapter) Printj(j log.JSON)                       { z.logger.Info().Fields(j).Msg("") }
+func (z *zerologAdapter) Debug(i ...interface{})                  { z.logger.Debug().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Debugf(format string, i ...interface{})  { z.logger.Debug().Msgf(format, i...) }
+func (z *zerologAdapter) Debugj(j log.JSON)                       { z.logger.Debug().Fields(j).Msg("") }
+func (z *zerologAdapter) Info(i ...interface{})                   { z.logger.Info().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Infof(format string, i ...interface{})   { z.logger.Info().Msgf(format, i...) }
+func (z *zerologAdapter) Infoj(j log.JSON)                        { z.logger.Info().Fields(j).Msg("") }
+func (z *zerologAdapter) Warn(i ...interface{})                   { z.logger.Warn().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Warnf(format string, i ...interface{})   { z.logger.Warn().Msgf(format, i...) }
+func (z *zerologAdapter) Warnj(j log.JSON)                        { z.logger.Warn().Fields(j).Msg("") }
+func (z *zerologAdapter) Error(i ...interface{})                  { z.logger.Error().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Errorf(format string, i ...interface{})  { z.logger.Error().Msgf(format, i...) }
+func (z *zerologAdapter) Errorj(j log.JSON)                       { z.logger.Error().Fields(j).Msg("") }
+func (z *zerologAdapter) Fatal(i ...interface{})                  { z.logger.Fatal().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Fatalf(format string, i ...interface{})  { z.logger.Fatal().Msgf(format, i...) }
+func (z *zerologAdapter) Fatalj(j log.JSON)                       { z.logger.Fatal().Fields(j).Msg("") }
+func (z *zerologAdapter) Panic(i ...interface{})                  { z.logger.Panic().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Panicf(format string, i ...interface{})  { z.logger.Panic().Msgf(format, i...) }
+func (z *zerologAdapter) Panicj(j log.JSON)                       { z.logger.Panic().Fields(j).Msg("") }

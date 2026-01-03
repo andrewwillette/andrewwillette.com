@@ -1,15 +1,18 @@
 package traffic
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
+	_ "modernc.org/sqlite"
 )
 
 var suspiciousPaths = []string{
@@ -20,6 +23,50 @@ var suspiciousPaths = []string{
 	"/config", "/backup", "/db", "/database",
 	"/shell", "/cmd", "/eval", "/exec",
 	"/api/", "/xmlrpc.php", "/wp-json",
+}
+
+var db *sql.DB
+
+func InitDB(dbPath string) error {
+	var err error
+	db, err = sql.Open("sqlite", dbPath)
+	if err != nil {
+		return err
+	}
+
+	// Create tables if they don't exist
+	schema := `
+	CREATE TABLE IF NOT EXISTS requests (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		path TEXT NOT NULL,
+		ip TEXT NOT NULL,
+		user_agent TEXT,
+		referrer TEXT,
+		timestamp DATETIME NOT NULL
+	);
+	CREATE TABLE IF NOT EXISTS suspicious_requests (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		path TEXT NOT NULL,
+		ip TEXT NOT NULL,
+		user_agent TEXT,
+		timestamp DATETIME NOT NULL
+	);
+	CREATE TABLE IF NOT EXISTS failed_auths (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		ip TEXT NOT NULL,
+		timestamp DATETIME NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS idx_requests_timestamp ON requests(timestamp);
+	CREATE INDEX IF NOT EXISTS idx_suspicious_timestamp ON suspicious_requests(timestamp);
+	CREATE INDEX IF NOT EXISTS idx_failed_auths_timestamp ON failed_auths(timestamp);
+	`
+	_, err = db.Exec(schema)
+	if err != nil {
+		return err
+	}
+
+	log.Info().Msgf("traffic: database initialized at %s", dbPath)
+	return nil
 }
 
 type Request struct {
@@ -33,78 +80,6 @@ type Request struct {
 type HourlyBucket struct {
 	Hour     string
 	Requests []Request
-}
-
-type SuspiciousRequest struct {
-	Path      string
-	IP        string
-	UserAgent string
-	Timestamp time.Time
-}
-
-type FailedAuth struct {
-	IP        string
-	Timestamp time.Time
-}
-
-type Store struct {
-	mu                 sync.RWMutex
-	requests           []Request
-	suspiciousRequests []SuspiciousRequest
-	failedAuths        []FailedAuth
-}
-
-var store = &Store{
-	requests:           make([]Request, 0),
-	suspiciousRequests: make([]SuspiciousRequest, 0),
-	failedAuths:        make([]FailedAuth, 0),
-}
-
-func RecordRequest(path, ip, userAgent, referrer string) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-
-	req := Request{
-		Path:      path,
-		IP:        ip,
-		UserAgent: userAgent,
-		Referrer:  referrer,
-		Timestamp: time.Now(),
-	}
-
-	store.requests = append(store.requests, req)
-}
-
-func isSuspiciousPath(path string) bool {
-	lowerPath := strings.ToLower(path)
-	for _, suspicious := range suspiciousPaths {
-		if strings.Contains(lowerPath, suspicious) {
-			return true
-		}
-	}
-	return false
-}
-
-func RecordSuspiciousRequest(path, ip, userAgent string) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-
-	store.suspiciousRequests = append(store.suspiciousRequests, SuspiciousRequest{
-		Path:      path,
-		IP:        ip,
-		UserAgent: userAgent,
-		Timestamp: time.Now(),
-	})
-}
-
-func RecordFailedAuth(ip string) {
-	store.mu.Lock()
-	defer store.mu.Unlock()
-
-	store.failedAuths = append(store.failedAuths, FailedAuth{
-		IP:        ip,
-		Timestamp: time.Now(),
-	})
 }
 
 type FailedAuthSummary struct {
@@ -121,73 +96,167 @@ type SuspiciousSummary struct {
 	Last  time.Time
 }
 
-func GetFailedAuthSummary() []FailedAuthSummary {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-
-	counts := make(map[string]*FailedAuthSummary)
-	for _, fa := range store.failedAuths {
-		if summary, exists := counts[fa.IP]; exists {
-			summary.Count++
-			if fa.Timestamp.After(summary.Last) {
-				summary.Last = fa.Timestamp
-			}
-		} else {
-			counts[fa.IP] = &FailedAuthSummary{
-				IP:    fa.IP,
-				Count: 1,
-				Last:  fa.Timestamp,
-			}
+func isSuspiciousPath(path string) bool {
+	lowerPath := strings.ToLower(path)
+	for _, suspicious := range suspiciousPaths {
+		if strings.Contains(lowerPath, suspicious) {
+			return true
 		}
 	}
+	return false
+}
 
-	result := make([]FailedAuthSummary, 0, len(counts))
-	for _, summary := range counts {
-		result = append(result, *summary)
+func RecordRequest(path, ip, userAgent, referrer string) {
+	if db == nil {
+		return
 	}
-	return result
+	_, err := db.Exec(
+		"INSERT INTO requests (path, ip, user_agent, referrer, timestamp) VALUES (?, ?, ?, ?, ?)",
+		path, ip, userAgent, referrer, time.Now(),
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to record request")
+	}
+}
+
+func RecordSuspiciousRequest(path, ip, userAgent string) {
+	if db == nil {
+		return
+	}
+	_, err := db.Exec(
+		"INSERT INTO suspicious_requests (path, ip, user_agent, timestamp) VALUES (?, ?, ?, ?)",
+		path, ip, userAgent, time.Now(),
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to record suspicious request")
+	}
+}
+
+func RecordFailedAuth(ip string) {
+	if db == nil {
+		return
+	}
+	_, err := db.Exec(
+		"INSERT INTO failed_auths (ip, timestamp) VALUES (?, ?)",
+		ip, time.Now(),
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to record failed auth")
+	}
+}
+
+func parseTimestamp(s string) time.Time {
+	// SQLite stores timestamps in various formats, try common ones
+	formats := []string{
+		"2006-01-02 15:04:05.999999999-07:00",
+		"2006-01-02T15:04:05.999999999-07:00",
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05Z",
+		time.RFC3339,
+		time.RFC3339Nano,
+	}
+	for _, format := range formats {
+		if t, err := time.Parse(format, s); err == nil {
+			return t
+		}
+	}
+	return time.Time{}
+}
+
+func GetFailedAuthSummary() []FailedAuthSummary {
+	if db == nil {
+		return nil
+	}
+
+	rows, err := db.Query(`
+		SELECT ip, COUNT(*) as count, MAX(timestamp) as last
+		FROM failed_auths
+		GROUP BY ip
+		ORDER BY last DESC
+	`)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to query failed auths")
+		return nil
+	}
+	defer rows.Close()
+
+	var results []FailedAuthSummary
+	for rows.Next() {
+		var summary FailedAuthSummary
+		var lastStr string
+		if err := rows.Scan(&summary.IP, &summary.Count, &lastStr); err != nil {
+			log.Error().Err(err).Msg("failed to scan failed auth row")
+			continue
+		}
+		summary.Last = parseTimestamp(lastStr)
+		results = append(results, summary)
+	}
+	return results
 }
 
 func GetSuspiciousSummary() []SuspiciousSummary {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
+	if db == nil {
+		log.Warn().Msg("GetSuspiciousSummary called with nil DB")
+		return nil
+	}
 
-	groups := make(map[string]*SuspiciousSummary)
-	for _, req := range store.suspiciousRequests {
-		key := req.IP + "|" + req.Path
-		if summary, exists := groups[key]; exists {
-			summary.Count++
-			if req.Timestamp.Before(summary.First) {
-				summary.First = req.Timestamp
-			}
-			if req.Timestamp.After(summary.Last) {
-				summary.Last = req.Timestamp
-			}
-		} else {
-			groups[key] = &SuspiciousSummary{
-				IP:    req.IP,
-				Path:  req.Path,
-				Count: 1,
-				First: req.Timestamp,
-				Last:  req.Timestamp,
-			}
+	rows, err := db.Query(`
+		SELECT ip, path, COUNT(*) as count, MIN(timestamp) as first, MAX(timestamp) as last
+		FROM suspicious_requests
+		GROUP BY ip, path
+		ORDER BY last DESC
+	`)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to query suspicious requests")
+		return nil
+	}
+	defer rows.Close()
+
+	var results []SuspiciousSummary
+	for rows.Next() {
+		var summary SuspiciousSummary
+		var firstStr, lastStr string
+		if err := rows.Scan(&summary.IP, &summary.Path, &summary.Count, &firstStr, &lastStr); err != nil {
+			log.Error().Err(err).Msg("failed to scan suspicious request row")
+			continue
 		}
+		summary.First = parseTimestamp(firstStr)
+		summary.Last = parseTimestamp(lastStr)
+		results = append(results, summary)
 	}
-
-	result := make([]SuspiciousSummary, 0, len(groups))
-	for _, summary := range groups {
-		result = append(result, *summary)
-	}
-	return result
+	return results
 }
 
 func GetHourlyBuckets() []HourlyBucket {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
+	if db == nil {
+		return nil
+	}
+
+	rows, err := db.Query(`
+		SELECT path, ip, user_agent, referrer, timestamp
+		FROM requests
+		ORDER BY timestamp DESC
+		LIMIT 1000
+	`)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to query requests")
+		return nil
+	}
+	defer rows.Close()
 
 	bucketMap := make(map[string][]Request)
+	for rows.Next() {
+		var req Request
+		var userAgent, referrer sql.NullString
+		var timestampStr string
+		if err := rows.Scan(&req.Path, &req.IP, &userAgent, &referrer, &timestampStr); err != nil {
+			log.Error().Err(err).Msg("failed to scan request row")
+			continue
+		}
+		req.UserAgent = userAgent.String
+		req.Referrer = referrer.String
+		req.Timestamp = parseTimestamp(timestampStr)
 
-	for _, req := range store.requests {
 		hourKey := req.Timestamp.Format("2006-01-02 15:00")
 		bucketMap[hourKey] = append(bucketMap[hourKey], req)
 	}
@@ -212,6 +281,49 @@ func GetHourlyBuckets() []HourlyBucket {
 	return buckets
 }
 
+func getTotalRequestCount() int {
+	if db == nil {
+		return 0
+	}
+
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM requests").Scan(&count)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to count requests")
+		return 0
+	}
+	return count
+}
+
+func getDBSize() int64 {
+	if config.C.TrafficDBPath == "" {
+		return 0
+	}
+	info, err := os.Stat(config.C.TrafficDBPath)
+	if err != nil {
+		return 0
+	}
+	return info.Size()
+}
+
+func humanBytes(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div),
+		"KMGTPE"[exp],
+	)
+}
+
 func TrackingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		path := c.Request().URL.Path
@@ -232,51 +344,25 @@ type AdminPageData struct {
 	CurrentYear        int
 	Buckets            []HourlyBucket
 	TotalCount         int
-	MemoryBytes        int
+	DBSize             string
 	SuspiciousRequests []SuspiciousSummary
 	FailedAuths        []FailedAuthSummary
 }
 
 func HandleAdminPage(c echo.Context) error {
+	log.Info().Msg("HandleAdminPage")
 	buckets := GetHourlyBuckets()
-	total := 0
-	for _, b := range buckets {
-		total += len(b.Requests)
-	}
 
 	data := AdminPageData{
 		CurrentYear:        time.Now().Year(),
 		Buckets:            buckets,
-		TotalCount:         total,
-		MemoryBytes:        getMemoryUsage(),
+		TotalCount:         getTotalRequestCount(),
+		DBSize:             humanBytes(getDBSize()),
 		SuspiciousRequests: GetSuspiciousSummary(),
 		FailedAuths:        GetFailedAuthSummary(),
 	}
+	log.Info().Msg("Rendering admin page")
 	return c.Render(http.StatusOK, "adminpage", data)
-}
-
-func getMemoryUsage() int {
-	store.mu.RLock()
-	defer store.mu.RUnlock()
-
-	total := 0
-
-	// Regular requests
-	for _, req := range store.requests {
-		total += len(req.Path) + len(req.IP) + len(req.UserAgent) + len(req.Referrer) + 24
-	}
-
-	// Suspicious requests
-	for _, req := range store.suspiciousRequests {
-		total += len(req.Path) + len(req.IP) + len(req.UserAgent) + 24
-	}
-
-	// Failed auths
-	for _, fa := range store.failedAuths {
-		total += len(fa.IP) + 24
-	}
-
-	return total
 }
 
 func BasicAuthMiddleware() echo.MiddlewareFunc {

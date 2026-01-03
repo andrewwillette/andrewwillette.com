@@ -67,3 +67,8 @@ Blogs are defined in `server/blog/blog.go` with markdown files in `server/blog/p
 Uses Viper with `.env` files. Looks for `app.env` (dev) or `prod.env` (when `ENV=PROD`). Config can also be in `~/.config/andrewwillette.com/`.
 
 Key config values: S3 bucket names/prefixes, SQS URL, logging settings, pprof toggle.
+
+### Admin Support
+This website has some admnistration workflows. An echo middleware layer tracks incoming ip traffic and displays it.
+
+Admin data is persisted to a sqlite database which is mounted on the podman container.

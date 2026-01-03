@@ -43,6 +43,7 @@ type Config struct {
 	SheetMusicS3Region       string `mapstructure:"SHEET_S3_REGION"`
 	HomePageImageS3URL       string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
 	AdminPassword            string `mapstructure:"PERSONAL_WEBSITE_PASSWORD"`
+	TrafficDBPath            string `mapstructure:"TRAFFIC_DB_PATH"`
 }
 
 func LoadDefaultConfig(fallbackpath string) (config Config, err error) {
@@ -86,6 +87,15 @@ func LoadDefaultConfig(fallbackpath string) (config Config, err error) {
 	if buildTimePassword != "" {
 		log.Info().Msg("config: using build-time password")
 		config.AdminPassword = buildTimePassword
+	}
+
+	// Default traffic DB path
+	if config.TrafficDBPath == "" {
+		if envVal == "PROD" {
+			config.TrafficDBPath = "/app/traffic.db"
+		} else {
+			config.TrafficDBPath = "./traffic.db"
+		}
 	}
 
 	log.Info().Msgf("config: AdminPassword set=%v", config.AdminPassword != "")

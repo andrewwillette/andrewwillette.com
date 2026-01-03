@@ -11,4 +11,4 @@ andrewwillettedotcom
 tmp
 # creating traces, see https://go.dev/blog/execution-traces-2024
 trace.out
-
+traffic.db
