@@ -259,6 +259,70 @@ footer {
     white-space: nowrap;
 }
 
+/* Security tables - shared styles */
+.failed-auth-table,
+.suspicious-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 2rem 0;
+}
+
+.failed-auth-table th,
+.failed-auth-table td,
+.suspicious-table th,
+.suspicious-table td {
+    border: 1px solid #665c54;
+    padding: 0.5em 0.75em;
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.failed-auth-table th,
+.suspicious-table th {
+    background: #3c3836;
+    color: #fabd2f;
+    font-weight: bold;
+}
+
+.failed-auth-table tr:hover,
+.suspicious-table tr:hover {
+    background: #3c3836;
+}
+
+/* Failed auth table */
+.failed-auth-table td:first-child {
+    font-family: monospace;
+    color: #fe8019;
+}
+
+.failed-auth-table td:nth-child(2) {
+    text-align: center;
+    font-weight: bold;
+    color: #fb4934;
+}
+
+/* Suspicious requests table */
+.suspicious-table td:first-child {
+    font-family: monospace;
+    color: #fe8019;
+}
+
+.suspicious-table td:nth-child(2) {
+    color: #fb4934;
+    font-family: monospace;
+}
+
+.suspicious-table td:nth-child(3) {
+    text-align: center;
+    font-weight: bold;
+    color: #fabd2f;
+}
+
+.suspicious-table td:nth-child(4) {
+    color: #928374;
+    font-size: 0.85em;
+}
+
 /* for light mode support, commenting out because not crazy about colorscheme */
 /* @media (prefers-color-scheme: light) { */
 /*     body { */
