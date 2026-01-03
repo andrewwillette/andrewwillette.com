@@ -1,0 +1,36 @@
+{{define "content"}}
+<div id="admin-page">
+	<h1>Traffic Stats</h1>
+	<p>Total requests tracked: {{.TotalCount}}</p>
+	{{range .Buckets}}
+	<div class="hour-bucket">
+		<h2>{{.Hour}} ({{len .Requests}} requests)</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Time</th>
+					<th>IP</th>
+					<th>Path</th>
+					<th>Referrer</th>
+					<th>User Agent</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .Requests}}
+				<tr>
+					<td>{{.Timestamp.Format "15:04:05"}}</td>
+					<td>{{.IP}}</td>
+					<td>{{.Path}}</td>
+					<td>{{if .Referrer}}{{.Referrer}}{{else}}-{{end}}</td>
+					<td>{{.UserAgent}}</td>
+				</tr>
+				{{end}}
+			</tbody>
+		</table>
+	</div>
+	{{else}}
+	<p>No traffic recorded yet.</p>
+	{{end}}
+	<p>Memory usage: {{.MemoryBytes}} bytes</p>
+</div>
+{{end}}

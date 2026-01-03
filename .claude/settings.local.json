@@ -3,7 +3,8 @@
     "allow": [
       "Bash(go build:*)",
       "Bash(git mv:*)",
-      "Bash(./scripts/deploy-prod-podman.sh:*)"
+      "Bash(./scripts/deploy-prod-podman.sh:*)",
+      "Bash(./scripts/local-integration-test.sh:*)"
     ]
   }
 }

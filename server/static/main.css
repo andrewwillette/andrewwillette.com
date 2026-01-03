@@ -221,6 +221,44 @@ footer {
     /* max-width: 400px; */
 }
 
+/* Admin traffic page */
+#admin-page {
+    padding: 2rem;
+}
+
+#admin-page h1 {
+    margin-bottom: 1rem;
+}
+
+.hour-bucket {
+    margin-bottom: 2em;
+}
+
+.hour-bucket table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5em;
+}
+
+.hour-bucket th,
+.hour-bucket td {
+    border: 1px solid #665c54;
+    padding: 0.5em;
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.hour-bucket th {
+    background: #3c3836;
+}
+
+.hour-bucket td:nth-child(5) {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* for light mode support, commenting out because not crazy about colorscheme */
 /* @media (prefers-color-scheme: light) { */
 /*     body { */

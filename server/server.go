@@ -19,6 +19,7 @@ import (
 	"github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
 	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
+	"github.com/andrewwillette/andrewwillettedotcom/server/traffic"
 )
 
 const (
@@ -41,6 +42,8 @@ const (
 	robotsTxtResource = "server/static/robots.txt"
 
 	keyOfDayEndpoint = "/key-of-the-day"
+
+	adminEndpoint = "/admin/traffic"
 )
 
 var (
@@ -89,10 +92,12 @@ func addRoutes(e *echo.Echo) {
 	e.GET(blogEndpoint, blog.HandleIndividualBlogPage)
 	e.File(cssEndpoint, cssResource)
 	e.File(robotsEndpoint, robotsTxtResource)
+	e.GET(adminEndpoint, traffic.HandleAdminPage, traffic.BasicAuthMiddleware())
 }
 
 func addMiddleware(e *echo.Echo) {
 	e.Use(logmiddleware)
+	e.Use(traffic.TrackingMiddleware)
 }
 
 type HomePageData struct {
@@ -170,6 +175,7 @@ func getTemplateRenderer() *Template {
 		"templates/sheetmusicpage.tmpl",
 		"templates/blogs/blogspage.tmpl",
 		"templates/blogs/singleblogpage.tmpl",
+		"templates/adminpage.tmpl",
 	}
 
 	for _, page := range pages {

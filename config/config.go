@@ -9,10 +9,13 @@ import (
 
 var C Config
 
+// Set at build time via ldflags: -ldflags "-X github.com/andrewwillette/andrewwillettedotcom/config.buildTimePassword=xxx"
+var buildTimePassword string
+
 const defaultConfigDir = "/.config/andrewwillette.com"
 
 func init() {
-	res, err := LoadConfig(".")
+	res, err := LoadDefaultConfig(".")
 	if err != nil {
 		log.Error().Msgf("Error loading config: %v", err)
 	}
@@ -39,38 +42,53 @@ type Config struct {
 	SheetMusicS3BucketPrefix string `mapstructure:"SHEET_S3_BUCKET_PREFIX"` // e.g. "dropbox_sheetmusic/"
 	SheetMusicS3Region       string `mapstructure:"SHEET_S3_REGION"`
 	HomePageImageS3URL       string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
+	AdminPassword            string `mapstructure:"PERSONAL_WEBSITE_PASSWORD"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
-	configName := os.Getenv("ENV")
-	if configName != "PROD" {
-		configName = "app"
-	} else {
+func LoadDefaultConfig(fallbackpath string) (config Config, err error) {
+	envVal := os.Getenv("ENV")
+	configName := "nonprod"
+	if envVal == "PROD" {
 		configName = "prod"
 	}
+
+	log.Info().Msgf("config: ENV=%q, looking for %s.env", envVal, configName)
 
 	viper.SetConfigName(configName)
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
 
-	viper.AddConfigPath(path)
-	readErr := viper.ReadInConfig()
+	var readErr error
+	home, herr := os.UserHomeDir()
+	if herr == nil {
+		configDir := home + defaultConfigDir
+		log.Info().Msgf("config: trying %s/%s.env", configDir, configName)
+		viper.AddConfigPath(configDir)
+		readErr = viper.ReadInConfig()
+	}
 
-	if readErr != nil {
-		home, herr := os.UserHomeDir()
-		if herr == nil {
-			viper.AddConfigPath(home + defaultConfigDir)
-			readErr = viper.ReadInConfig()
-		}
+	if readErr != nil || herr != nil {
+		log.Info().Msgf("config: trying fallback %s/%s.env", fallbackpath, configName)
+		viper.AddConfigPath(fallbackpath)
+		readErr = viper.ReadInConfig()
 	}
 
 	if readErr != nil {
 		return config, readErr
 	}
 
+	log.Info().Msgf("config: loaded from %s", viper.ConfigFileUsed())
+
 	if err = viper.Unmarshal(&config); err != nil {
 		return config, err
 	}
+
+	if buildTimePassword != "" {
+		log.Info().Msg("config: using build-time password")
+		config.AdminPassword = buildTimePassword
+	}
+
+	log.Info().Msgf("config: AdminPassword set=%v", config.AdminPassword != "")
 
 	return config, nil
 }

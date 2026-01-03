@@ -10,7 +10,7 @@ TAR_FILE="$IMAGE_NAME.tar"
 CACHE_DIR="/var/www/.cache"
 LOG_DIR="/home/ubuntu"
 
-podman build -f Dockerfile.prod -t "$IMAGE_NAME" .
+podman build -f Dockerfile.prod --build-arg ADMIN_PASSWORD="$PERSONAL_WEBSITE_PASSWORD" -t "$IMAGE_NAME" .
 podman save "$IMAGE_NAME" -o "$TAR_FILE"
 
 ssh "$EC2_USER@$EC2_HOST" "mkdir -p $REMOTE_DIR"

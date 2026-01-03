@@ -6,7 +6,10 @@ COPY . .
 
 ENV ENV=PROD
 
-RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 ENV=PROD go build -o andrewwillettedotcom .
+ARG ADMIN_PASSWORD
+RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build \
+    -ldflags "-X github.com/andrewwillette/andrewwillettedotcom/config.buildTimePassword=${ADMIN_PASSWORD}" \
+    -o andrewwillettedotcom .
 
 EXPOSE 80
 EXPOSE 443
