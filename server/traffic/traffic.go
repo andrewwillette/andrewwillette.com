@@ -110,9 +110,10 @@ func RecordRequest(path, ip, userAgent, referrer string) {
 	if db == nil {
 		return
 	}
+	timestamp := time.Now().UTC().Format(time.RFC3339Nano)
 	_, err := db.Exec(
 		"INSERT INTO requests (path, ip, user_agent, referrer, timestamp) VALUES (?, ?, ?, ?, ?)",
-		path, ip, userAgent, referrer, time.Now(),
+		path, ip, userAgent, referrer, timestamp,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to record request")
@@ -123,9 +124,10 @@ func RecordSuspiciousRequest(path, ip, userAgent string) {
 	if db == nil {
 		return
 	}
+	timestamp := time.Now().UTC().Format(time.RFC3339Nano)
 	_, err := db.Exec(
 		"INSERT INTO suspicious_requests (path, ip, user_agent, timestamp) VALUES (?, ?, ?, ?)",
-		path, ip, userAgent, time.Now(),
+		path, ip, userAgent, timestamp,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to record suspicious request")
@@ -136,9 +138,10 @@ func RecordFailedAuth(ip string) {
 	if db == nil {
 		return
 	}
+	timestamp := time.Now().UTC().Format(time.RFC3339Nano)
 	_, err := db.Exec(
 		"INSERT INTO failed_auths (ip, timestamp) VALUES (?, ?)",
-		ip, time.Now(),
+		ip, timestamp,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to record failed auth")
@@ -147,7 +150,13 @@ func RecordFailedAuth(ip string) {
 
 func parseTimestamp(s string) time.Time {
 	// SQLite stores timestamps in various formats, try common ones
+	trimmed := strings.TrimSpace(s)
+	if idx := strings.Index(trimmed, " m="); idx != -1 {
+		trimmed = trimmed[:idx]
+	}
 	formats := []string{
+		"2006-01-02 15:04:05.999999999 -0700 MST",
+		"2006-01-02 15:04:05 -0700 MST",
 		"2006-01-02 15:04:05.999999999-07:00",
 		"2006-01-02T15:04:05.999999999-07:00",
 		"2006-01-02 15:04:05",
@@ -156,7 +165,7 @@ func parseTimestamp(s string) time.Time {
 		time.RFC3339Nano,
 	}
 	for _, format := range formats {
-		if t, err := time.Parse(format, s); err == nil {
+		if t, err := time.Parse(format, trimmed); err == nil {
 			return t
 		}
 	}
