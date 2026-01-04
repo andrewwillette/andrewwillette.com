@@ -15,16 +15,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var suspiciousPaths = []string{
-	"/wp-admin", "/wp-login", "/wp-content", "/wordpress",
-	"/.env", "/.git", "/.gitignore", "/.htaccess",
-	"/phpmyadmin", "/pma", "/mysql", "/adminer",
-	"/admin", "/administrator", "/login", "/signin",
-	"/config", "/backup", "/db", "/database",
-	"/shell", "/cmd", "/eval", "/exec",
-	"/api/", "/xmlrpc.php", "/wp-json",
-}
-
 var db *sql.DB
 
 func InitDB(dbPath string) error {
@@ -94,6 +84,16 @@ type SuspiciousSummary struct {
 	Count int
 	First time.Time
 	Last  time.Time
+}
+
+var suspiciousPaths = []string{
+	"/wp-admin", "/wp-login", "/wp-content", "/wordpress",
+	"/.env", "/.git", "/.gitignore", "/.htaccess",
+	"/phpmyadmin", "/pma", "/mysql", "/adminer",
+	"/admin", "/administrator", "/login", "/signin",
+	"/config", "/backup", "/db", "/database",
+	"/shell", "/cmd", "/eval", "/exec",
+	"/api/", "/xmlrpc.php", "/wp-json",
 }
 
 func isSuspiciousPath(path string) bool {

@@ -13,7 +13,7 @@ import (
 	"github.com/andrewwillette/keyofday/key"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
+	gommonlog "github.com/labstack/gommon/log"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
@@ -216,38 +216,38 @@ func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 type zerologAdapter struct {
 	logger zerolog.Logger
 	prefix string
-	level  log.Lvl
+	level  gommonlog.Lvl
 }
 
 func newZerologAdapter(logger zerolog.Logger) *zerologAdapter {
-	return &zerologAdapter{logger: logger, level: log.INFO}
+	return &zerologAdapter{logger: logger, level: gommonlog.INFO}
 }
 
-func (z *zerologAdapter) Output() io.Writer                       { return z.logger }
-func (z *zerologAdapter) SetOutput(w io.Writer)                   { z.logger = z.logger.Output(w) }
-func (z *zerologAdapter) Prefix() string                          { return z.prefix }
-func (z *zerologAdapter) SetPrefix(p string)                      { z.prefix = p }
-func (z *zerologAdapter) Level() log.Lvl                          { return z.level }
-func (z *zerologAdapter) SetLevel(l log.Lvl)                      { z.level = l }
-func (z *zerologAdapter) SetHeader(h string)                      {}
-func (z *zerologAdapter) Print(i ...interface{})                  { z.logger.Info().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Printf(format string, i ...interface{})  { z.logger.Info().Msgf(format, i...) }
-func (z *zerologAdapter) Printj(j log.JSON)                       { z.logger.Info().Fields(j).Msg("") }
-func (z *zerologAdapter) Debug(i ...interface{})                  { z.logger.Debug().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Debugf(format string, i ...interface{})  { z.logger.Debug().Msgf(format, i...) }
-func (z *zerologAdapter) Debugj(j log.JSON)                       { z.logger.Debug().Fields(j).Msg("") }
-func (z *zerologAdapter) Info(i ...interface{})                   { z.logger.Info().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Infof(format string, i ...interface{})   { z.logger.Info().Msgf(format, i...) }
-func (z *zerologAdapter) Infoj(j log.JSON)                        { z.logger.Info().Fields(j).Msg("") }
-func (z *zerologAdapter) Warn(i ...interface{})                   { z.logger.Warn().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Warnf(format string, i ...interface{})   { z.logger.Warn().Msgf(format, i...) }
-func (z *zerologAdapter) Warnj(j log.JSON)                        { z.logger.Warn().Fields(j).Msg("") }
-func (z *zerologAdapter) Error(i ...interface{})                  { z.logger.Error().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Errorf(format string, i ...interface{})  { z.logger.Error().Msgf(format, i...) }
-func (z *zerologAdapter) Errorj(j log.JSON)                       { z.logger.Error().Fields(j).Msg("") }
-func (z *zerologAdapter) Fatal(i ...interface{})                  { z.logger.Fatal().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Fatalf(format string, i ...interface{})  { z.logger.Fatal().Msgf(format, i...) }
-func (z *zerologAdapter) Fatalj(j log.JSON)                       { z.logger.Fatal().Fields(j).Msg("") }
-func (z *zerologAdapter) Panic(i ...interface{})                  { z.logger.Panic().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Panicf(format string, i ...interface{})  { z.logger.Panic().Msgf(format, i...) }
-func (z *zerologAdapter) Panicj(j log.JSON)                       { z.logger.Panic().Fields(j).Msg("") }
+func (z *zerologAdapter) Output() io.Writer                      { return z.logger }
+func (z *zerologAdapter) SetOutput(w io.Writer)                  { z.logger = z.logger.Output(w) }
+func (z *zerologAdapter) Prefix() string                         { return z.prefix }
+func (z *zerologAdapter) SetPrefix(p string)                     { z.prefix = p }
+func (z *zerologAdapter) Level() gommonlog.Lvl                   { return z.level }
+func (z *zerologAdapter) SetLevel(l gommonlog.Lvl)               { z.level = l }
+func (z *zerologAdapter) SetHeader(h string)                     {}
+func (z *zerologAdapter) Print(i ...interface{})                 { z.logger.Info().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Printf(format string, i ...interface{}) { z.logger.Info().Msgf(format, i...) }
+func (z *zerologAdapter) Printj(j gommonlog.JSON)                { z.logger.Info().Fields(j).Msg("") }
+func (z *zerologAdapter) Debug(i ...interface{})                 { z.logger.Debug().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Debugf(format string, i ...interface{}) { z.logger.Debug().Msgf(format, i...) }
+func (z *zerologAdapter) Debugj(j gommonlog.JSON)                { z.logger.Debug().Fields(j).Msg("") }
+func (z *zerologAdapter) Info(i ...interface{})                  { z.logger.Info().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Infof(format string, i ...interface{})  { z.logger.Info().Msgf(format, i...) }
+func (z *zerologAdapter) Infoj(j gommonlog.JSON)                 { z.logger.Info().Fields(j).Msg("") }
+func (z *zerologAdapter) Warn(i ...interface{})                  { z.logger.Warn().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Warnf(format string, i ...interface{})  { z.logger.Warn().Msgf(format, i...) }
+func (z *zerologAdapter) Warnj(j gommonlog.JSON)                 { z.logger.Warn().Fields(j).Msg("") }
+func (z *zerologAdapter) Error(i ...interface{})                 { z.logger.Error().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Errorf(format string, i ...interface{}) { z.logger.Error().Msgf(format, i...) }
+func (z *zerologAdapter) Errorj(j gommonlog.JSON)                { z.logger.Error().Fields(j).Msg("") }
+func (z *zerologAdapter) Fatal(i ...interface{})                 { z.logger.Fatal().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Fatalf(format string, i ...interface{}) { z.logger.Fatal().Msgf(format, i...) }
+func (z *zerologAdapter) Fatalj(j gommonlog.JSON)                { z.logger.Fatal().Fields(j).Msg("") }
+func (z *zerologAdapter) Panic(i ...interface{})                 { z.logger.Panic().Msg(fmt.Sprint(i...)) }
+func (z *zerologAdapter) Panicf(format string, i ...interface{}) { z.logger.Panic().Msgf(format, i...) }
+func (z *zerologAdapter) Panicj(j gommonlog.JSON)                { z.logger.Panic().Fields(j).Msg("") }
