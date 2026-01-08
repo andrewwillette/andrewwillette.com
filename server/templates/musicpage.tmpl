@@ -3,16 +3,11 @@
 	<div id="music-page-new">
     {{ if . }}
         {{ range .Songs }}
-            <!-- Accent Image -->
-            <div class="accent-image">
-                <img src="{{ .ImageURL }}" alt="Audio Accent Image">
-            </div>
-
-            <!-- Audio Player Container -->
             <div class="audio-player-container">
-                <h2 class="audio-title">{{ .Name }}</h2>
-
-                <!-- Audio Element with Native Controls -->
+                <!-- <h2 class="audio-title">{{ .Name }}</h2> -->
+				<div class="accent-image">
+					<img src="{{ .ImageURL }}" alt="Audio Accent Image">
+				</div>
                 <audio controls class="audio-player">
                     <source src="{{ .AudioURL }}" type="audio/wav">
                     Your browser does not support the audio element.

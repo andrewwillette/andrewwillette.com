@@ -69,6 +69,63 @@ func UploadAudioToS3(filePath string) error {
 	return nil
 }
 
+// GetAudioKeysFromS3 returns the S3 keys for all audio files.
+// Used for generating cover art images without needing presigned URLs.
+func GetAudioKeysFromS3() ([]string, error) {
+	input := &s3.ListObjectsV2Input{
+		Bucket: aws.String(webCfg.C.AudioS3BucketName),
+		Prefix: aws.String(webCfg.C.AudioS3BucketPrefix),
+	}
+
+	output, err := getS3Client().ListObjectsV2(context.TODO(), input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list objects in S3: %w", err)
+	}
+
+	var keys []string
+	for _, item := range output.Contents {
+		if item.Key == nil || *item.Key == webCfg.C.AudioS3BucketPrefix {
+			continue
+		}
+		key := *item.Key
+		if strings.HasSuffix(key, ".wav") || strings.HasSuffix(key, ".mp3") {
+			keys = append(keys, key)
+		}
+	}
+	return keys, nil
+}
+
+// UploadAudioImageToS3 uploads a cover art image to the audio S3 bucket.
+func UploadAudioImageToS3(filePath string) error {
+	log.Debug().Msgf("Uploading image file %s to S3...", filePath)
+
+	client := getS3Client()
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	key := filepath.Join(webCfg.C.AudioS3BucketPrefix, filepath.Base(filePath))
+
+	uploader := manager.NewUploader(client)
+
+	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
+		Bucket:      aws.String(webCfg.C.AudioS3BucketName),
+		Key:         aws.String(key),
+		Body:        file,
+		ContentType: aws.String("image/png"),
+		ACL:         types.ObjectCannedACLPublicRead,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to upload to S3: %w", err)
+	}
+
+	log.Info().Msgf("Successfully uploaded %s to s3://%s/%s", filePath, webCfg.C.AudioS3BucketName, key)
+	return nil
+}
+
 func GetAudioFromS3() ([]S3Song, error) {
 	log.Debug().Msg("GetS3Songs()")
 

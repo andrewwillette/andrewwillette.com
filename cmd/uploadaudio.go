@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
+	"github.com/andrewwillette/andrewwillettedotcom/images"
 	"github.com/andrewwillette/gofzf"
 
 	"github.com/rs/zerolog/log"
@@ -25,11 +26,10 @@ var uploadAudioCmd = &cobra.Command{
 			if err := uploadAudioFileFromDir(audioFileDir); err != nil {
 				log.Fatal().Err(err).Msg("Failed to upload audio from directory")
 			}
-		} else if audioFilePath != "" { // other
-			if err := uploadAudioToS3(audioFilePath); err != nil {
+		} else if audioFilePath != "" {
+			if err := uploadAudioWithImage(audioFilePath); err != nil {
 				log.Fatal().Err(err).Msg("Failed to upload audio")
 			}
-			log.Info().Msg("Upload complete!")
 		} else {
 			_ = cmd.Help()
 			os.Exit(1)
@@ -67,7 +67,7 @@ func uploadAudioFileFromDir(dir string) error {
 	if err != nil {
 		return fmt.Errorf("failed to select file: %w", err)
 	}
-	return aws.UploadAudioToS3(fileMap[selected])
+	return uploadAudioWithImage(fileMap[selected])
 }
 
 func uploadAudioToS3(audioFile string) error {
@@ -76,6 +76,29 @@ func uploadAudioToS3(audioFile string) error {
 		return fmt.Errorf("invalid audio file: %s", audioFile)
 	}
 	return aws.UploadAudioToS3(audioFile)
+}
+
+func uploadAudioWithImage(audioFile string) error {
+	// Upload audio
+	if err := uploadAudioToS3(audioFile); err != nil {
+		return err
+	}
+
+	// Generate cover art image
+	log.Info().Msg("Generating cover art image...")
+	imagePath, err := images.GenerateSingleCoverArt(audioFile)
+	if err != nil {
+		return fmt.Errorf("failed to generate cover art: %w", err)
+	}
+
+	// Upload image
+	log.Info().Msgf("Uploading cover art image %s to S3...", imagePath)
+	if err := aws.UploadAudioImageToS3(imagePath); err != nil {
+		return fmt.Errorf("failed to upload cover art: %w", err)
+	}
+
+	log.Info().Msg("Audio and cover art uploaded successfully!")
+	return nil
 }
 
 func isValidAudioFile(path string) bool {

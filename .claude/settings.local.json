@@ -7,7 +7,9 @@
       "Bash(./scripts/local-integration-test.sh:*)",
       "Bash(go get:*)",
       "Bash(go mod tidy:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(./andrewwillettedotcom generate-images:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
