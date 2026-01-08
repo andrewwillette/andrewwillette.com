@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	"github.com/andrewwillette/gofzf"
 	"github.com/rs/zerolog/log"
@@ -33,6 +36,9 @@ func deleteAudioFromS3() error {
 		toselect[i] = song.Name
 	}
 	selected, err := gofzf.Select(toselect)
+	if err != nil {
+		return err
+	}
 	var selectedKey string
 	for _, song := range songs {
 		if song.Name == selected {
@@ -40,5 +46,19 @@ func deleteAudioFromS3() error {
 			break
 		}
 	}
-	return aws.DeleteAudioFromS3(selectedKey)
+
+	// Delete audio file
+	if err := aws.DeleteAudioFromS3(selectedKey); err != nil {
+		return err
+	}
+
+	// Delete corresponding image (replace .wav/.mp3 with .png)
+	ext := filepath.Ext(selectedKey)
+	imageKey := strings.TrimSuffix(selectedKey, ext) + ".png"
+	log.Info().Msgf("Deleting corresponding image %s...", imageKey)
+	if err := aws.DeleteAudioFromS3(imageKey); err != nil {
+		log.Warn().Msgf("Could not delete image (may not exist): %v", err)
+	}
+
+	return nil
 }
