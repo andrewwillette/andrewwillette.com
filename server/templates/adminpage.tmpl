@@ -1,90 +1,90 @@
 {{define "content"}}
 <div id="admin-page">
-	<h1>Traffic Stats</h1>
-	<p>Total requests tracked: {{.TotalCount}}</p>
+    <h1>Traffic Stats</h1>
+    <p>Total requests tracked: {{.TotalCount}}</p>
 
-	<h2>Security</h2>
+    <h2>Security</h2>
 
-	<h3>Failed Auth Attempts ({{len .FailedAuths}} IPs)</h3>
-	{{if .FailedAuths}}
-	<table class="failed-auth-table">
-		<thead>
-			<tr>
-				<th>IP</th>
-				<th>Attempts</th>
-				<th>Last Attempt</th>
-			</tr>
-		</thead>
-		<tbody>
-			{{range .FailedAuths}}
-			<tr>
-				<td>{{.IP}}</td>
-				<td>{{.Count}}</td>
-				<td>{{.Last.Format "2006-01-02 15:04:05"}}</td>
-			</tr>
-			{{end}}
-		</tbody>
-	</table>
-	{{else}}
-	<p>No failed auth attempts.</p>
-	{{end}}
+    <h3>Failed Auth Attempts ({{len .FailedAuths}} IPs)</h3>
+    {{if .FailedAuths}}
+    <table class="failed-auth-table">
+        <thead>
+            <tr>
+                <th>IP</th>
+                <th>Attempts</th>
+                <th>Last Attempt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .FailedAuths}}
+            <tr>
+                <td>{{.IP}}</td>
+                <td>{{.Count}}</td>
+                <td>{{.Last.Format "2006-01-02 15:04:05"}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <p>No failed auth attempts.</p>
+    {{end}}
 
-	<h3>Suspicious Requests ({{len .SuspiciousRequests}} groups)</h3>
-	{{if .SuspiciousRequests}}
-	<table class="suspicious-table">
-		<thead>
-			<tr>
-				<th>IP</th>
-				<th>Path</th>
-				<th>Count</th>
-				<th>Time Range</th>
-			</tr>
-		</thead>
-		<tbody>
-			{{range .SuspiciousRequests}}
-			<tr>
-				<td>{{.IP}}</td>
-				<td>{{.Path}}</td>
-				<td>{{.Count}}</td>
-				<td>{{.First.Format "01-02 15:04"}} - {{.Last.Format "01-02 15:04"}}</td>
-			</tr>
-			{{end}}
-		</tbody>
-	</table>
-	{{else}}
-	<p>No suspicious requests.</p>
-	{{end}}
+    <h3>Suspicious Requests ({{len .SuspiciousRequests}} groups)</h3>
+    {{if .SuspiciousRequests}}
+    <table class="suspicious-table">
+        <thead>
+            <tr>
+                <th>IP</th>
+                <th>Path</th>
+                <th>Count</th>
+                <th>Time Range</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .SuspiciousRequests}}
+            <tr>
+                <td>{{.IP}}</td>
+                <td>{{.Path}}</td>
+                <td>{{.Count}}</td>
+                <td>{{.First.Format "01-02 15:04"}} - {{.Last.Format "01-02 15:04"}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <p>No suspicious requests.</p>
+    {{end}}
 
-	<h2>All Traffic</h2>
-	{{range .Buckets}}
-	<div class="hour-bucket">
-		<h3>{{.Hour}} ({{len .Requests}} requests)</h3>
-		<table>
-			<thead>
-				<tr>
-					<th>Time</th>
-					<th>IP</th>
-					<th>Path</th>
-					<th>Referrer</th>
-					<th>User Agent</th>
-				</tr>
-			</thead>
-			<tbody>
-				{{range .Requests}}
-				<tr>
-					<td>{{.Timestamp.Format "15:04:05"}}</td>
-					<td>{{.IP}}</td>
-					<td>{{.Path}}</td>
-					<td>{{if .Referrer}}{{.Referrer}}{{else}}-{{end}}</td>
-					<td>{{.UserAgent}}</td>
-				</tr>
-				{{end}}
-			</tbody>
-		</table>
-	</div>
-	{{else}}
-	<p>No traffic recorded yet.</p>
-	{{end}}
-	<p>Database size: {{.DBSize}}</p>
+    <h2>All Traffic</h2>
+    {{range .Buckets}}
+    <div class="hour-bucket">
+        <h3>{{.Hour}} ({{len .Requests}} requests)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>IP</th>
+                    <th>Path</th>
+                    <th>Referrer</th>
+                    <th>User Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Requests}}
+                <tr>
+                    <td>{{.Timestamp.Format "15:04:05"}}</td>
+                    <td>{{.IP}}</td>
+                    <td>{{.Path}}</td>
+                    <td>{{if .Referrer}}{{.Referrer}}{{else}}-{{end}}</td>
+                    <td>{{.UserAgent}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+    <p>No traffic recorded yet.</p>
+    {{end}}
+    <p>Database size: {{.DBSize}}</p>
 </div>
 {{end}}

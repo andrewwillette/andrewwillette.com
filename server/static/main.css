@@ -193,7 +193,7 @@ footer {
     border: 2px solid #ddd;
     border-radius: 1rem;
     padding: 2rem;
-    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    background: transparent;
     margin-bottom: 5rem;
     text-align: center;
     display: flex;

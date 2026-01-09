@@ -1,17 +1,17 @@
 {{define "content"}}
 <div class="container">
-	<div id="blog-page">
-		<ul>
-		{{range .BlogPosts}}
-			<li class="blog-entry-li">
-				<h2><a href="/blog/{{.URLVal}}">{{.Title}}</a></h2>
-				<p>{{.Created}}</p>
-			</li>
-		{{end}}
-		</ul>
-		<div class="rss-link">
-			<a href="/blog/rss">RSS Feed</a>
-		</div>
-	</div>
+    <div id="blog-page">
+        <ul>
+        {{range .BlogPosts}}
+            <li class="blog-entry-li">
+                <h2><a href="/blog/{{.URLVal}}">{{.Title}}</a></h2>
+                <p>{{.Created}}</p>
+            </li>
+        {{end}}
+        </ul>
+        <div class="rss-link">
+            <a href="/blog/rss">RSS Feed</a>
+        </div>
+    </div>
 </div>
 {{end}}
