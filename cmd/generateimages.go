@@ -12,6 +12,7 @@ import (
 )
 
 var uploadImages bool
+var keepImages bool
 
 var generateImagesCmd = &cobra.Command{
 	Use:   "generate-images",
@@ -38,6 +39,11 @@ var generateImagesCmd = &cobra.Command{
 			if err := uploadGeneratedImages(); err != nil {
 				log.Fatal().Err(err).Msg("Failed to upload images to S3")
 			}
+			if !keepImages {
+				if err := cleanupGeneratedImages(); err != nil {
+					log.Warn().Msgf("Could not clean up generated images: %v", err)
+				}
+			}
 		}
 
 		log.Info().Msg("Image generation complete!")
@@ -46,6 +52,7 @@ var generateImagesCmd = &cobra.Command{
 
 func init() {
 	generateImagesCmd.Flags().BoolVarP(&uploadImages, "upload", "u", false, "Upload generated images to S3")
+	generateImagesCmd.Flags().BoolVarP(&keepImages, "keep", "k", false, "Keep generated images locally after upload")
 	rootCmd.AddCommand(generateImagesCmd)
 }
 
@@ -64,6 +71,27 @@ func uploadGeneratedImages() error {
 		imagePath := filepath.Join(imagesDir, entry.Name())
 		if err := aws.UploadAudioImageToS3(imagePath); err != nil {
 			return fmt.Errorf("failed to upload %s: %w", entry.Name(), err)
+		}
+	}
+
+	return nil
+}
+
+func cleanupGeneratedImages() error {
+	imagesDir := "images/audioimages"
+	entries, err := os.ReadDir(imagesDir)
+	if err != nil {
+		return fmt.Errorf("failed to read images directory: %w", err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".png" {
+			continue
+		}
+
+		imagePath := filepath.Join(imagesDir, entry.Name())
+		if err := os.Remove(imagePath); err != nil {
+			log.Warn().Msgf("Could not delete %s: %v", imagePath, err)
 		}
 	}
 

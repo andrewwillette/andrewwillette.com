@@ -97,6 +97,11 @@ func uploadAudioWithImage(audioFile string) error {
 		return fmt.Errorf("failed to upload cover art: %w", err)
 	}
 
+	// Clean up generated image
+	if err := os.Remove(imagePath); err != nil {
+		log.Warn().Msgf("Could not delete generated image: %v", err)
+	}
+
 	log.Info().Msg("Audio and cover art uploaded successfully!")
 	return nil
 }
