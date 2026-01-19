@@ -2,6 +2,7 @@ package traffic
 
 import (
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,6 +16,9 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+//go:embed schema.sql
+var schema string
+
 var db *sql.DB
 
 func InitDB(dbPath string) error {
@@ -24,32 +28,6 @@ func InitDB(dbPath string) error {
 		return err
 	}
 
-	// Create tables if they don't exist
-	schema := `
-	CREATE TABLE IF NOT EXISTS requests (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		path TEXT NOT NULL,
-		ip TEXT NOT NULL,
-		user_agent TEXT,
-		referrer TEXT,
-		timestamp DATETIME NOT NULL
-	);
-	CREATE TABLE IF NOT EXISTS suspicious_requests (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		path TEXT NOT NULL,
-		ip TEXT NOT NULL,
-		user_agent TEXT,
-		timestamp DATETIME NOT NULL
-	);
-	CREATE TABLE IF NOT EXISTS failed_auths (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		ip TEXT NOT NULL,
-		timestamp DATETIME NOT NULL
-	);
-	CREATE INDEX IF NOT EXISTS idx_requests_timestamp ON requests(timestamp);
-	CREATE INDEX IF NOT EXISTS idx_suspicious_timestamp ON suspicious_requests(timestamp);
-	CREATE INDEX IF NOT EXISTS idx_failed_auths_timestamp ON failed_auths(timestamp);
-	`
 	_, err = db.Exec(schema)
 	if err != nil {
 		return err
