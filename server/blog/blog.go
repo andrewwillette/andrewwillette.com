@@ -33,6 +33,12 @@ var (
 	initializedBlogs   = []Blog{}
 	uninitializedBlogs = []Blog{
 		{
+			Title:    "Trump and the Dollar",
+			Created:  time.Date(2026, time.January, 22, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
+			FileName: "trump_and_the_dollar.md",
+			URLVal:   "trump_and_the_dollar",
+		},
+		{
 			Title:    "LLM Coding: A Vim User's Perspective",
 			Created:  time.Date(2026, time.January, 2, 0, 0, 0, 0, time.UTC).Format("January 2, 2006"),
 			FileName: "llm_coding_from_vim_user.md",
