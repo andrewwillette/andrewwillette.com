@@ -17,6 +17,7 @@ import (
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/time/rate"
 
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	"github.com/andrewwillette/andrewwillettedotcom/config"
@@ -73,17 +74,38 @@ func StartServer(sslEnabled bool) {
 	aws.UpdateSheetMusicCache()
 	go aws.UpdateAudioCacheOnPresignExpiry()
 	go aws.StartSQSPoller()
+	const (
+		readTimeout  = 10 * time.Second
+		writeTimeout = 30 * time.Second
+		idleTimeout  = 120 * time.Second
+	)
 	if sslEnabled {
 		e.Pre(middleware.HTTPSRedirect())
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
 		const sslCacheDir = "/var/www/.cache"
 		e.AutoTLSManager.Cache = autocert.DirCache(sslCacheDir)
+		// Configure timeouts on the TLS server Echo uses internally for StartAutoTLS
+		e.TLSServer.ReadTimeout = readTimeout
+		e.TLSServer.WriteTimeout = writeTimeout
+		e.TLSServer.IdleTimeout = idleTimeout
 		go func(c *echo.Echo) {
-			e.Logger.Fatal(e.Start(":80"))
+			redirectServer := &http.Server{
+				Addr:         ":80",
+				ReadTimeout:  readTimeout,
+				WriteTimeout: writeTimeout,
+				IdleTimeout:  idleTimeout,
+			}
+			e.Logger.Fatal(e.StartServer(redirectServer))
 		}(e)
 		e.Logger.Fatal(e.StartAutoTLS(":443"))
 	} else {
-		e.Logger.Fatal(e.Start(":80"))
+		s := &http.Server{
+			Addr:         ":80",
+			ReadTimeout:  readTimeout,
+			WriteTimeout: writeTimeout,
+			IdleTimeout:  idleTimeout,
+		}
+		e.Logger.Fatal(e.StartServer(s))
 	}
 }
 
@@ -99,12 +121,38 @@ func addRoutes(e *echo.Echo) {
 	e.GET(blogEndpoint, blog.HandleIndividualBlogPage)
 	e.File(cssEndpoint, cssResource)
 	e.File(robotsEndpoint, robotsTxtResource)
-	e.GET(adminEndpoint, traffic.HandleAdminPage, traffic.BasicAuthMiddleware())
+	e.GET(adminEndpoint, traffic.HandleAdminPage, adminRateLimiter(), traffic.BasicAuthMiddleware())
+}
+
+// adminRateLimiter returns a rate limiter middleware scoped to the admin route.
+// Allows 5 requests per minute per IP to mitigate brute-force attacks.
+func adminRateLimiter() echo.MiddlewareFunc {
+	config := middleware.RateLimiterConfig{
+		Skipper: middleware.DefaultSkipper,
+		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
+			middleware.RateLimiterMemoryStoreConfig{
+				Rate:      rate.Limit(5.0 / 60.0), // 5 requests per minute
+				Burst:     5,
+				ExpiresIn: 5 * time.Minute,
+			},
+		),
+		IdentifierExtractor: func(c echo.Context) (string, error) {
+			return c.RealIP(), nil
+		},
+		ErrorHandler: func(c echo.Context, err error) error {
+			return c.JSON(http.StatusForbidden, map[string]string{"error": "rate limit exceeded"})
+		},
+		DenyHandler: func(c echo.Context, identifier string, err error) error {
+			return c.JSON(http.StatusTooManyRequests, map[string]string{"error": "too many requests"})
+		},
+	}
+	return middleware.RateLimiterWithConfig(config)
 }
 
 func addMiddleware(e *echo.Echo) {
 	e.Use(logmiddleware)
 	e.Use(traffic.TrackingMiddleware)
+	e.Use(middleware.Secure())
 }
 
 type HomePageData struct {
