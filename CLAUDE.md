@@ -56,6 +56,7 @@ Routes:
 Templates use a base layout pattern (`server/templates/base.tmpl`) with page-specific content blocks in `server/templates/*.tmpl`.
 
 ### AWS Integration
+- **EC2**: The production server runs on an EC2 instance. The binary is deployed via `./scripts/deploy-prod-podman.sh`, which runs the app in a Podman container on the instance.
 - **S3**: Stores audio files, sheet music PDFs, and images. Uses presigned URLs with 60-minute expiry.
 - **SQS**: Polls for S3 events to trigger cache updates when audio/sheet music changes.
 - Audio and sheet music are cached in memory with periodic refresh before presigned URLs expire.
