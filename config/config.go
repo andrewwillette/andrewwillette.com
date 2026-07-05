@@ -41,6 +41,9 @@ type Config struct {
 	SheetMusicS3BucketName   string `mapstructure:"SHEET_S3_BUCKET_NAME"`
 	SheetMusicS3BucketPrefix string `mapstructure:"SHEET_S3_BUCKET_PREFIX"` // e.g. "dropbox_sheetmusic/"
 	SheetMusicS3Region       string `mapstructure:"SHEET_S3_REGION"`
+	ShowsS3BucketName        string `mapstructure:"SHOWS_S3_BUCKET_NAME"`
+	ShowsS3BucketPrefix      string `mapstructure:"SHOWS_S3_BUCKET_PREFIX"` // e.g. "shows/"
+	ShowsS3Region            string `mapstructure:"SHOWS_S3_REGION"`
 	HomePageImageS3URL       string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
 	AdminPassword            string `mapstructure:"PERSONAL_WEBSITE_PASSWORD"`
 	TrafficDBPath            string `mapstructure:"TRAFFIC_DB_PATH"`

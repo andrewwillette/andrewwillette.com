@@ -100,6 +100,10 @@ func handleSQSEvent(msg types.Message) bool {
 			log.Info().Msgf("Detected sheetmusic S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
 			go UpdateSheetMusicCache()
 			return true
+		case strings.HasPrefix(key, webCfg.C.ShowsS3BucketPrefix):
+			log.Info().Msgf("Detected shows S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
+			go UpdateShowsCache()
+			return true
 		}
 	}
 

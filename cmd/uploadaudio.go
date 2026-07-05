@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -90,6 +91,48 @@ func moveToResultDir(src, destDir string) error {
 	return nil
 }
 
+// promptDeleteExisting checks S3 for a file with the same basename as audioFile.
+// If found, it prompts the user to delete it (plus its cover art) before continuing.
+// Returns an error if the user declines or deletion fails.
+func promptDeleteExisting(audioFile string) error {
+	base := filepath.Base(audioFile)
+	keys, err := aws.GetAudioKeysFromS3()
+	if err != nil {
+		return fmt.Errorf("failed to list S3 audio files: %w", err)
+	}
+	var matchKey string
+	for _, k := range keys {
+		if filepath.Base(k) == base {
+			matchKey = k
+			break
+		}
+	}
+	if matchKey == "" {
+		return nil
+	}
+
+	fmt.Printf("S3 already has %q. Delete it and upload the new one? [y/N] ", base)
+	reader := bufio.NewReader(os.Stdin)
+	answer, _ := reader.ReadString('\n')
+	answer = strings.TrimSpace(strings.ToLower(answer))
+	if answer != "y" {
+		return fmt.Errorf("upload cancelled")
+	}
+
+	if err := aws.DeleteAudioFromS3(matchKey); err != nil {
+		return fmt.Errorf("failed to delete existing audio: %w", err)
+	}
+
+	// Delete associated cover art: same key but with .png extension
+	ext := filepath.Ext(matchKey)
+	imageKey := strings.TrimSuffix(matchKey, ext) + ".png"
+	if err := aws.DeleteAudioFromS3(imageKey); err != nil {
+		log.Warn().Msgf("Could not delete existing cover art %s: %v", imageKey, err)
+	}
+
+	return nil
+}
+
 func uploadAudioToS3(audioFile string) error {
 	log.Info().Msgf("Uploading audio file %s to S3...", audioFile)
 	if !isValidAudioFile(audioFile) {
@@ -99,6 +142,10 @@ func uploadAudioToS3(audioFile string) error {
 }
 
 func uploadAudioWithImage(audioFile string) error {
+	if err := promptDeleteExisting(audioFile); err != nil {
+		return err
+	}
+
 	if err := uploadAudioToS3(audioFile); err != nil {
 		return err
 	}

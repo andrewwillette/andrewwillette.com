@@ -1,0 +1,17 @@
+{{define "content"}}
+<div class="container">
+    <div id="shows-page" class="center">
+        {{ if .Shows }}
+            {{ range .Shows }}
+            <div class="show-entry">
+                <h2 class="show-title">{{ .Title }}</h2>
+                {{ if .Date }}<p class="show-date">{{ .FormattedDate }}</p>{{ end }}
+                <p class="show-description">{{ .Description }}</p>
+            </div>
+            {{ end }}
+        {{ else }}
+            <p>No shows listed.</p>
+        {{ end }}
+    </div>
+</div>
+{{end}}

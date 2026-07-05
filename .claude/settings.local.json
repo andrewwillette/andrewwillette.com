@@ -9,7 +9,8 @@
       "Bash(go mod tidy:*)",
       "Bash(sqlite3:*)",
       "Bash(./andrewwillettedotcom generate-images:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(python3 *)"
     ]
   }
 }

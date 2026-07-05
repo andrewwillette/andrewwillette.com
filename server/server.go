@@ -35,6 +35,8 @@ const (
 
 	sheetmusicEndpoint = "/sheet-music"
 
+	showsEndpoint = "/shows"
+
 	blogsEndpoint   = "/blog"
 	blogEndpoint    = "/blog/:blog"
 	blogRssEndpoint = "/blog/rss"
@@ -72,6 +74,7 @@ func StartServer(sslEnabled bool) {
 	blog.InitializeBlogs()
 	aws.UpdateAudioCache()
 	aws.UpdateSheetMusicCache()
+	aws.UpdateShowsCache()
 	go aws.UpdateAudioCacheOnPresignExpiry()
 	go aws.StartSQSPoller()
 	const (
@@ -115,6 +118,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(resumeEndpoint, handleResumePage)
 	e.GET(musicEndpoint, handleRecordingsPage)
 	e.GET(sheetmusicEndpoint, handleSheetmusicPage)
+	e.GET(showsEndpoint, handleShowsPage)
 	e.GET(keyOfDayEndpoint, handleKeyOfDayPage)
 	e.GET(blogsEndpoint, blog.HandleBlogPage)
 	e.GET(blogRssEndpoint, blog.HandleRssFeed)
@@ -235,6 +239,7 @@ func getTemplateRenderer() *Template {
 		"templates/blogs/blogspage.tmpl",
 		"templates/blogs/singleblogpage.tmpl",
 		"templates/adminpage.tmpl",
+		"templates/showspage.tmpl",
 	}
 
 	for _, page := range pages {
