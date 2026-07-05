@@ -85,6 +85,11 @@ func UpdateShowsCache() {
 
 func PutShowJSON(title, date, description string) error {
 	slug := slugify(title)
+	if d := strings.TrimSpace(date); d != "" {
+		slug = slug + "_" + d
+	} else {
+		slug = fmt.Sprintf("%s_%d", slug, time.Now().UnixMilli())
+	}
 	key := ensureTrailingSlash(webCfg.C.ShowsS3BucketPrefix) + slug + ".json"
 
 	item := ShowJSONObject{
