@@ -46,8 +46,27 @@ func GetCachedShows() ([]ShowJSONObject, error) {
 	return cp, nil
 }
 
+func deleteExpiredShows() {
+	objects, err := ListShowObjects()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to list show objects for expiry check")
+		return
+	}
+	today := time.Now().Format("2006-01-02")
+	for _, obj := range objects {
+		if obj.Date != "" && obj.Date < today {
+			if err := DeleteShowFromS3(obj.Key); err != nil {
+				log.Error().Err(err).Msgf("Failed to delete expired show %s", obj.Key)
+			} else {
+				log.Info().Msgf("Deleted expired show %s (date=%s)", obj.Key, obj.Date)
+			}
+		}
+	}
+}
+
 func UpdateShowsCache() {
 	log.Debug().Msg("Updating shows cache...")
+	deleteExpiredShows()
 	items, err := ListShowsFromS3()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to list shows from S3")
