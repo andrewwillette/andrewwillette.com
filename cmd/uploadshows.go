@@ -14,6 +14,7 @@ import (
 var (
 	showTitleFlag       string
 	showDateFlag        string
+	showTimeFlag        string
 	showDescriptionFlag string
 )
 
@@ -30,6 +31,7 @@ var uploadShowCmd = &cobra.Command{
 func init() {
 	uploadShowCmd.Flags().StringVarP(&showTitleFlag, "title", "t", "", "Show title")
 	uploadShowCmd.Flags().StringVarP(&showDateFlag, "date", "D", "", "Show date (YYYY-MM-DD)")
+	uploadShowCmd.Flags().StringVarP(&showTimeFlag, "time", "T", "", "Show time (e.g. 8:00pm-10:00pm)")
 	uploadShowCmd.Flags().StringVarP(&showDescriptionFlag, "description", "d", "", "Show description")
 	rootCmd.AddCommand(uploadShowCmd)
 }
@@ -60,6 +62,16 @@ func runUploadShow() error {
 		date = strings.TrimSpace(date)
 	}
 
+	showTime := strings.TrimSpace(showTimeFlag)
+	if showTime == "" {
+		var err error
+		showTime, err = prompt(reader, "Show time (e.g. 8:00pm-10:00pm): ")
+		if err != nil {
+			return err
+		}
+		showTime = strings.TrimSpace(showTime)
+	}
+
 	description := strings.TrimSpace(showDescriptionFlag)
 	if description == "" {
 		var err error
@@ -70,8 +82,8 @@ func runUploadShow() error {
 		description = strings.TrimSpace(description)
 	}
 
-	log.Info().Msgf("Uploading show: title=%q date=%q", title, date)
-	if err := aws.PutShowJSON(title, date, description); err != nil {
+	log.Info().Msgf("Uploading show: title=%q date=%q time=%q", title, date, showTime)
+	if err := aws.PutShowJSON(title, date, showTime, description); err != nil {
 		return err
 	}
 	log.Info().Msg("Upload complete")

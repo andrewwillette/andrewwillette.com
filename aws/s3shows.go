@@ -19,6 +19,7 @@ import (
 type ShowJSONObject struct {
 	Title       string `json:"title"`
 	Date        string `json:"date"` // YYYY-MM-DD
+	Time        string `json:"time"` // e.g. "8:00pm-10:00pm"
 	Description string `json:"description"`
 }
 
@@ -102,7 +103,7 @@ func UpdateShowsCache() {
 	log.Info().Msgf("Shows cache updated, %d entries", len(items))
 }
 
-func PutShowJSON(title, date, description string) error {
+func PutShowJSON(title, date, showTime, description string) error {
 	slug := slugify(title)
 	if d := strings.TrimSpace(date); d != "" {
 		slug = slug + "_" + d
@@ -114,6 +115,7 @@ func PutShowJSON(title, date, description string) error {
 	item := ShowJSONObject{
 		Title:       strings.TrimSpace(title),
 		Date:        strings.TrimSpace(date),
+		Time:        strings.TrimSpace(showTime),
 		Description: strings.TrimSpace(description),
 	}
 	body, err := json.MarshalIndent(item, "", "  ")

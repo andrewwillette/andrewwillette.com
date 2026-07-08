@@ -11,7 +11,9 @@
       "Bash(./andrewwillettedotcom generate-images:*)",
       "WebFetch(domain:github.com)",
       "Bash(python3 *)",
-      "Bash(go test *)"
+      "Bash(go test *)",
+      "Bash(aws s3 *)",
+      "Read(//tmp/**)"
     ]
   }
 }
