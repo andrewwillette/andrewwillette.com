@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
+	"github.com/andrewwillette/andrewwillettedotcom/dropbox"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -86,12 +88,32 @@ func runUploadSheetMusic() error {
 		}
 	}
 
-	log.Info().Msgf("Uploading sheet JSON: name=%q url=%q (key=%s)", displayName, dropboxURL, key)
-	if err := aws.PutSheetJSON(displayName, dropboxURL); err != nil {
+	fileID := resolveDropboxFileID(dropboxURL)
+
+	log.Info().Msgf("Uploading sheet JSON: name=%q url=%q fileID=%q (key=%s)", displayName, dropboxURL, fileID, key)
+	if err := aws.PutSheetJSON(displayName, dropboxURL, fileID); err != nil {
 		return err
 	}
 	log.Info().Msg("Upload complete")
 	return nil
+}
+
+// resolveDropboxFileID looks up the stable Dropbox file ID backing a shared
+// URL, so the link refresh job can find this file later even if it's renamed
+// or moved. Returns "" (logging a warning) if Dropbox isn't configured yet or
+// the lookup fails — the entry is still saved, just without that safety net.
+func resolveDropboxFileID(dropboxURL string) string {
+	dbx := dropbox.NewClientFromConfig()
+	if dbx == nil {
+		log.Warn().Msg("Dropbox API not configured (DROPBOX_REFRESH_TOKEN unset); saving entry without a file ID, so it won't be covered by the automatic link refresh job")
+		return ""
+	}
+	fileID, err := dbx.ResolveSharedLinkFileID(context.Background(), dropboxURL)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to resolve Dropbox file ID for this URL; saving entry without one")
+		return ""
+	}
+	return fileID
 }
 
 func prompt(r *bufio.Reader, label string) (string, error) {

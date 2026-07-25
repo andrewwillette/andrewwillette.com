@@ -14,3 +14,5 @@ trace.out
 traffic.db
 **/audioimages/
 andrewwillette.com.tar
+nonprod.env
+prod.env

@@ -47,6 +47,10 @@ type Config struct {
 	HomePageImageS3URL       string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
 	AdminPassword            string `mapstructure:"PERSONAL_WEBSITE_PASSWORD"`
 	TrafficDBPath            string `mapstructure:"TRAFFIC_DB_PATH"`
+	DropboxAppKey            string `mapstructure:"DROPBOX_APP_KEY"`
+	DropboxAppSecret         string `mapstructure:"DROPBOX_APP_SECRET"`
+	DropboxRefreshToken      string `mapstructure:"DROPBOX_REFRESH_TOKEN"`
+	DropboxSheetMusicFolder  string `mapstructure:"DROPBOX_SHEET_MUSIC_FOLDER"` // relative to the app's Dropbox access root; "" means that root itself
 }
 
 func LoadDefaultConfig(fallbackpath string) (config Config, err error) {

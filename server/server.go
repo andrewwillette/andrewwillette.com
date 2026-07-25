@@ -77,6 +77,7 @@ func StartServer(sslEnabled bool) {
 	aws.UpdateShowsCache()
 	go aws.UpdateAudioCacheOnPresignExpiry()
 	go aws.StartSQSPoller()
+	aws.StartSheetMusicLinkRefreshJob()
 	const (
 		readTimeout  = 10 * time.Second
 		writeTimeout = 30 * time.Second

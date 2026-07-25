@@ -65,7 +65,7 @@ Templates use a base layout pattern (`server/templates/base.tmpl`) with page-spe
 Blogs are defined in `server/blog/blog.go` with markdown files in `server/blog/posts/`. Adding a new blog requires adding an entry to the `uninitializedBlogs` slice.
 
 ### Configuration
-Uses Viper with `.env` files. Looks for `app.env` (dev) or `prod.env` (when `ENV=PROD`). Config can also be in `~/.config/andrewwillette.com/`.
+Uses Viper with `.env` files. Looks for `nonprod.env` (dev) or `prod.env` (when `ENV=PROD`). Config can also be in `~/.config/andrewwillette.com/`. Neither file is tracked in git (they hold real secrets) — copy `nonprod.env.example`/`prod.env.example` to get started.
 
 Key config values: S3 bucket names/prefixes, SQS URL, logging settings, pprof toggle.
 

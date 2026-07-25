@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -22,6 +23,10 @@ import (
 type SheetMusicJSONObject struct {
 	DisplayName string `json:"display_name"`
 	DropboxURL  string `json:"url"`
+	// DropboxFileID is the stable Dropbox file ID backing this entry, used by
+	// the link refresh job to re-locate the file even if it's renamed or moved.
+	// Empty for entries uploaded before that job existed.
+	DropboxFileID string `json:"dropbox_file_id,omitempty"`
 }
 
 // SheetMusicAdminObject used for managing the S3 state with various commands
@@ -62,14 +67,15 @@ func UpdateSheetMusicCache() {
 	log.Info().Msgf("Sheet music cache updated, %d entries", len(items))
 }
 
-func PutSheetJSON(displayName, dropboxURL string) error {
+func PutSheetJSON(displayName, dropboxURL, dropboxFileID string) error {
 	// slug is the name of object in S3 bucket, derived from display name. (eg derived_display_name.json)
 	slug := slugify(displayName)
 	key := ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
 
 	item := SheetMusicJSONObject{
-		DisplayName: strings.TrimSpace(displayName),
-		DropboxURL:  normalizeDropboxURL(strings.TrimSpace(dropboxURL)),
+		DisplayName:   strings.TrimSpace(displayName),
+		DropboxURL:    normalizeDropboxURL(strings.TrimSpace(dropboxURL)),
+		DropboxFileID: strings.TrimSpace(dropboxFileID),
 	}
 	body, err := json.MarshalIndent(item, "", "  ")
 	if err != nil {
@@ -251,39 +257,21 @@ func ensureTrailingSlash(p string) string {
 	return p + "/"
 }
 
-func normalizeDropboxURL(URL string) string {
-	if URL == "" {
-		return URL
+func normalizeDropboxURL(rawURL string) string {
+	if rawURL == "" {
+		return rawURL
 	}
-	loweredURL := strings.ToLower(URL)
-	if !strings.Contains(loweredURL, "dropbox.com") {
-		return URL
+	if !strings.Contains(strings.ToLower(rawURL), "dropbox.com") {
+		return rawURL
 	}
-	// remove automatic download references if they exist
-	if strings.Contains(URL, "?dl=") {
-		return reparam(URL, "dl", "0")
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
 	}
-	if strings.Contains(URL, "?") {
-		return URL + "&dl=0"
-	}
-	return URL + "?dl=0"
-}
-
-func reparam(u, key, val string) string {
-	k1 := key + "="
-	if i := strings.Index(u, k1); i != -1 {
-		j := i + len(k1)
-		if end := strings.Index(u[j:], "&"); end == -1 {
-			u = u[:i]
-		} else {
-			u = u[:i] + u[j+end+1:]
-		}
-		u = strings.TrimSuffix(u, "?")
-		u = strings.TrimSuffix(u, "&")
-	}
-	sep := "?"
-	if strings.Contains(u, "?") {
-		sep = "&"
-	}
-	return u + sep + key + "=" + val
+	// Force a single canonical dl=0 (preview, not auto-download), regardless
+	// of how many dl= params (or where) the URL already had.
+	q := parsed.Query()
+	q.Set("dl", "0")
+	parsed.RawQuery = q.Encode()
+	return parsed.String()
 }
