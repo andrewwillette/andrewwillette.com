@@ -13,7 +13,9 @@
       "Bash(python3 *)",
       "Bash(go test *)",
       "Bash(aws s3 *)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(go vet *)",
+      "Bash(gofmt -l .)"
     ]
   }
 }
