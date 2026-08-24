@@ -15,7 +15,11 @@
       "Bash(aws s3 *)",
       "Read(//tmp/**)",
       "Bash(go vet *)",
-      "Bash(gofmt -l .)"
+      "Bash(gofmt -l .)",
+      "Bash(go run *)",
+      "Bash(ENV=PROD go run ./tmpdebug)",
+      "Bash(git checkout *)",
+      "Bash(echo \"diff exit: $?\")"
     ]
   }
 }

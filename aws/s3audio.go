@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/rs/zerolog/log"
 
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
@@ -59,7 +58,6 @@ func UploadAudioToS3(filePath string) error {
 		Key:         aws.String(key),
 		Body:        file,
 		ContentType: aws.String(contentType),
-		ACL:         types.ObjectCannedACLPublicRead,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload to S3: %w", err)
@@ -116,7 +114,6 @@ func UploadAudioImageToS3(filePath string) error {
 		Key:         aws.String(key),
 		Body:        file,
 		ContentType: aws.String("image/png"),
-		ACL:         types.ObjectCannedACLPublicRead,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload to S3: %w", err)
