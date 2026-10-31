@@ -22,6 +22,7 @@ import (
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	"github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
+	"github.com/andrewwillette/andrewwillettedotcom/server/chordcharts"
 	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
 	"github.com/andrewwillette/andrewwillettedotcom/server/traffic"
 )
@@ -41,8 +42,14 @@ const (
 	blogEndpoint    = "/blog/:blog"
 	blogRssEndpoint = "/blog/rss"
 
+	chordChartsEndpoint = "/chord-charts"
+	chordChartEndpoint  = "/chord-charts/:chart"
+
 	cssEndpoint = "/static/main.css"
 	cssResource = "server/static/main.css"
+
+	chordChartsJsEndpoint = "/static/chordcharts.js"
+	chordChartsJsResource = "server/static/chordcharts.js"
 
 	robotsEndpoint    = "/robots.txt"
 	robotsTxtResource = "server/static/robots.txt"
@@ -59,9 +66,13 @@ var (
 
 // StartServer start the server with https certificate configurable
 func StartServer(sslEnabled bool) {
+	if err := traffic.RestoreFromS3IfEmpty(config.C.TrafficDBPath); err != nil {
+		zlog.Error().Err(err).Msg("failed to restore traffic database from S3")
+	}
 	if err := traffic.InitDB(config.C.TrafficDBPath); err != nil {
 		zlog.Error().Err(err).Msg("failed to initialize traffic database")
 	}
+	traffic.StartBackupJob()
 	e := echo.New()
 	e.HideBanner = true
 	e.Logger = newZerologAdapter(zlog.Logger)
@@ -72,6 +83,7 @@ func StartServer(sslEnabled bool) {
 	}
 	e.Renderer = getTemplateRenderer()
 	blog.InitializeBlogs()
+	chordcharts.InitializeChordCharts()
 	aws.UpdateAudioCache()
 	aws.UpdateSheetMusicCache()
 	aws.UpdateShowsCache()
@@ -124,7 +136,10 @@ func addRoutes(e *echo.Echo) {
 	e.GET(blogsEndpoint, blog.HandleBlogPage)
 	e.GET(blogRssEndpoint, blog.HandleRssFeed)
 	e.GET(blogEndpoint, blog.HandleIndividualBlogPage)
+	e.GET(chordChartsEndpoint, chordcharts.HandleChordChartsPage)
+	e.GET(chordChartEndpoint, chordcharts.HandleChordChartPage)
 	e.File(cssEndpoint, cssResource)
+	e.File(chordChartsJsEndpoint, chordChartsJsResource)
 	e.File(robotsEndpoint, robotsTxtResource)
 	e.GET(adminEndpoint, traffic.HandleAdminPage, adminRateLimiter(), traffic.BasicAuthMiddleware())
 }
@@ -239,6 +254,8 @@ func getTemplateRenderer() *Template {
 		"templates/sheetmusicpage.tmpl",
 		"templates/blogs/blogspage.tmpl",
 		"templates/blogs/singleblogpage.tmpl",
+		"templates/chordcharts/chordchartspage.tmpl",
+		"templates/chordcharts/singlechordchartpage.tmpl",
 		"templates/adminpage.tmpl",
 		"templates/showspage.tmpl",
 	}

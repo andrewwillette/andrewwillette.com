@@ -1,0 +1,29 @@
+{{define "content"}}
+<div class="container">
+    <div id="single-chord-chart-page" data-default-key="{{.DefaultKey}}">
+        <h1>{{.Title}}</h1>
+        <p>{{.Artist}}</p>
+        {{if .TimeSignature}}<p class="chord-chart-time">Time: {{.TimeSignature}}</p>{{end}}
+        <div class="chord-chart-key-picker">
+            <label for="key-picker">Key:</label>
+            <select id="key-picker">
+                <option value="numerals">Numerals</option>
+                <option value="C">C</option>
+                <option value="Db">Db</option>
+                <option value="D">D</option>
+                <option value="Eb">Eb</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="Gb">Gb</option>
+                <option value="G">G</option>
+                <option value="Ab">Ab</option>
+                <option value="A">A</option>
+                <option value="Bb">Bb</option>
+                <option value="B">B</option>
+            </select>
+        </div>
+        <pre class="chord-chart-body">{{.BodyHTML}}</pre>
+    </div>
+</div>
+<script src="/static/chordcharts.js"></script>
+{{end}}

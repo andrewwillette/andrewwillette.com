@@ -1,0 +1,241 @@
+# Chord Chart Format (`.chord`)
+
+Chord charts live in `server/chordcharts/charts/` as `.chord` files. They are
+written in Roman numerals, so the site can show any chart in any key. The key
+picker on the chart page converts the numerals to letter chords in the
+browser.
+
+Run `andrewwillettedotcom sync-chord-charts` to validate every file and upload
+the charts to S3. It reads from `--dir`, else the `CHORD_CHARTS_DIR` config
+value, else `server/chordcharts/charts` relative to the current directory. If any file fails validation, the command uploads nothing.
+
+## File layout
+
+A `.chord` file has a header, a `---` separator line, and then the chart body:
+
+```
+Title: Soldier's Joy
+Artist: Traditional (Benton Flippen)
+Key: D
+---
+A part:
+I     |  I     |  I     |  V     |
+I     |  I     |  V     |  I     |
+
+B part:
+I     |  IV    |  I     |  V     |
+I     |  IV    |  I  V  |  I     |
+```
+
+### File name
+
+- Must end in `.chord`.
+- The name without the extension becomes the URL slug, for example
+  `soldiers_joy.chord` → `/chord-charts/soldiers_joy`. It may contain only
+  lowercase letters, digits, and underscores.
+
+### Header
+
+Each header line is `Field: value`. Field names are case-insensitive, and
+blank lines in the header are ignored.
+
+| Field    | Required | Notes                                                                 |
+|----------|----------|-----------------------------------------------------------------------|
+| `Title`  | yes      | The title shown on the list page and the chart page.                  |
+| `Artist` | no       | Credit or source, such as `Traditional (Benton Flippen)`.             |
+| `Key`    | yes      | The default key. It must match `[A-G]`, plus an optional `#` or `b`, plus an optional `m`, such as `D`, `Bb`, `F#`, or `Am`. |
+| `Time`   | no       | The time signature for the whole chart, such as `4/4`, `3/4`, or `6/8`. Leaving it out means 4/4, and no time is shown. Single bars can override it. See [Time signatures](#time-signatures). |
+
+An unknown header field or a line with no `:` is an error. The first line
+whose only content is `---` ends the header.
+
+### Body
+
+Every line in the body must be one of the following:
+
+1. **A blank line.**
+2. **A section label.** This is any line ending in `:`, such as `A part:`,
+   `B part:`, or `Verse:`. The label appears as plain text.
+3. **A chord line.** Every whitespace-separated token on the line must be
+   a bar (`|`, `||`, `|||`, …), a chord token (see below), or a
+   [time signature](#time-signatures).
+
+Any other line fails validation. This includes lyrics, comments, and a chord
+line containing even one unrecognized token.
+
+The body is displayed in a `<pre>` block, so spacing is kept exactly. Line up
+the bars with spaces so the measures form columns. To put two chords in one
+measure, write both between the bars (`|  I  V7  |`).
+
+## Time signatures
+
+A chart can set a time signature for the whole chart and override it for any
+single bar. Both are optional. A chart with neither is treated as 4/4.
+
+### Syntax
+
+A time signature is a number from 1 to 99, a `/`, and a denominator of `1`,
+`2`, `4`, `8`, or `16`, with no spaces:
+
+| Valid                       | Invalid                                        |
+|-----------------------------|------------------------------------------------|
+| `4/4`, `3/4`, `2/4`, `5/4`  | `3/5` (the denominator must be a power of two, up to 16) |
+| `6/8`, `9/8`, `12/8`        | `0/4`, `100/4` (the top number must be 1–99)   |
+| `2/2`, `7/16`               | `3 / 4`, `(3/4)`, `C`, `waltz`                 |
+
+### The whole chart: the `Time` header
+
+```
+Title: Angel's Waltz
+Artist: Bobby Hicks
+Key: G
+Time: 3/4
+---
+```
+
+The page shows it as "Time: 3/4" under the artist. If you leave the field out,
+the chart is treated as 4/4 and no time is shown. Write `Time: 4/4` if you
+want 4/4 shown.
+
+### A single bar: an inline time signature
+
+Write the time signature as the first token of a measure to change the meter
+for that one bar. This is for crooked tunes, which mostly stay in one meter
+but have the odd short or long bar:
+
+```
+Title: Rebecca
+Artist: Herschel Sizemore
+Key: B
+Time: 4/4
+---
+A Part:
+I     |  I IV  |  I     |  I      |
+V     |  V     |  IV    |  2/4 IV |  I     |  I     |
+```
+
+The inline time signature applies **only to the bar it starts**. The next bar
+goes back to the chart's `Time`, or 4/4 if there is none. In the example,
+only the `IV` bar is in 2/4, and the two `I` bars after it are in 4/4 again.
+To change the meter for several bars in a row, mark each bar:
+
+```
+I     |  3/4 IV  |  3/4 IV  |  I     |
+```
+
+#### Where an inline time signature may go
+
+It must be the first token in its measure, so it must come either at the
+start of the line or right after a bar (`|`, `||`, …):
+
+| Line                     | Valid? | Why                                           |
+|--------------------------|--------|-----------------------------------------------|
+| `I  |  2/4 V  |  I  |`   | yes    | It starts the second measure.                 |
+| `3/4 I  |  I  |`         | yes    | It starts the line, so it starts the first measure. |
+| `I  2/4 V  |`            | no     | It comes after a chord in the same measure.   |
+| `|  2/4 3/4 V  |`        | no     | A measure can have only one time signature.   |
+| `|  2/4  |`              | yes    | A measure with only a time signature is allowed, though it has no chord to show. |
+
+`sync-chord-charts` rejects a misplaced time signature and names it in the
+error, for example `time signature "2/4" must be the first token in its
+measure`.
+
+### How it looks on the page
+
+- Inline time signatures are shown in a separate color from the chords.
+- The key picker never changes them. Only the chords are converted to
+  letters.
+- A time signature takes up columns like any other token. Pad the other rows
+  so the bars still line up. In the Rebecca example, the first row has
+  `I      |` (seven columns) to match `2/4 IV |` below it.
+
+### Deploying
+
+Time signatures are parsed by the server when it renders a page, not by
+`sync-chord-charts` alone. If a chart that uses them is synced to S3 while
+production is running an older build, that build doesn't recognize `2/4` as a
+token. It shows every line containing an inline time signature as plain text:
+the numerals on those lines aren't converted by the key picker and aren't
+colored. It also doesn't show the `Time` header. Redeploy the site
+(`./scripts/deploy-prod-podman.sh`) to fix this.
+
+## Chord tokens
+
+A chord token has the form `[accidental]NUMERAL[quality]`, such as `I`, `vi`,
+`V7`, `ii7`, `bVII`, or `IVmaj7`.
+
+### Numeral
+
+The numeral is a scale degree, `I` to `VII`, counted from the major scale of
+the current key. **Case sets the third:**
+
+- **Uppercase** (`I II III IV V VI VII`) is a **major** chord.
+- **Lowercase** (`i ii iii iv v vi vii`) is a **minor** chord.
+
+Mixed case, such as `Iv`, is invalid. Arabic numbers (`1`, `5`) are no longer
+accepted.
+
+### Accidental (optional)
+
+| Prefix | Meaning                      | Example in G   |
+|--------|------------------------------|----------------|
+| (none) | the diatonic degree          | `VI` → `E`     |
+| `b`    | lowered one semitone         | `bVII` → `F`   |
+| `#`    | raised one semitone          | `#IV` → `C#`   |
+
+Only one accidental is allowed. `bbVII` is not valid.
+
+The accidental and the case are independent. For example, in G the diatonic
+`VII` is F#, so an F major chord ("flat seven major") is `bVII`: `b` lowers F#
+to F, and the uppercase numeral makes it major (`bvii` would be Fm).
+
+### Quality (optional)
+
+A token can have at most one suffix. It is added after the numeral, and the
+numeral's case decides how it is spelled:
+
+| Suffix | Uppercase (major)            | Lowercase (minor)              |
+|--------|------------------------------|--------------------------------|
+| (none) | `I` → `G`                    | `vi` → `Em`                    |
+| `7`    | `V7` → `D7` (dominant 7th)   | `ii7` → `Am7` (minor 7th)      |
+| `6`    | `IV6` → `C6`                 | `iv6` → `Cm6`                  |
+| `9`    | `V9` → `D9`                  | `ii9` → `Am9`                  |
+| `maj7` | `IVmaj7` → `Cmaj7`           | `imaj7` → `Gmmaj7`             |
+| `add9` | `Iadd9` → `Gadd9`            | `iadd9` → `Gmadd9`             |
+| `dim`  | `#IVdim` → `C#dim`           | `viidim` → `F#dim`             |
+| `dim7` | `#IVdim7` → `C#dim7`         | `viidim7` → `F#dim7`           |
+| `m7b5` | `VIIm7b5` → `F#m7b5`         | `viim7b5` → `F#m7b5`           |
+| `aug`  | `Vaug` → `Daug`              | not allowed                    |
+| `sus2` | `Isus2` → `Gsus2`            | not allowed                    |
+| `sus4` | `Vsus4` → `Dsus4`            | not allowed                    |
+
+(Examples are in the key of G.)
+
+- `dim`, `dim7`, and `m7b5` already have a minor third, so they are spelled the
+  same in either case. Lowercase (`viidim`) is the conventional choice.
+- `aug`, `sus2`, and `sus4` don't have a minor third, so they are rejected on a
+  lowercase numeral.
+- There is no `m` suffix. Use a lowercase numeral instead (`vi`, not `VIm`).
+
+Combined suffixes are not supported, such as `7sus4`, `maj9`, `13`, and slash
+chords like `I/III`. To add a suffix, edit `chordTokenRe` in `render.go`, and
+list longer alternatives before their prefixes (for example `m7b5` before
+`maj7`). If the new suffix is a lowercase case, also update the minor-handling
+`switch` in `parseChord`.
+
+### Letter spelling
+
+When a key is selected, `server/static/chordcharts.js` spells the chord from
+that key's major scale. It walks the letter names in order, so for example `IV`
+in F is `Bb`, not `A#`. The `b` or `#` prefix then lowers or raises that
+spelled note. The quality from the table above is added after it. The
+`Numerals` option shows each token exactly as written in the file.
+
+## Key picker caveats
+
+The picker lists only `Numerals` and the 12 major keys `C Db D Eb E F Gb G Ab A
+Bb B`. The chart opens in its `Key` only when that key is in the list.
+Otherwise, such as with `F#`, `C#`, or a minor key like `Am`, it opens in
+`Numerals`. Numerals are always counted from the major scale, so chart a
+minor-key tune from its relative major (with `vi` as home) or from the parallel
+major (`i`, `bIII`, `iv`, `bVI`, `bVII`, …).

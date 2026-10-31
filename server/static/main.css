@@ -351,3 +351,46 @@ footer {
 /*         padding: 0.5em 10px; */
 /*     } */
 /* } */
+
+#chord-charts-page ul {
+    list-style-type: none;
+}
+
+#chord-charts-page .chord-chart-entry-li h2 {
+    font-size: 1.5rem;
+    display: inline-block;
+    padding: 1rem;
+}
+
+#chord-charts-page .chord-chart-entry-li p {
+    font-size: 1.5rem;
+    display: inline-block;
+    padding: 1rem;
+}
+
+#single-chord-chart-page {
+    padding: 2rem;
+    padding-top: 0;
+}
+
+#single-chord-chart-page .chord-chart-key-picker {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+#single-chord-chart-page pre.chord-chart-body {
+    font-family: Consolas, "Liberation Mono", Menlo, monospace;
+    white-space: pre;
+    line-height: 2;
+    font-size: 1rem;
+}
+
+#single-chord-chart-page .chord {
+    color: #b16286;
+    font-weight: bold;
+}
+
+#single-chord-chart-page .timesig {
+    color: #458588;
+    font-weight: bold;
+}

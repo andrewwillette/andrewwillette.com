@@ -1,0 +1,14 @@
+{{define "content"}}
+<div class="container">
+    <div id="chord-charts-page">
+        <ul>
+        {{range .ChordCharts}}
+            <li class="chord-chart-entry-li">
+                <h2><a href="/chord-charts/{{.URLVal}}">{{.Title}}</a></h2>
+                <p>{{.Artist}}</p>
+            </li>
+        {{end}}
+        </ul>
+    </div>
+</div>
+{{end}}

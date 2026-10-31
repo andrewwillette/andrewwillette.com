@@ -23,34 +23,40 @@ func init() {
 }
 
 type Config struct {
-	PProfEnabled             bool   `mapstructure:"PPROF_ENABLED"`
-	LogLevel                 string `mapstructure:"LOG_LEVEL"`
-	LogConsole               bool   `mapstructure:"LOG_CONSOLE"`
-	LogFile                  bool   `mapstructure:"LOG_FILE"`
-	LogJSON                  bool   `mapstructure:"LOG_JSON"`
-	LogDir                   string `mapstructure:"LOG_DIR"`
-	LogFileName              string `mapstructure:"LOG_FILE_NAME"`
-	LogFileMaxMB             int    `mapstructure:"LOG_FILE_MAX_MB"`
-	LogFileMaxBacks          int    `mapstructure:"LOG_FILE_MAX_BACKUPS"`
-	LogFileMaxAge            int    `mapstructure:"LOG_FILE_MAX_AGE"`
-	AudioS3BucketName        string `mapstructure:"AUDIO_S3_BUCKET_NAME"`
-	AudioS3BucketPrefix      string `mapstructure:"AUDIO_S3_BUCKET_PREFIX"`
-	AudioS3Region            string `mapstructure:"AUDIO_S3_REGION"`
-	AudioS3URL               string `mapstructure:"AUDIO_S3_URL"`
-	AudioSQSURL              string `mapstructure:"AUDIO_SQS_URL"`
-	SheetMusicS3BucketName   string `mapstructure:"SHEET_S3_BUCKET_NAME"`
-	SheetMusicS3BucketPrefix string `mapstructure:"SHEET_S3_BUCKET_PREFIX"` // e.g. "dropbox_sheetmusic/"
-	SheetMusicS3Region       string `mapstructure:"SHEET_S3_REGION"`
-	ShowsS3BucketName        string `mapstructure:"SHOWS_S3_BUCKET_NAME"`
-	ShowsS3BucketPrefix      string `mapstructure:"SHOWS_S3_BUCKET_PREFIX"` // e.g. "shows/"
-	ShowsS3Region            string `mapstructure:"SHOWS_S3_REGION"`
-	HomePageImageS3URL       string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
-	AdminPassword            string `mapstructure:"PERSONAL_WEBSITE_PASSWORD"`
-	TrafficDBPath            string `mapstructure:"TRAFFIC_DB_PATH"`
-	DropboxAppKey            string `mapstructure:"DROPBOX_APP_KEY"`
-	DropboxAppSecret         string `mapstructure:"DROPBOX_APP_SECRET"`
-	DropboxRefreshToken      string `mapstructure:"DROPBOX_REFRESH_TOKEN"`
-	DropboxSheetMusicFolder  string `mapstructure:"DROPBOX_SHEET_MUSIC_FOLDER"` // relative to the app's Dropbox access root; "" means that root itself
+	PProfEnabled              bool   `mapstructure:"PPROF_ENABLED"`
+	LogLevel                  string `mapstructure:"LOG_LEVEL"`
+	LogConsole                bool   `mapstructure:"LOG_CONSOLE"`
+	LogFile                   bool   `mapstructure:"LOG_FILE"`
+	LogJSON                   bool   `mapstructure:"LOG_JSON"`
+	LogDir                    string `mapstructure:"LOG_DIR"`
+	LogFileName               string `mapstructure:"LOG_FILE_NAME"`
+	LogFileMaxMB              int    `mapstructure:"LOG_FILE_MAX_MB"`
+	LogFileMaxBacks           int    `mapstructure:"LOG_FILE_MAX_BACKUPS"`
+	LogFileMaxAge             int    `mapstructure:"LOG_FILE_MAX_AGE"`
+	AudioS3BucketName         string `mapstructure:"AUDIO_S3_BUCKET_NAME"`
+	AudioS3BucketPrefix       string `mapstructure:"AUDIO_S3_BUCKET_PREFIX"`
+	AudioS3Region             string `mapstructure:"AUDIO_S3_REGION"`
+	AudioS3URL                string `mapstructure:"AUDIO_S3_URL"`
+	AudioSQSURL               string `mapstructure:"AUDIO_SQS_URL"`
+	SheetMusicS3BucketName    string `mapstructure:"SHEET_S3_BUCKET_NAME"`
+	SheetMusicS3BucketPrefix  string `mapstructure:"SHEET_S3_BUCKET_PREFIX"` // e.g. "dropbox_sheetmusic/"
+	SheetMusicS3Region        string `mapstructure:"SHEET_S3_REGION"`
+	ShowsS3BucketName         string `mapstructure:"SHOWS_S3_BUCKET_NAME"`
+	ShowsS3BucketPrefix       string `mapstructure:"SHOWS_S3_BUCKET_PREFIX"` // e.g. "shows/"
+	ShowsS3Region             string `mapstructure:"SHOWS_S3_REGION"`
+	ChordChartsS3BucketName   string `mapstructure:"CHORD_CHARTS_S3_BUCKET_NAME"`
+	ChordChartsS3BucketPrefix string `mapstructure:"CHORD_CHARTS_S3_BUCKET_PREFIX"` // e.g. "chord_charts/"
+	ChordChartsS3Region       string `mapstructure:"CHORD_CHARTS_S3_REGION"`
+	ChordChartsDir            string `mapstructure:"CHORD_CHARTS_DIR"` // local .chord files for sync-chord-charts; "~/" is expanded
+	HomePageImageS3URL        string `mapstructure:"HOME_PAGE_IMAGE_S3_URL"`
+	AdminPassword             string `mapstructure:"PERSONAL_WEBSITE_PASSWORD"`
+	TrafficDBPath             string `mapstructure:"TRAFFIC_DB_PATH"`
+	BackupS3BucketName        string `mapstructure:"BACKUP_S3_BUCKET_NAME"`   // where the server snapshots traffic.db; unset disables backups
+	BackupS3BucketPrefix      string `mapstructure:"BACKUP_S3_BUCKET_PREFIX"` // e.g. "backups/"
+	DropboxAppKey             string `mapstructure:"DROPBOX_APP_KEY"`
+	DropboxAppSecret          string `mapstructure:"DROPBOX_APP_SECRET"`
+	DropboxRefreshToken       string `mapstructure:"DROPBOX_REFRESH_TOKEN"`
+	DropboxSheetMusicFolder   string `mapstructure:"DROPBOX_SHEET_MUSIC_FOLDER"` // relative to the app's Dropbox access root; "" means that root itself
 }
 
 func LoadDefaultConfig(fallbackpath string) (config Config, err error) {

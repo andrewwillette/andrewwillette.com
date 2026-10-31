@@ -96,7 +96,7 @@ func runUploadSheetMusic() error {
 		return err
 	}
 	if exists && !sheetOverwriteFlg {
-		ans, err := promptDefault(reader, fmt.Sprintf("Entry exists at %s; overwrite?", key), "n")
+		ans, err := promptDefault(reader, fmt.Sprintf("Entry exists at %s; overwrite? (y/n)", key), "n")
 		if err != nil {
 			return err
 		}

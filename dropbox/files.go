@@ -1,6 +1,14 @@
 package dropbox
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+const contentBaseURL = "https://content.dropboxapi.com/2"
 
 // FileMetadata is the subset of Dropbox file metadata this project cares about.
 type FileMetadata struct {
@@ -134,6 +142,45 @@ func (c *Client) ResolveSharedLinkFileID(ctx context.Context, sharedURL string) 
 		return "", err
 	}
 	return meta.ID, nil
+}
+
+// Download fetches the raw content of a file by its stable Dropbox ID (or path).
+func (c *Client) Download(ctx context.Context, pathOrID string) ([]byte, error) {
+	token, err := c.accessTokenValue(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	apiArg, err := json.Marshal(map[string]interface{}{"path": pathOrID})
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, contentBaseURL+"/files/download", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Dropbox-API-Arg", string(apiArg))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		var apiErr apiError
+		_ = json.Unmarshal(body, &apiErr)
+		return nil, &Err{StatusCode: resp.StatusCode, Summary: apiErr.ErrorSummary, Body: body}
+	}
+
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading dropbox download response: %w", err)
+	}
+	return content, nil
 }
 
 func asErr(err error, target **Err) bool {

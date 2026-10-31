@@ -19,7 +19,25 @@
       "Bash(go run *)",
       "Bash(ENV=PROD go run ./tmpdebug)",
       "Bash(git checkout *)",
-      "Bash(echo \"diff exit: $?\")"
+      "Bash(echo \"diff exit: $?\")",
+      "Bash(podman machine *)",
+      "Bash(podman --version)",
+      "Bash(krunkit --version)",
+      "Bash(sw_vers)",
+      "Read(//Users/andrewwillette/.local/share/containers/podman/machine/applehv/**)",
+      "Read(//Users/andrewwillette/.config/containers/podman/machine/**)",
+      "Read(//Users/andrewwillette/.local/share/containers/podman/machine/**)",
+      "Read(//Users/andrewwillette/**)",
+      "Bash(brew --version)",
+      "Bash(brew info *)",
+      "Bash(podman info *)",
+      "Bash(brew list *)",
+      "Bash(brew tap *)",
+      "Read(//opt/podman/bin/**)",
+      "Bash(/opt/podman/bin/krunkit --version)",
+      "Bash(codesign -dv /opt/podman/bin/krunkit)",
+      "Bash(sh /var/folders/z1/_3h29qkd4l74kw_jttcfmjxr0000gn/T/podman/krunkit-debug.sh)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }
