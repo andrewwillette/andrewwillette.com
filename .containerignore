@@ -1,0 +1,14 @@
+# Keep the build context small and keep local data/secrets out of images.
+# prod.env is intentionally NOT ignored: Dockerfile.prod copies it in.
+.git
+.claude
+tmp
+images/audioimages
+images/images
+log/*.log
+logs
+traffic.db
+nonprod.env
+andrewwillettedotcom
+*.tar
+trace.out

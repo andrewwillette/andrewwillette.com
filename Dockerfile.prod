@@ -1,15 +1,38 @@
-FROM golang:latest
+# Build stage: runs on the build machine's native platform and cross-compiles
+# a static linux/amd64 binary, so no emulation is needed on Apple Silicon.
+FROM --platform=$BUILDPLATFORM golang:1.25 AS build
 
+# Must stay /app: templates and blog posts are located at runtime via
+# runtime.Caller, which records this build path (so no -trimpath either).
 WORKDIR /app
+
+# Download modules in their own layer so code changes reuse the cache.
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . .
 
+ARG ADMIN_PASSWORD
+# timetzdata embeds the zone database (keyofday loads America/Chicago at
+# init), since the runtime image has no /usr/share/zoneinfo.
+RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -tags timetzdata \
+    -ldflags "-s -w -X github.com/andrewwillette/andrewwillettedotcom/config.buildTimePassword=${ADMIN_PASSWORD}" \
+    -o andrewwillettedotcom .
+
+# Runtime stage: only the binary, the files it reads from disk, and prod
+# config. No RUN steps here, so building it never executes amd64 code.
+FROM --platform=linux/amd64 alpine:3.22
+
+WORKDIR /app
+
 ENV ENV=PROD
 
-ARG ADMIN_PASSWORD
-RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build \
-    -ldflags "-X github.com/andrewwillette/andrewwillettedotcom/config.buildTimePassword=${ADMIN_PASSWORD}" \
-    -o andrewwillettedotcom .
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /app/andrewwillettedotcom ./
+COPY --from=build /app/server/templates ./server/templates
+COPY --from=build /app/server/static ./server/static
+COPY --from=build /app/server/blog/posts ./server/blog/posts
+COPY --from=build /app/prod.env ./
 
 EXPOSE 80
 EXPOSE 443
