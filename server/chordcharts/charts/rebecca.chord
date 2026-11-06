@@ -5,13 +5,13 @@ Time: 4/4
 ---
 
 A Part:
-I     |  I IV  |  I     |  I      |
-V     |  V     |  IV    |  2/4 IV | I     | I     |
-I     |  I IV  |  I     |  I      |
-V     |  V     |  IV    |  2/4 IV | I     | I     |
+I  | I IV  | I  | I      |
+V  | V     | IV | 2/4 IV | I  | I  |
+I  | I IV  | I  | I      |
+V  | V     | IV | 2/4 IV | I  | I  |
 
 B Part:
-V     |  V     |  IV    |  2/4 IV | I     | I     |
-V     |  V     |  IV    |  2/4 IV | V     | V     |
-I     |  I IV  |  I     |  I      |
-V     |  V     |  IV    |  2/4 IV | I     | I     |
+V  | V     | IV | 2/4 IV | I  | I  |
+V  | V     | IV | 2/4 IV | V  | V  |
+I  | I IV  | I  | I      |
+V  | V     | IV | 2/4 IV | I  | I  |

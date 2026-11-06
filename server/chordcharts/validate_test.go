@@ -78,6 +78,8 @@ func TestValidateRejectsProblems(t *testing.T) {
 		{"invalid chord line", ParsedChordFile{FileName: "x.chord", Title: "X", DefaultKey: "D", Body: "this is not a chord line at all"}},
 		{"old arabic numerals", ParsedChordFile{FileName: "x.chord", Title: "X", DefaultKey: "D", Body: "1 | 5 |"}},
 		{"bad header time signature", ParsedChordFile{FileName: "x.chord", Title: "X", DefaultKey: "D", TimeSignature: "waltz", Body: "I | I |"}},
+		{"lowercase key change", ParsedChordFile{FileName: "x.chord", Title: "X", DefaultKey: "D", Body: "B (-> iv):\nI | I |"}},
+		{"malformed key change", ParsedChordFile{FileName: "x.chord", Title: "X", DefaultKey: "D", Body: "B -> IV:\nI | I |"}},
 		{"mid-measure time signature", ParsedChordFile{FileName: "x.chord", Title: "X", DefaultKey: "D", Body: "I 2/4 V | I |"}},
 	}
 	for _, c := range cases {
@@ -108,7 +110,7 @@ func TestValidateAllowsSectionLabelsAndBlankLines(t *testing.T) {
 		FileName:   "x.chord",
 		Title:      "X",
 		DefaultKey: "Bb",
-		Body:       "A part:\nI     |  vi    |\n\nB part:\nIV    |  V7    |",
+		Body:       "A part:\nI     |  vi    |\n\nB part (-> IV):\nIV    |  V7    |",
 	}
 	if errs := Validate(p); len(errs) != 0 {
 		t.Errorf("expected no validation errors, got: %v", errs)

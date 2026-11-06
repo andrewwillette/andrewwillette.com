@@ -390,6 +390,10 @@ footer {
     font-weight: bold;
 }
 
+#single-chord-chart-page .modulation {
+    font-weight: bold;
+}
+
 #single-chord-chart-page .timesig {
     color: #458588;
     font-weight: bold;

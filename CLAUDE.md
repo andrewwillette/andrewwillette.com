@@ -39,6 +39,8 @@ The application uses Cobra for CLI. Available subcommands:
 - `delete-audio` - Interactive deletion of audio from S3
 - `upload-sheetmusic` - Upload sheet music to S3
 - `delete-sheetmusic` - Interactive deletion of sheet music from S3
+- `format-chord-charts [--check]` - Line up the bars in local `.chord` files
+- `sync-chord-charts` - Validate local `.chord` files and sync them to S3
 
 ## Architecture
 

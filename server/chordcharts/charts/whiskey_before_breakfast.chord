@@ -4,14 +4,14 @@ Key: D
 Time: 4/4
 ---
 A part:
-I     |  I     |  IV  I  |  V     |
-I     |  I     |  IV  I  |  V  I  |
-I     |  I     |  IV  I  |  V     |
-I     |  I     |  IV  I  |  V  I  |
+I     | I     | IV I  | V     |
+I     | I     | IV I  | V I   |
+I     | I     | IV I  | V     |
+I     | I     | IV I  | V I   |
 
 B part:
-I     |  I     |  ii    |  V     |
-I  V  |  IV I  |  IV I  |  V  I  |
-I     |  I     |  ii    |  V     |
-I  V  |  IV I  |  IV I  |  V  I  |
+I     | I     | ii    | V     |
+I V   | IV I  | IV I  | V I   |
+I     | I     | ii    | V     |
+I V   | IV I  | IV I  | V I   |
 

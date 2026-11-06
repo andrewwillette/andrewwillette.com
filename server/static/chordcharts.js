@@ -8,9 +8,12 @@
     return ((n % m) + m) % m;
   }
 
+  // root like "D", "Bb", or "Bbb". A key change can land on a
+  // double-flat or double-sharp root, e.g. bIII of Gb is Bbb.
   function parseRoot(root) {
     const letter = root[0];
-    const accidental = root.length > 1 ? (root[1] === "b" ? -1 : 1) : 0;
+    let accidental = 0;
+    for (const c of root.slice(1)) accidental += c === "b" ? -1 : 1;
     return { letter, accidental };
   }
 
@@ -61,11 +64,22 @@
         if (node.textContent.includes("\n")) overflow = 0;
         return;
       }
-      if (!node.classList || !node.classList.contains("chord")) return;
+      if (!node.classList) return;
+      // A key change target in a section label, e.g. the "IV" in
+      // "B (-> IV):", shown as the new key's letter.
+      if (node.classList.contains("modulation")) {
+        node.textContent = key === "numerals" ? node.dataset.numeral : toLetterChord(key, node.dataset.degree, "");
+        return;
+      }
+      if (!node.classList.contains("chord")) return;
       const degree = node.dataset.degree;
       const quality = node.dataset.quality || "";
       const numeral = node.dataset.numeral;
-      const label = key === "numerals" ? numeral : toLetterChord(key, degree, quality);
+      // Chords in a section with a key change count from that degree of
+      // the chart's key, e.g. data-tonic="4" spells the section in IV.
+      const tonic = node.dataset.tonic;
+      const chordKey = tonic && key !== "numerals" ? toLetterChord(key, tonic, "") : key;
+      const label = key === "numerals" ? numeral : toLetterChord(chordKey, degree, quality);
       // Pad to the cell width the chart was written with, less any overflow
       // to absorb; keep at least one space if the cell had trailing spaces.
       const width = parseInt(node.dataset.width, 10) || numeral.length;

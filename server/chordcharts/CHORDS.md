@@ -9,6 +9,11 @@ Run `andrewwillettedotcom sync-chord-charts` to validate every file and upload
 the charts to S3. It reads from `--dir`, else the `CHORD_CHARTS_DIR` config
 value, else `server/chordcharts/charts` relative to the current directory. If any file fails validation, the command uploads nothing.
 
+Run `andrewwillettedotcom format-chord-charts` to line up the bars. It reads
+the same directory as `sync-chord-charts`. With `--check`, it changes nothing,
+lists the files that need formatting, and exits with status 1 if there are any.
+See [Formatting](#formatting).
+
 ## File layout
 
 A `.chord` file has a header, a `---` separator line, and then the chart body:
@@ -55,7 +60,9 @@ Every line in the body must be one of the following:
 
 1. **A blank line.**
 2. **A section label.** This is any line ending in `:`, such as `A part:`,
-   `B part:`, or `Verse:`. The label appears as plain text.
+   `B part:`, or `Verse:`. The label appears as plain text. A label can also
+   change the key for its section, such as `B (-> IV):`. See
+   [Key changes](#key-changes).
 3. **A chord line.** Every whitespace-separated token on the line must be
    a bar (`|`, `||`, `|||`, …), a chord token (see below), or a
    [time signature](#time-signatures).
@@ -66,6 +73,31 @@ line containing even one unrecognized token.
 The body is displayed in a `<pre>` block, so spacing is kept exactly. Line up
 the bars with spaces so the measures form columns. To put two chords in one
 measure, write both between the bars (`|  I  V7  |`).
+
+### Formatting
+
+`format-chord-charts` rewrites every chord line in a file so that:
+
+- The bars line up in columns across all the chord lines in the file. Each
+  column is as wide as its widest measure.
+- There is one space between each bar and the chord after it, and one space
+  between chords in the same measure.
+- The first measure starts at the left edge, and trailing spaces are removed.
+
+Each chord gets room for its longest letter spelling, a two-character root
+plus its quality (`I` → `Bb`, `ii7` → `Bbm7`), so the bars stay lined up
+after the key picker converts numerals to letters. The header, section labels,
+blank lines, and any line that isn't a valid chord line are left exactly as
+they are. Formatting a formatted file changes nothing.
+
+```
+Before:                               After:
+I     |  I IV  |  I     |  I      |   I  | I IV  | I  | I      |
+V |   V |  IV    |  2/4 IV | I |      V  | V     | IV | 2/4 IV | I  |
+```
+
+If one bar run in a column is longer than another (`|` and `||`), the shorter
+one is padded, which leaves an extra space before the chord after it.
 
 ## Time signatures
 
@@ -158,6 +190,76 @@ token. It shows every line containing an inline time signature as plain text:
 the numerals on those lines aren't converted by the key picker and aren't
 colored. It also doesn't show the `Time` header. Redeploy the site
 (`./scripts/deploy-prod-podman.sh`) to fix this.
+
+## Key changes
+
+A section can move to a key related to the chart's key, such as a polka whose
+B part goes to the IV. Put `(-> NUMERAL)` in the section label:
+
+```
+Title: Example Polka
+Key: A
+---
+A:
+IV    |  I     |  V     |  I     |
+
+B (-> IV):
+I     |  IV    |  V7    |  I     |
+```
+
+Inside that section, numerals count from the new key, so the B part is
+written as if it were its own tune in I. In A, the IV is D, so that
+section's `I` is D, `IV` is G, and `V7` is A7. With the picker set to G, the B
+part is in C instead.
+
+### Scope
+
+The key change lasts **until the next section label**. A label without a
+marker goes back to the chart's `Key`. To stay in the new key for several
+sections, mark each one:
+
+```
+B (-> IV):
+...
+B ending (-> IV):
+...
+A:
+...            <- back in the chart's key
+```
+
+The target is always counted from the chart's `Key`, not from the previous
+section. `C (-> V):` after `B (-> IV):` goes to the V of the chart's key.
+
+### Syntax
+
+| Label                  | Valid? | Why                                                      |
+|------------------------|--------|----------------------------------------------------------|
+| `B (-> IV):`           | yes    |                                                          |
+| `B part (->bVII):`     | yes    | Spaces around `->` are optional. `b` and `#` are allowed. |
+| `B (-> iv):`           | no     | The new key is always major, so the numeral must be uppercase. |
+| `B (-> IV7):`          | no     | The target is a key, not a chord, so it takes no suffix. |
+| `B (-> D):`            | no     | Use a numeral, so the change follows the picker.         |
+| `B -> IV:`             | no     | The parentheses are required.                            |
+
+`sync-chord-charts` rejects any label containing `->` that isn't written as
+`(-> NUMERAL)`.
+
+To change to a minor key, mark the relative major and chart the section from
+it, with `vi` as home. This is the same as for a minor-key chart (see
+[Key picker caveats](#key-picker-caveats)).
+
+### How it looks on the page
+
+In `Numerals` mode the label shows the numeral as written (`B (-> IV):`). In a
+letter key, the picker replaces it with the new key's letter (`B (-> D):` in
+A).
+
+### Deploying
+
+Like time signatures, key changes are handled when a page renders. A chart
+synced to S3 while production runs an older build shows the label as plain
+text and spells that section's chords **in the chart's key**, which is wrong.
+Redeploy the site before syncing charts that use key changes.
 
 ## Chord tokens
 

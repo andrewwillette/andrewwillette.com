@@ -112,8 +112,15 @@ func Validate(p ParsedChordFile) []string {
 	}
 	for i, line := range strings.Split(p.Body, "\n") {
 		trimmed := strings.TrimSpace(line)
-		if trimmed == "" || strings.HasSuffix(trimmed, ":") {
-			continue // blank line or section label, e.g. "A part:"
+		if trimmed == "" {
+			continue
+		}
+		if isSectionLabel(line) {
+			// e.g. "A part:" or "B (-> IV):"
+			if _, _, _, err := parseModulation(line); err != nil {
+				errs = append(errs, fmt.Sprintf("line %d has an invalid key change (%s): %q", i+1, err, line))
+			}
+			continue
 		}
 		if err := chordLineError(line); err != nil {
 			errs = append(errs, fmt.Sprintf("line %d is not a valid chord line, section label, or blank line (%s): %q", i+1, err, line))

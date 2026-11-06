@@ -4,13 +4,13 @@ Key: G
 Time: 3/4
 ---
 A part:
-I     |  I     |  II    |  II    |
-V     |  V     |  I     |  V     |
-I     |  I     |  II    |  II    |
-V     |  V     |  I     |  I     |
+I   | I   | II | II |
+V   | V   | I  | V  |
+I   | I   | II | II |
+V   | V   | I  | I  |
 
 B part:
-bVI   |  bVI   |  I     |  I     |
-bVI   |  bVI   |  I     |  V     |
-I     |  I     |  II    |  II    |
-V     |  V     |  I     |  V     |
+bVI | bVI | I  | I  |
+bVI | bVI | I  | V  |
+I   | I   | II | II |
+V   | V   | I  | V  |

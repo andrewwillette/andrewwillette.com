@@ -115,3 +115,49 @@ func TestRenderBodyWrapsTimeSignatures(t *testing.T) {
 		t.Errorf("rendered text changed:\n got %q\nwant %q", text, line)
 	}
 }
+
+func TestParseModulation(t *testing.T) {
+	cases := []struct {
+		label, degree string
+		ok, wantErr   bool
+	}{
+		{"B (-> IV):", "4", true, false},
+		{"B part (->bVII):", "b7", true, false},
+		{"Bridge ( -> #IV ):", "#4", true, false},
+		{"A part:", "", false, false},
+		{"B (-> iv):", "", true, true},
+		{"B (-> IV7):", "", true, true},
+		{"B (-> D):", "", true, true},
+		{"B -> IV:", "", true, true},
+	}
+	for _, c := range cases {
+		t.Run(c.label, func(t *testing.T) {
+			degree, _, ok, err := parseModulation(c.label)
+			if ok != c.ok || (err != nil) != c.wantErr || degree != c.degree {
+				t.Errorf("parseModulation(%q) = %q, %v, %v; want %q, %v, err %v", c.label, degree, ok, err, c.degree, c.ok, c.wantErr)
+			}
+		})
+	}
+}
+
+func TestRenderBodyKeyChangeAppliesToItsSection(t *testing.T) {
+	body := "A:\nI  |\n\nB (-> IV):\nI  |  V  |\n\nC:\nI  |"
+	html := string(RenderBody(body))
+	if !strings.Contains(html, `B (-&gt; <span class="modulation" data-numeral="IV" data-degree="4">IV</span>):`) {
+		t.Errorf("expected modulation span in label, got: %s", html)
+	}
+	lines := strings.Split(html, "\n")
+	if strings.Contains(lines[1], "data-tonic") {
+		t.Errorf("expected no tonic before the key change, got: %s", lines[1])
+	}
+	if strings.Count(lines[4], `data-tonic="4"`) != 2 {
+		t.Errorf("expected both chords after the key change to have tonic 4, got: %s", lines[4])
+	}
+	if strings.Contains(lines[7], "data-tonic") {
+		t.Errorf("expected the next section label to return to the home key, got: %s", lines[7])
+	}
+	text := regexp.MustCompile(`<[^>]+>`).ReplaceAllString(html, "")
+	if text != strings.ReplaceAll(body, ">", "&gt;") {
+		t.Errorf("rendered text changed:\n got %q\nwant %q", text, body)
+	}
+}

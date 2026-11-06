@@ -4,11 +4,11 @@ Key: C
 Time: 4/4
 ---
 Verse:
-I     |  I7    |  IV    | #ivdim |
-I     |  V7    |  I     |  IV    |
-I     |  I7    |  IV    |  II    |
-I     |  V7    |  I     |  I     |
+I   | I7  | IV  | #ivdim |
+I   | V7  | I   | IV     |
+I   | I7  | IV  | II     |
+I   | V7  | I   | I      |
 
 Bridge:
-V7    |  I     |  V7    |  I     |
-V7    |  I     |  II7   |  V7    |
+V7  | I   | V7  | I      |
+V7  | I   | II7 | V7     |
