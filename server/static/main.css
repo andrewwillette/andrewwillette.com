@@ -373,6 +373,11 @@ footer {
     padding-top: 0;
 }
 
+#single-chord-chart-page .chord-chart-notes {
+    white-space: pre-wrap;
+    margin-bottom: 1rem;
+}
+
 #single-chord-chart-page .chord-chart-key-picker {
     margin-bottom: 1rem;
     font-size: 1.1rem;

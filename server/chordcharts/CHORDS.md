@@ -50,9 +50,56 @@ blank lines in the header are ignored.
 | `Artist` | no       | Credit or source, such as `Traditional (Benton Flippen)`.             |
 | `Key`    | yes      | The default key. It must match `[A-G]`, plus an optional `#` or `b`, plus an optional `m`, such as `D`, `Bb`, `F#`, or `Am`. |
 | `Time`   | no       | The time signature for the whole chart, such as `4/4`, `3/4`, or `6/8`. Leaving it out means 4/4, and no time is shown. Single bars can override it. See [Time signatures](#time-signatures). |
+| `Notes`  | no       | Free text shown under the title. It can span several lines, and it must be the last header field. See [Notes](#notes). |
+| `Draft`  | no       | `true` or `false`. A draft is not validated or uploaded by `sync-chord-charts`. See [Drafts](#drafts). |
 
 An unknown header field or a line with no `:` is an error. The first line
 whose only content is `---` ends the header.
+
+### Drafts
+
+Put `Draft: true` in the header to keep a chart off the site while you work
+on it:
+
+```
+Draft: true
+Title: Lady Be Good
+Key: G
+---
+```
+
+`sync-chord-charts` still formats a draft, but it doesn't validate or upload
+it, and lists it under "Skipped drafts". A draft that fails validation
+doesn't stop the other charts from syncing. Because the sync deletes S3
+charts that it doesn't upload, marking a published chart as a draft takes it
+off the site. Remove the line or change it to `false` to publish the chart.
+
+Put the `Draft` line first. The header is read top to bottom, so if a header
+line above `Draft` is malformed, the file is reported as an error instead of
+skipped. A file with no `---` line is always an error.
+
+### Notes
+
+`Notes:` starts a block of free text that appears on the chart page, under
+the title and above the key picker. The notes run from `Notes:` to the `---`
+line, so `Notes` must be the last field in the header:
+
+```
+Title: Salt River
+Key: A
+Notes: Play it AABB.
+
+  Kick off with the last four bars of the B part.
+---
+```
+
+- Text on the `Notes:` line is optional; the notes can start on the next line.
+- Line breaks, blank lines, and indentation are kept. Blank lines at the
+  start and end, and trailing spaces, are removed.
+- Every line in the block is part of the notes, even one that looks like a
+  header field. In the example, a `Key: A` line placed after `Notes:` would
+  show up as notes, and the chart would have no key.
+- The notes are plain text. The key picker doesn't convert numerals in them.
 
 ### Body
 
@@ -244,9 +291,8 @@ section. `C (-> V):` after `B (-> IV):` goes to the V of the chart's key.
 `sync-chord-charts` rejects any label containing `->` that isn't written as
 `(-> NUMERAL)`.
 
-To change to a minor key, mark the relative major and chart the section from
-it, with `vi` as home. This is the same as for a minor-key chart (see
-[Key picker caveats](#key-picker-caveats)).
+A key change always lands on a major key. To change to a minor key, mark the
+relative major and chart the section from it, with `vi` as home.
 
 ### How it looks on the page
 
@@ -335,9 +381,13 @@ spelled note. The quality from the table above is added after it. The
 
 ## Key picker caveats
 
-The picker lists only `Numerals` and the 12 major keys `C Db D Eb E F Gb G Ab A
-Bb B`. The chart opens in its `Key` only when that key is in the list.
-Otherwise, such as with `F#`, `C#`, or a minor key like `Am`, it opens in
-`Numerals`. Numerals are always counted from the major scale, so chart a
-minor-key tune from its relative major (with `vi` as home) or from the parallel
-major (`i`, `bIII`, `iv`, `bVI`, `bVII`, …).
+For a major-key chart, the picker lists `Numerals` and the 12 major keys `C Db
+D Eb E F Gb G Ab A Bb B`. For a minor-key chart (a `Key` ending in `m`, such as
+`Gm`), it lists `Numerals` and the 12 minor keys `Cm C#m Dm Ebm Em Fm F#m Gm
+G#m Am Bbm Bm`. The chart opens in its `Key` only when that key is in the
+list. Otherwise, such as with `F#` or `Dbm`, it opens in `Numerals`.
+
+Numerals are always counted from the major scale of the key's tonic, so chart
+a minor-key tune with `i` as home and the other degrees flattened as needed
+(`i`, `bIII`, `iv`, `v`, `bVI`, `bVII`, …). In `Gm`, `i` is `Gm`, `bVII` is
+`F`, and `v` is `Dm`.

@@ -4,6 +4,7 @@
         <h1>{{.Title}}</h1>
         <p>{{.Artist}}</p>
         {{if .TimeSignature}}<p class="chord-chart-time">Time: {{.TimeSignature}}</p>{{end}}
+        {{if .Notes}}<p class="chord-chart-notes">{{.Notes}}</p>{{end}}
         <div class="chord-chart-key-picker">
             <label for="key-picker">Key:</label>
             <select id="key-picker">

@@ -3,6 +3,10 @@
   const NATURAL_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
   const MAJOR_SCALE_STEPS = [0, 2, 4, 5, 7, 9, 11];
   const KEYS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+  // Tonics for minor keys, spelled the way minor keys usually are (C#m, not
+  // Dbm). Numerals still count from the tonic's major scale, so in Gm "i" is
+  // Gm and "bVII" is F.
+  const MINOR_TONICS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"];
 
   function mod(n, m) {
     return ((n % m) + m) % m;
@@ -94,8 +98,18 @@
     const container = document.getElementById("single-chord-chart-page");
     const select = document.getElementById("key-picker");
     if (!container || !select) return;
-    const defaultKey = container.dataset.defaultKey;
-    if (defaultKey && KEYS.includes(defaultKey)) select.value = defaultKey;
+    const defaultKey = container.dataset.defaultKey || "";
+    if (defaultKey.endsWith("m")) {
+      // A minor-key chart: offer minor keys. Each option's value is the
+      // tonic the numerals count from.
+      const numerals = select.querySelector('option[value="numerals"]');
+      select.replaceChildren(numerals);
+      for (const tonic of MINOR_TONICS) select.add(new Option(tonic + "m", tonic));
+      const tonic = defaultKey.slice(0, -1);
+      if (MINOR_TONICS.includes(tonic)) select.value = tonic;
+    } else if (KEYS.includes(defaultKey)) {
+      select.value = defaultKey;
+    }
     applyKey(container, select.value);
     select.addEventListener("change", () => applyKey(container, select.value));
   });

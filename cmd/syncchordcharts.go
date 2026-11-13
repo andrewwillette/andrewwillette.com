@@ -19,7 +19,7 @@ const defaultChordChartsDir = "server/chordcharts/charts"
 
 var syncChordChartsCmd = &cobra.Command{
 	Use:   "sync-chord-charts",
-	Short: "Validate local .chord files and sync them to S3",
+	Short: "Format and validate local .chord files and sync them to S3",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := runSyncChordCharts(); err != nil {
 			fmt.Fprintln(os.Stderr, "sync-chord-charts failed:", err)
@@ -64,16 +64,31 @@ func runSyncChordCharts() error {
 	}
 
 	var items []aws.ChordChartJSONObject
+	var drafts []string
 	var validationErrs []string
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(strings.ToLower(e.Name()), ".chord") {
 			continue
 		}
-		raw, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		path := filepath.Join(dir, e.Name())
+		raw, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("reading %s: %w", e.Name(), err)
 		}
-		parsed, err := chordcharts.ParseChordFile(e.Name(), string(raw))
+		formatted := chordcharts.FormatFile(string(raw))
+		if formatted != string(raw) {
+			if err := os.WriteFile(path, []byte(formatted), 0o644); err != nil {
+				return fmt.Errorf("writing %s: %w", e.Name(), err)
+			}
+			fmt.Println("formatted:", e.Name())
+		}
+		parsed, err := chordcharts.ParseChordFile(e.Name(), formatted)
+		// A draft is skipped even if the rest of its header is broken, as long
+		// as the Draft line comes before the problem.
+		if parsed.Draft {
+			drafts = append(drafts, e.Name())
+			continue
+		}
 		if err != nil {
 			validationErrs = append(validationErrs, fmt.Sprintf("%s: %s", e.Name(), err))
 			continue
@@ -89,6 +104,7 @@ func runSyncChordCharts() error {
 			Artist:        parsed.Artist,
 			DefaultKey:    parsed.DefaultKey,
 			TimeSignature: parsed.TimeSignature,
+			Notes:         parsed.Notes,
 			URLVal:        parsed.URLVal(),
 			FileName:      parsed.FileName,
 			Body:          parsed.Body,
@@ -101,8 +117,11 @@ func runSyncChordCharts() error {
 		}
 		return fmt.Errorf("%d chord file(s) failed validation; nothing was synced", len(validationErrs))
 	}
+	if len(drafts) > 0 {
+		fmt.Printf("Skipped drafts: %v\n", drafts)
+	}
 	if len(items) == 0 {
-		return fmt.Errorf("no .chord files found in %q", dir)
+		return fmt.Errorf("no non-draft .chord files found in %q", dir)
 	}
 
 	log.Info().Msgf("Syncing %d chord chart(s) from %s to S3...", len(items), dir)

@@ -23,6 +23,7 @@ type ChordChartJSONObject struct {
 	Artist        string `json:"artist"`
 	DefaultKey    string `json:"default_key"`
 	TimeSignature string `json:"time_signature,omitempty"`
+	Notes         string `json:"notes,omitempty"`
 	URLVal        string `json:"url_val"`
 	FileName      string `json:"file_name"`
 	Body          string `json:"body"`
@@ -73,7 +74,7 @@ func UpdateChordChartsCache() {
 // tell an unchanged chart apart from one whose content actually differs
 // without re-uploading every chart on every sync.
 func chordChartChecksum(item ChordChartJSONObject) string {
-	h := sha256.Sum256([]byte(item.Title + "\x00" + item.Artist + "\x00" + item.DefaultKey + "\x00" + item.TimeSignature + "\x00" + item.Body))
+	h := sha256.Sum256([]byte(item.Title + "\x00" + item.Artist + "\x00" + item.DefaultKey + "\x00" + item.TimeSignature + "\x00" + item.Notes + "\x00" + item.Body))
 	return hex.EncodeToString(h[:])
 }
 

@@ -41,6 +41,53 @@ func TestParseChordFile(t *testing.T) {
 	}
 }
 
+func TestParseChordFileDraft(t *testing.T) {
+	tests := []struct {
+		header  string
+		want    bool
+		wantErr bool
+	}{
+		{"", false, false},
+		{"Draft: true\n", true, false},
+		{"draft: TRUE\n", true, false},
+		{"Draft: false\n", false, false},
+		{"Draft: yes\n", false, true},
+	}
+	for _, tt := range tests {
+		parsed, err := ParseChordFile("x.chord", tt.header+validChordFile)
+		if (err != nil) != tt.wantErr {
+			t.Errorf("%q: err = %v, wantErr %v", tt.header, err, tt.wantErr)
+		}
+		if parsed.Draft != tt.want {
+			t.Errorf("%q: Draft = %v, want %v", tt.header, parsed.Draft, tt.want)
+		}
+	}
+}
+
+func TestParseChordFileNotes(t *testing.T) {
+	raw := "Title: X\nKey: D\nNotes: Play AABB.\n\n  Kick off with the last\n  four bars.  \n\n---\nI | I |\n"
+	parsed, err := ParseChordFile("x.chord", raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "Play AABB.\n\n  Kick off with the last\n  four bars."
+	if parsed.Notes != want {
+		t.Errorf("Notes = %q, want %q", parsed.Notes, want)
+	}
+	if parsed.Body != "I | I |" {
+		t.Errorf("Body = %q", parsed.Body)
+	}
+
+	// Text on later lines only, and a later "Field:" line is part of the notes.
+	parsed, err = ParseChordFile("x.chord", "Title: X\nNotes:\nKey: D\n---\nI |\n")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if parsed.Notes != "Key: D" || parsed.DefaultKey != "" {
+		t.Errorf("Notes = %q, DefaultKey = %q", parsed.Notes, parsed.DefaultKey)
+	}
+}
+
 func TestParseChordFileMissingSeparator(t *testing.T) {
 	_, err := ParseChordFile("bad.chord", "Title: X\nKey: D\nI | I |\n")
 	if err == nil {
@@ -128,6 +175,9 @@ func TestChartsDirectoryFilesAreValid(t *testing.T) {
 			t.Fatal(err)
 		}
 		parsed, err := ParseChordFile(filepath.Base(path), string(raw))
+		if parsed.Draft {
+			continue
+		}
 		if err != nil {
 			t.Errorf("%s: %v", path, err)
 			continue

@@ -37,6 +37,14 @@ func TestFormatBodyLeadingBar(t *testing.T) {
 	}
 }
 
+func TestFormatBodySplitsBarsFromChords(t *testing.T) {
+	got := FormatBody("i   | i   | bVII | bVII |\ni  | i  |i  bVII  | v i|")
+	want := "i   | i   | bVII     | bVII    |\ni   | i   | i bVII   | v i     |"
+	if got != want {
+		t.Errorf("FormatBody:\n got %q\nwant %q", got, want)
+	}
+}
+
 func TestFormatBodyIsIdempotent(t *testing.T) {
 	once := FormatBody("I | I IV | 2/4 V |\nbVII7 | vi | I |\n\nB (-> IV):\nI | V7 | I |")
 	if twice := FormatBody(once); twice != once {

@@ -16,6 +16,7 @@ type ChordChart struct {
 	Artist        string
 	DefaultKey    string
 	TimeSignature string
+	Notes         string
 	URLVal        string
 	FileName      string
 	Body          string
@@ -41,6 +42,7 @@ func chordChartFromJSON(j aws.ChordChartJSONObject) ChordChart {
 		Artist:        j.Artist,
 		DefaultKey:    j.DefaultKey,
 		TimeSignature: j.TimeSignature,
+		Notes:         j.Notes,
 		URLVal:        j.URLVal,
 		FileName:      j.FileName,
 		Body:          j.Body,

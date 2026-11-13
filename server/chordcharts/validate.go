@@ -29,7 +29,12 @@ type ParsedChordFile struct {
 	DefaultKey string
 	// TimeSignature is the chart-wide meter, e.g. "3/4". Empty means 4/4.
 	TimeSignature string
-	Body          string
+	// Draft marks a chart that sync-chord-charts skips: it isn't validated or
+	// uploaded, and a copy already in S3 is deleted.
+	Draft bool
+	// Notes is free text shown with the chart. It can span several lines.
+	Notes string
+	Body  string
 }
 
 // URLVal derives the URL slug for this chart from its filename.
@@ -53,7 +58,8 @@ func ParseChordFile(fileName string, raw string) (ParsedChordFile, error) {
 		return parsed, fmt.Errorf("missing '---' header separator")
 	}
 
-	for _, line := range lines[:sepIdx] {
+	header := lines[:sepIdx]
+	for i, line := range header {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
@@ -72,6 +78,25 @@ func ParseChordFile(fileName string, raw string) (ParsedChordFile, error) {
 			parsed.DefaultKey = val
 		case "time":
 			parsed.TimeSignature = val
+		case "notes":
+			// Notes is the last header field: it takes the rest of its line and
+			// every line after it, up to the "---".
+			noteLines := []string{val}
+			for _, l := range header[i+1:] {
+				noteLines = append(noteLines, strings.TrimRight(l, " \t\r"))
+			}
+			parsed.Notes = strings.Trim(strings.Join(noteLines, "\n"), "\n")
+			parsed.Body = strings.Trim(strings.Join(lines[sepIdx+1:], "\n"), "\n")
+			return parsed, nil
+		case "draft":
+			switch strings.ToLower(val) {
+			case "true":
+				parsed.Draft = true
+			case "false":
+				parsed.Draft = false
+			default:
+				return parsed, fmt.Errorf("draft %q must be true or false", val)
+			}
 		default:
 			return parsed, fmt.Errorf("unknown header field %q", key)
 		}

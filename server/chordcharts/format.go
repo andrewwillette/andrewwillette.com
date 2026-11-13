@@ -1,6 +1,7 @@
 package chordcharts
 
 import (
+	"regexp"
 	"strings"
 )
 
@@ -8,6 +9,10 @@ import (
 // e.g. "Bb" or "F#". Cells reserve room for it so the bars still line up
 // after numerals are converted to letters ("I" -> "Bb").
 const maxRootWidth = 2
+
+// barRunRe matches a run of bars anywhere in a line, including one written
+// up against a chord ("|i" or "IV|").
+var barRunRe = regexp.MustCompile(`\|+`)
 
 // FormatFile formats the body of a raw .chord file and leaves the header
 // untouched. It returns raw unchanged if the file has no "---" separator.
@@ -24,8 +29,9 @@ func FormatFile(raw string) string {
 
 // FormatBody lines up the bars of every chord line in a chart body into
 // shared columns, with one space between each bar and the chord after it.
-// Section labels, blank lines, and any line that isn't a valid chord line
-// are left as they are.
+// Bars written up against a chord ("|i") are split off it first. Section
+// labels, blank lines, and any line that still isn't a valid chord line are
+// left as they are.
 //
 // Each column is as wide as its widest cell, where a chord counts as the
 // wider of its numeral and its longest letter spelling (a two-character
@@ -36,6 +42,7 @@ func FormatBody(body string) string {
 	rows := make(map[int]chordRow)
 	var cellWidths, barWidths []int
 	for i, line := range lines {
+		line = barRunRe.ReplaceAllString(line, " $0 ")
 		if !isChordLine(line) {
 			continue
 		}
