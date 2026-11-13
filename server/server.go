@@ -75,6 +75,9 @@ func StartServer(sslEnabled bool) {
 	traffic.StartBackupJob()
 	e := echo.New()
 	e.HideBanner = true
+	// No reverse proxy sits in front of the server, so never trust
+	// client-supplied X-Forwarded-For / X-Real-IP headers (GO-2026-6872).
+	e.IPExtractor = echo.ExtractIPDirect()
 	e.Logger = newZerologAdapter(zlog.Logger)
 	addRoutes(e)
 	addMiddleware(e)
