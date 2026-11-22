@@ -1,26 +1,21 @@
 package server
 
 import (
-	"fmt"
-	"html/template"
-	"io"
 	"net/http"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/andrewwillette/keyofday/key"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	gommonlog "github.com/labstack/gommon/log"
-	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/time/rate"
 
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	"github.com/andrewwillette/andrewwillettedotcom/config"
+	applog "github.com/andrewwillette/andrewwillettedotcom/log"
 	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
 	"github.com/andrewwillette/andrewwillettedotcom/server/chordcharts"
 	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
@@ -65,7 +60,8 @@ var (
 	basepath   = filepath.Dir(b)
 )
 
-// StartServer start the server with https certificate configurable
+// StartServer starts the Echo server. Pass sslEnabled=true in production to
+// enable AutoTLS; false runs plain HTTP on port 80.
 func StartServer(sslEnabled bool) {
 	if err := traffic.RestoreFromS3IfEmpty(config.C.TrafficDBPath); err != nil {
 		zlog.Error().Err(err).Msg("failed to restore traffic database from S3")
@@ -74,36 +70,43 @@ func StartServer(sslEnabled bool) {
 		zlog.Error().Err(err).Msg("failed to initialize traffic database")
 	}
 	traffic.StartBackupJob()
+
 	e := echo.New()
 	e.HideBanner = true
 	// No reverse proxy sits in front of the server, so never trust
 	// client-supplied X-Forwarded-For / X-Real-IP headers (GO-2026-6872).
 	e.IPExtractor = echo.ExtractIPDirect()
-	e.Logger = newZerologAdapter(zlog.Logger)
-	addRoutes(e)
+	e.Logger = applog.NewEchoAdapter(zlog.Logger)
+	e.Renderer = newTemplateRenderer()
+
 	addMiddleware(e)
+	addRoutes(e)
+
 	if config.C.PProfEnabled {
 		echopprof.Wrap(e)
 	}
-	e.Renderer = getTemplateRenderer()
+
 	blog.InitializeBlogs()
 	chordcharts.InitializeChordCharts()
 	aws.UpdateAudioCache()
 	aws.UpdateSheetMusicCache()
 	aws.UpdateShowsCache()
 	go aws.UpdateAudioCacheOnPresignExpiry()
-	go aws.StartSQSPoller()
+	aws.StartSQSPoller()
 	aws.StartSheetMusicLinkRefreshJob()
+
 	const (
 		readTimeout  = 10 * time.Second
 		writeTimeout = 30 * time.Second
 		idleTimeout  = 120 * time.Second
 	)
+
 	if sslEnabled {
 		e.Pre(middleware.HTTPSRedirect())
 	}
 	// Registered after HTTPSRedirect so git traffic is only ever proxied over TLS.
 	addGitProxy(e)
+
 	if sslEnabled {
 		tlsHosts := []string{"andrewwillette.com"}
 		if config.C.GitHost != "" {
@@ -112,7 +115,6 @@ func StartServer(sslEnabled bool) {
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(tlsHosts...)
 		const sslCacheDir = "/var/www/.cache"
 		e.AutoTLSManager.Cache = autocert.DirCache(sslCacheDir)
-		// Configure timeouts on the TLS server Echo uses internally for StartAutoTLS
 		e.TLSServer.ReadTimeout = readTimeout
 		e.TLSServer.WriteTimeout = writeTimeout
 		e.TLSServer.IdleTimeout = idleTimeout
@@ -137,7 +139,6 @@ func StartServer(sslEnabled bool) {
 	}
 }
 
-// addRoutes add routes to the echo webserver
 func addRoutes(e *echo.Echo) {
 	e.GET(homeEndpoint, handleHomePage)
 	e.GET(resumeEndpoint, handleResumePage)
@@ -156,8 +157,6 @@ func addRoutes(e *echo.Echo) {
 	e.GET(adminEndpoint, traffic.HandleAdminPage, adminRateLimiter(), traffic.BasicAuthMiddleware())
 }
 
-// addGitProxy forwards requests for the git subdomain to Forgejo when
-// GIT_HOST is configured.
 func addGitProxy(e *echo.Echo) {
 	if config.C.GitHost == "" {
 		return
@@ -171,14 +170,14 @@ func addGitProxy(e *echo.Echo) {
 	zlog.Info().Msgf("proxying %s to %s", config.C.GitHost, config.C.GitUpstreamURL)
 }
 
-// adminRateLimiter returns a rate limiter middleware scoped to the admin route.
+// adminRateLimiter returns a rate limiter scoped to the admin route.
 // Allows 5 requests per minute per IP to mitigate brute-force attacks.
 func adminRateLimiter() echo.MiddlewareFunc {
-	config := middleware.RateLimiterConfig{
+	cfg := middleware.RateLimiterConfig{
 		Skipper: middleware.DefaultSkipper,
 		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
 			middleware.RateLimiterMemoryStoreConfig{
-				Rate:      rate.Limit(5.0 / 60.0), // 5 requests per minute
+				Rate:      rate.Limit(5.0 / 60.0),
 				Burst:     5,
 				ExpiresIn: 5 * time.Minute,
 			},
@@ -193,11 +192,11 @@ func adminRateLimiter() echo.MiddlewareFunc {
 			return c.JSON(http.StatusTooManyRequests, map[string]string{"error": "too many requests"})
 		},
 	}
-	return middleware.RateLimiterWithConfig(config)
+	return middleware.RateLimiterWithConfig(cfg)
 }
 
 func addMiddleware(e *echo.Echo) {
-	e.Use(logmiddleware)
+	e.Use(logMiddleware)
 	e.Use(traffic.TrackingMiddleware)
 	e.Use(middleware.Secure())
 }
@@ -206,25 +205,12 @@ type HomePageData struct {
 	CurrentYear int
 }
 
-// handleHomePage handles returning the homepage template
 func handleHomePage(c echo.Context) error {
-	data := HomePageData{
-		CurrentYear: time.Now().Year(),
-	}
-	err := c.Render(http.StatusOK, "homepage", data)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.Render(http.StatusOK, "homepage", HomePageData{CurrentYear: time.Now().Year()})
 }
 
-// handleResumePage handles returning the resume template
 func handleResumePage(c echo.Context) error {
-	err := c.Redirect(http.StatusPermanentRedirect, config.C.HomePageImageS3URL)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.Redirect(http.StatusPermanentRedirect, config.C.HomePageImageS3URL)
 }
 
 type KeyOfDayPage struct {
@@ -232,75 +218,19 @@ type KeyOfDayPage struct {
 	CurrentYear int
 }
 
-// handleKeyOfDayPage handles returning the key of the day
 func handleKeyOfDayPage(c echo.Context) error {
 	data := KeyOfDayPage{
 		KeyOfDay:    key.TodaysKey(),
 		CurrentYear: time.Now().Year(),
 	}
-	err := c.Render(http.StatusOK, "keyofdaypage", data)
-	if err != nil {
-		zlog.Error().Msgf("handleKeyOfDyPage error: %v", err)
+	if err := c.Render(http.StatusOK, "keyofdaypage", data); err != nil {
+		zlog.Error().Err(err).Msg("handleKeyOfDayPage render failed")
 		return err
 	}
 	return nil
 }
 
-// Template is the template renderer for my echo webserver
-type Template struct {
-	templates map[string]*template.Template
-}
-
-// Render renders the template
-func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) error {
-	tmpl, ok := t.templates[name]
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "template not found: "+name)
-	}
-	if err := tmpl.ExecuteTemplate(w, "base", data); err != nil {
-		zlog.Error().Err(err).Str("template", name).Msg("template execution failed")
-		return err
-	}
-	return nil
-}
-
-// getTemplateRenderer returns a template renderer for my echo webserver
-func getTemplateRenderer() *Template {
-	// Parse base layout
-	base := template.Must(template.ParseFiles(
-		filepath.Join(basepath, "templates/base.tmpl"),
-	))
-
-	templates := make(map[string]*template.Template)
-
-	// Pages that use the base layout
-	pages := []string{
-		"templates/homepage.tmpl",
-		"templates/musicpage.tmpl",
-		"templates/keyofdaypage.tmpl",
-		"templates/sheetmusicpage.tmpl",
-		"templates/blogs/blogspage.tmpl",
-		"templates/blogs/singleblogpage.tmpl",
-		"templates/chordcharts/chordchartspage.tmpl",
-		"templates/chordcharts/singlechordchartpage.tmpl",
-		"templates/adminpage.tmpl",
-		"templates/showspage.tmpl",
-	}
-
-	for _, page := range pages {
-		// Clone base so each page gets its own copy
-		pageTemplate := template.Must(base.Clone())
-		template.Must(pageTemplate.ParseFiles(filepath.Join(basepath, page)))
-
-		// Store with page name as key (e.g., "homepage")
-		name := strings.TrimSuffix(filepath.Base(page), ".tmpl")
-		templates[name] = pageTemplate
-	}
-
-	return &Template{templates: templates}
-}
-
-func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func logMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		zlog.Info().Msgf("Request to registered path %s with ip %s", c.Path(), c.RealIP())
 		if err := next(c); err != nil {
@@ -309,43 +239,3 @@ func logmiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		return nil
 	}
 }
-
-// zerologAdapter adapts zerolog to Echo's Logger interface
-type zerologAdapter struct {
-	logger zerolog.Logger
-	prefix string
-	level  gommonlog.Lvl
-}
-
-func newZerologAdapter(logger zerolog.Logger) *zerologAdapter {
-	return &zerologAdapter{logger: logger, level: gommonlog.INFO}
-}
-
-func (z *zerologAdapter) Output() io.Writer                      { return z.logger }
-func (z *zerologAdapter) SetOutput(w io.Writer)                  { z.logger = z.logger.Output(w) }
-func (z *zerologAdapter) Prefix() string                         { return z.prefix }
-func (z *zerologAdapter) SetPrefix(p string)                     { z.prefix = p }
-func (z *zerologAdapter) Level() gommonlog.Lvl                   { return z.level }
-func (z *zerologAdapter) SetLevel(l gommonlog.Lvl)               { z.level = l }
-func (z *zerologAdapter) SetHeader(h string)                     {}
-func (z *zerologAdapter) Print(i ...interface{})                 { z.logger.Info().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Printf(format string, i ...interface{}) { z.logger.Info().Msgf(format, i...) }
-func (z *zerologAdapter) Printj(j gommonlog.JSON)                { z.logger.Info().Fields(j).Msg("") }
-func (z *zerologAdapter) Debug(i ...interface{})                 { z.logger.Debug().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Debugf(format string, i ...interface{}) { z.logger.Debug().Msgf(format, i...) }
-func (z *zerologAdapter) Debugj(j gommonlog.JSON)                { z.logger.Debug().Fields(j).Msg("") }
-func (z *zerologAdapter) Info(i ...interface{})                  { z.logger.Info().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Infof(format string, i ...interface{})  { z.logger.Info().Msgf(format, i...) }
-func (z *zerologAdapter) Infoj(j gommonlog.JSON)                 { z.logger.Info().Fields(j).Msg("") }
-func (z *zerologAdapter) Warn(i ...interface{})                  { z.logger.Warn().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Warnf(format string, i ...interface{})  { z.logger.Warn().Msgf(format, i...) }
-func (z *zerologAdapter) Warnj(j gommonlog.JSON)                 { z.logger.Warn().Fields(j).Msg("") }
-func (z *zerologAdapter) Error(i ...interface{})                 { z.logger.Error().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Errorf(format string, i ...interface{}) { z.logger.Error().Msgf(format, i...) }
-func (z *zerologAdapter) Errorj(j gommonlog.JSON)                { z.logger.Error().Fields(j).Msg("") }
-func (z *zerologAdapter) Fatal(i ...interface{})                 { z.logger.Fatal().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Fatalf(format string, i ...interface{}) { z.logger.Fatal().Msgf(format, i...) }
-func (z *zerologAdapter) Fatalj(j gommonlog.JSON)                { z.logger.Fatal().Fields(j).Msg("") }
-func (z *zerologAdapter) Panic(i ...interface{})                 { z.logger.Panic().Msg(fmt.Sprint(i...)) }
-func (z *zerologAdapter) Panicf(format string, i ...interface{}) { z.logger.Panic().Msgf(format, i...) }
-func (z *zerologAdapter) Panicj(j gommonlog.JSON)                { z.logger.Panic().Fields(j).Msg("") }

@@ -13,7 +13,7 @@ import (
 
 func TestHandleHomePage(t *testing.T) {
 	e := echo.New()
-	e.Renderer = getTemplateRenderer()
+	e.Renderer = newTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -26,7 +26,7 @@ func TestHandleHomePage(t *testing.T) {
 
 func TestHandleResumePage(t *testing.T) {
 	e := echo.New()
-	e.Renderer = getTemplateRenderer()
+	e.Renderer = newTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -37,7 +37,7 @@ func TestHandleResumePage(t *testing.T) {
 
 func TestHandleKeyOfDayPage(t *testing.T) {
 	e := echo.New()
-	e.Renderer = getTemplateRenderer()
+	e.Renderer = newTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -48,7 +48,7 @@ func TestHandleKeyOfDayPage(t *testing.T) {
 
 func BenchmarkHandleHomePage(b *testing.B) {
 	e := echo.New()
-	e.Renderer = getTemplateRenderer()
+	e.Renderer = newTemplateRenderer()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()

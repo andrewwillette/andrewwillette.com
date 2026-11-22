@@ -28,7 +28,7 @@ type ObjectInfo struct {
 // ListAllObjects returns every object in the bucket, following pagination.
 func ListAllObjects(bucket string) ([]ObjectInfo, error) {
 	var objects []ObjectInfo
-	paginator := s3.NewListObjectsV2Paginator(getS3Client(), &s3.ListObjectsV2Input{
+	paginator := s3.NewListObjectsV2Paginator(getBackupS3Client(), &s3.ListObjectsV2Input{
 		Bucket: aws.String(bucket),
 	})
 	for paginator.HasMorePages() {
@@ -50,7 +50,7 @@ func ListAllObjects(bucket string) ([]ObjectInfo, error) {
 
 // GetObjectBytes downloads an object fully into memory, returning its body and content type.
 func GetObjectBytes(bucket, key string) ([]byte, string, error) {
-	resp, err := getS3Client().GetObject(context.TODO(), &s3.GetObjectInput{
+	resp, err := getBackupS3Client().GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}, quietChecksums)
@@ -72,7 +72,7 @@ func PutObjectFromFile(bucket, key, path, contentType string) error {
 		return err
 	}
 	defer f.Close()
-	_, err = getS3Client().PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = getBackupS3Client().PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(key),
 		Body:        f,
@@ -84,7 +84,7 @@ func PutObjectFromFile(bucket, key, path, contentType string) error {
 // GetObjectToWriter streams an object into w. It reports found=false
 // (with no error) when the key does not exist.
 func GetObjectToWriter(bucket, key string, w io.Writer) (found bool, err error) {
-	resp, err := getS3Client().GetObject(context.TODO(), &s3.GetObjectInput{
+	resp, err := getBackupS3Client().GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})

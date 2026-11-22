@@ -11,6 +11,7 @@ import (
 	"time"
 
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
+	"github.com/andrewwillette/andrewwillettedotcom/internal/stringutil"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/rs/zerolog/log"
@@ -104,13 +105,13 @@ func UpdateShowsCache() {
 }
 
 func PutShowJSON(title, date, showTime, description string) error {
-	slug := slugify(title)
+	slug := stringutil.Slugify(title)
 	if d := strings.TrimSpace(date); d != "" {
 		slug = slug + "_" + d
 	} else {
 		slug = fmt.Sprintf("%s_%d", slug, time.Now().UnixMilli())
 	}
-	key := ensureTrailingSlash(webCfg.C.ShowsS3BucketPrefix) + slug + ".json"
+	key := stringutil.EnsureTrailingSlash(webCfg.C.ShowsS3BucketPrefix) + slug + ".json"
 
 	item := ShowJSONObject{
 		Title:       strings.TrimSpace(title),
@@ -123,7 +124,7 @@ func PutShowJSON(title, date, showTime, description string) error {
 		return err
 	}
 
-	_, err = getS3Client().PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = getShowsS3Client().PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(webCfg.C.ShowsS3BucketName),
 		Key:         aws.String(key),
 		Body:        strings.NewReader(string(body)),
@@ -138,10 +139,10 @@ func PutShowJSON(title, date, showTime, description string) error {
 }
 
 func ListShowsFromS3() ([]ShowJSONObject, error) {
-	client := getS3Client()
+	client := getShowsS3Client()
 	out, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: aws.String(webCfg.C.ShowsS3BucketName),
-		Prefix: aws.String(ensureTrailingSlash(webCfg.C.ShowsS3BucketPrefix)),
+		Prefix: aws.String(stringutil.EnsureTrailingSlash(webCfg.C.ShowsS3BucketPrefix)),
 	})
 	if err != nil {
 		return nil, err
@@ -163,7 +164,7 @@ func ListShowsFromS3() ([]ShowJSONObject, error) {
 			continue
 		}
 		if strings.TrimSpace(item.Title) == "" {
-			item.Title = fallbackNameFromKey(key, webCfg.C.ShowsS3BucketPrefix)
+			item.Title = stringutil.FallbackNameFromKey(key, webCfg.C.ShowsS3BucketPrefix)
 		}
 		items = append(items, item)
 	}
@@ -177,10 +178,10 @@ type ShowAdminObject struct {
 }
 
 func ListShowObjects() ([]ShowAdminObject, error) {
-	client := getS3Client()
+	client := getShowsS3Client()
 	out, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: aws.String(webCfg.C.ShowsS3BucketName),
-		Prefix: aws.String(ensureTrailingSlash(webCfg.C.ShowsS3BucketPrefix)),
+		Prefix: aws.String(stringutil.EnsureTrailingSlash(webCfg.C.ShowsS3BucketPrefix)),
 	})
 	if err != nil {
 		return nil, err
@@ -202,7 +203,7 @@ func ListShowObjects() ([]ShowAdminObject, error) {
 		}
 		title := strings.TrimSpace(item.Title)
 		if title == "" {
-			title = fallbackNameFromKey(key, webCfg.C.ShowsS3BucketPrefix)
+			title = stringutil.FallbackNameFromKey(key, webCfg.C.ShowsS3BucketPrefix)
 		}
 		items = append(items, ShowAdminObject{Key: key, Title: title, Date: item.Date})
 	}
@@ -217,7 +218,7 @@ func DeleteShowFromS3(key string) error {
 	if key == "" {
 		return fmt.Errorf("empty key")
 	}
-	_, err := getS3Client().DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+	_, err := getShowsS3Client().DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(webCfg.C.ShowsS3BucketName),
 		Key:    aws.String(key),
 	})

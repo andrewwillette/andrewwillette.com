@@ -16,4 +16,6 @@ traffic.db
 andrewwillette.com.tar
 nonprod.env
 prod.env
-backup
+# local backup output; the package source in this directory is tracked
+/backup/*
+!/backup/*.go

@@ -8,6 +8,7 @@ import (
 
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/andrewwillette/andrewwillettedotcom/dropbox"
+	"github.com/andrewwillette/andrewwillettedotcom/internal/stringutil"
 	"github.com/rs/zerolog/log"
 )
 
@@ -121,11 +122,11 @@ func refreshKnownEntry(ctx context.Context, dbx *dropbox.Client, key string, ite
 // to the same thing as item's display name. ambiguous is true if more than one
 // file matches; match is nil if none do.
 func findFolderMatch(displayName string, folderFiles []dropbox.FileMetadata) (match *dropbox.FileMetadata, ambiguous bool) {
-	target := slugify(displayName)
+	target := stringutil.Slugify(displayName)
 	for i := range folderFiles {
 		f := folderFiles[i]
 		name := strings.TrimSuffix(f.Name, filepath.Ext(f.Name))
-		if slugify(name) != target {
+		if stringutil.Slugify(name) != target {
 			continue
 		}
 		if match != nil {

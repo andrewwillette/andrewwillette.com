@@ -6,17 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
+	"github.com/andrewwillette/andrewwillettedotcom/internal/stringutil"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // JSON object stored in S3
@@ -69,8 +67,8 @@ func UpdateSheetMusicCache() {
 
 func PutSheetJSON(displayName, dropboxURL, dropboxFileID string) error {
 	// slug is the name of object in S3 bucket, derived from display name. (eg derived_display_name.json)
-	slug := slugify(displayName)
-	key := ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
+	slug := stringutil.Slugify(displayName)
+	key := stringutil.EnsureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
 
 	item := SheetMusicJSONObject{
 		DisplayName:   strings.TrimSpace(displayName),
@@ -82,7 +80,7 @@ func PutSheetJSON(displayName, dropboxURL, dropboxFileID string) error {
 		return err
 	}
 
-	_, err = getS3Client().PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = getSheetMusicS3Client().PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(webCfg.C.SheetMusicS3BucketName),
 		Key:         aws.String(key),
 		Body:        strings.NewReader(string(body)),
@@ -101,14 +99,14 @@ func DeleteSheetMusicFromS3(key string) error {
 	if key == "" {
 		return fmt.Errorf("empty key")
 	}
-	if !strings.HasPrefix(key, ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix)) {
-		key = ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + key
+	if !strings.HasPrefix(key, stringutil.EnsureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix)) {
+		key = stringutil.EnsureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + key
 	}
 	if !strings.HasSuffix(strings.ToLower(key), ".json") {
 		key = key + ".json"
 	}
 
-	_, err := getS3Client().DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+	_, err := getSheetMusicS3Client().DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(webCfg.C.SheetMusicS3BucketName),
 		Key:    aws.String(key),
 	})
@@ -121,8 +119,8 @@ func DeleteSheetMusicFromS3(key string) error {
 }
 
 func DeleteSheetMusicByDisplayName(displayName string) error {
-	slug := slugify(displayName)
-	key := ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
+	slug := stringutil.Slugify(displayName)
+	key := stringutil.EnsureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
 	return DeleteSheetMusicFromS3(key)
 }
 
@@ -135,7 +133,7 @@ func ListSheetMusicFromS3() ([]SheetMusicJSONObject, error) {
 	for _, r := range rows {
 		item := r.JSONItem
 		if strings.TrimSpace(item.DisplayName) == "" {
-			item.DisplayName = fallbackNameFromKey(r.Key, webCfg.C.SheetMusicS3BucketPrefix)
+			item.DisplayName = stringutil.FallbackNameFromKey(r.Key, webCfg.C.SheetMusicS3BucketPrefix)
 		}
 		item.DropboxURL = normalizeDropboxURL(item.DropboxURL)
 		out = append(out, item)
@@ -153,7 +151,7 @@ func ListSheetMusicObjects() ([]SheetMusicAdminObject, error) {
 	for _, r := range rows {
 		name := strings.TrimSpace(r.JSONItem.DisplayName)
 		if name == "" {
-			name = fallbackNameFromKey(r.Key, webCfg.C.SheetMusicS3BucketPrefix)
+			name = stringutil.FallbackNameFromKey(r.Key, webCfg.C.SheetMusicS3BucketPrefix)
 		}
 		out = append(out, SheetMusicAdminObject{
 			Key:         r.Key,
@@ -174,10 +172,10 @@ type sheetMusicS3Object struct {
 
 // listSheetJSONRaw main entry point for retrieving
 func listSheetJSONRaw() ([]sheetMusicS3Object, error) {
-	client := getS3Client()
+	client := getSheetMusicS3Client()
 	out, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: aws.String(webCfg.C.SheetMusicS3BucketName),
-		Prefix: aws.String(ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix)),
+		Prefix: aws.String(stringutil.EnsureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix)),
 	})
 	if err != nil {
 		return nil, err
@@ -225,36 +223,6 @@ func readSheetMusicJSONFromS3(client *s3.Client, bucket, key string) (SheetMusic
 		return SheetMusicJSONObject{}, err
 	}
 	return item, nil
-}
-
-func slugify(s string) string {
-	s = strings.TrimSpace(strings.ToLower(s))
-	s = strings.ReplaceAll(s, " ", "_")
-	s = strings.ReplaceAll(s, "-", "_")
-	out := make([]rune, 0, len(s))
-	for _, r := range s {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_' {
-			out = append(out, r)
-		}
-	}
-	s = string(out)
-	return strings.Trim(s, "_")
-}
-
-func fallbackNameFromKey(key, prefix string) string {
-	base := strings.TrimPrefix(key, ensureTrailingSlash(prefix))
-	base = strings.TrimSuffix(base, filepath.Ext(base))
-	base = strings.ReplaceAll(base, "_", " ")
-	base = strings.ReplaceAll(base, "-", " ")
-	c := cases.Title(language.AmericanEnglish)
-	return c.String(base)
-}
-
-func ensureTrailingSlash(p string) string {
-	if p == "" || strings.HasSuffix(p, "/") {
-		return p
-	}
-	return p + "/"
 }
 
 func normalizeDropboxURL(rawURL string) string {

@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
+	"github.com/andrewwillette/andrewwillettedotcom/internal/stringutil"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/rs/zerolog/log"
@@ -94,7 +95,7 @@ func SyncChordCharts(items []ChordChartJSONObject) (ChordChartSyncResult, error)
 		existingByURLVal[e.URLVal] = e
 	}
 
-	client := getS3Client()
+	client := getChordChartsS3Client()
 	seen := make(map[string]bool, len(items))
 	for _, item := range items {
 		seen[item.URLVal] = true
@@ -151,14 +152,14 @@ func deleteChordChart(client *s3.Client, urlVal string) error {
 }
 
 func chordChartKey(urlVal string) string {
-	return ensureTrailingSlash(webCfg.C.ChordChartsS3BucketPrefix) + urlVal + ".json"
+	return stringutil.EnsureTrailingSlash(webCfg.C.ChordChartsS3BucketPrefix) + urlVal + ".json"
 }
 
 func listChordChartsFromS3() ([]ChordChartJSONObject, error) {
-	client := getS3Client()
+	client := getChordChartsS3Client()
 	out, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
 		Bucket: aws.String(webCfg.C.ChordChartsS3BucketName),
-		Prefix: aws.String(ensureTrailingSlash(webCfg.C.ChordChartsS3BucketPrefix)),
+		Prefix: aws.String(stringutil.EnsureTrailingSlash(webCfg.C.ChordChartsS3BucketPrefix)),
 	})
 	if err != nil {
 		return nil, err

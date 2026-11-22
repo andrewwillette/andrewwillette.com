@@ -16,37 +16,27 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-	sqsClient       *sqs.Client
-	sqsPollInterval = 10 * time.Second
-)
+var sqsClient *sqs.Client
 
+// StartSQSPoller starts a background goroutine that long-polls the SQS queue
+// and triggers in-memory cache refreshes when S3 content changes.
 func StartSQSPoller() {
-	go func() {
-		for {
-			msgs, err := receiveSQSMessages(webCfg.C.AudioSQSURL)
-			if err != nil {
-				log.Error().Msgf("Failed to receive SQS messages: %v", err)
-				time.Sleep(sqsPollInterval)
-				continue
-			}
+	go pollSQS()
+}
 
-			if len(msgs) == 0 {
-				time.Sleep(sqsPollInterval)
-				continue
-			}
-
-			for _, msg := range msgs {
-				handled := handleSQSEvent(msg)
-				if handled {
-					deleteSQSMessage(webCfg.C.AudioSQSURL, *msg.ReceiptHandle)
-				} else {
-					log.Info().Msg("SQS message on queue not related to audio, deleting it")
-					deleteSQSMessage(webCfg.C.AudioSQSURL, *msg.ReceiptHandle)
-				}
-			}
+func pollSQS() {
+	for {
+		msgs, err := receiveSQSMessages(webCfg.C.AudioSQSURL)
+		if err != nil {
+			log.Error().Msgf("Failed to receive SQS messages: %v", err)
+			time.Sleep(10 * time.Second)
+			continue
 		}
-	}()
+
+		for _, msg := range msgs {
+			handleSQSMessage(msg)
+		}
+	}
 }
 
 func receiveSQSMessages(queueURL string) ([]types.Message, error) {
@@ -61,7 +51,7 @@ func receiveSQSMessages(queueURL string) ([]types.Message, error) {
 	resp, err := sqsClient.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
 		QueueUrl:            aws.String(queueURL),
 		MaxNumberOfMessages: 5,
-		WaitTimeSeconds:     0,
+		WaitTimeSeconds:     20, // long-polling: reduces API calls and latency
 	})
 	if err != nil {
 		return nil, err
@@ -81,38 +71,63 @@ type S3Event struct {
 	} `json:"Records"`
 }
 
-func handleSQSEvent(msg types.Message) bool {
-	var payload S3Event
+// contentType ties an S3 key prefix to the cache that mirrors it.
+type contentType struct {
+	name    string
+	prefix  string
+	refresh func()
+}
 
-	if err := json.Unmarshal([]byte(*msg.Body), &payload); err != nil {
+func contentTypes() []contentType {
+	return []contentType{
+		{"audio", webCfg.C.AudioS3BucketPrefix, UpdateAudioCache},
+		{"sheet music", webCfg.C.SheetMusicS3BucketPrefix, UpdateSheetMusicCache},
+		{"shows", webCfg.C.ShowsS3BucketPrefix, UpdateShowsCache},
+		{"chord charts", webCfg.C.ChordChartsS3BucketPrefix, UpdateChordChartsCache},
+	}
+}
+
+// handleSQSMessage refreshes affected caches and deletes the message. Messages
+// that can't be parsed are deleted too, since retrying would never succeed.
+func handleSQSMessage(msg types.Message) {
+	matched, err := matchContentTypes(aws.ToString(msg.Body), contentTypes())
+	if err != nil {
 		log.Error().Msgf("Invalid SQS message format: %v", err)
-		return false
+	} else if len(matched) == 0 {
+		log.Info().Msg("SQS message not related to any known content prefix, deleting")
+	}
+	for _, ct := range matched {
+		log.Info().Msgf("Detected %s S3 event, updating cache", ct.name)
+		go ct.refresh()
+	}
+	deleteSQSMessage(webCfg.C.AudioSQSURL, aws.ToString(msg.ReceiptHandle))
+}
+
+// matchContentTypes returns each content type touched by any record in body,
+// once. Unset prefixes never match, since they would claim every key.
+func matchContentTypes(body string, candidates []contentType) ([]contentType, error) {
+	var payload S3Event
+	if err := json.Unmarshal([]byte(body), &payload); err != nil {
+		return nil, err
 	}
 
+	var matched []contentType
+	seen := make(map[string]bool, len(candidates))
 	for _, record := range payload.Records {
-		key, _ := url.QueryUnescape(record.S3.Object.Key)
-		switch {
-		case strings.HasPrefix(key, webCfg.C.AudioS3BucketPrefix):
-			log.Info().Msgf("Detected audiodata S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
-			go UpdateAudioCache()
-			return true
-		case strings.HasPrefix(key, webCfg.C.SheetMusicS3BucketPrefix):
-			log.Info().Msgf("Detected sheetmusic S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
-			go UpdateSheetMusicCache()
-			return true
-		case strings.HasPrefix(key, webCfg.C.ShowsS3BucketPrefix):
-			log.Info().Msgf("Detected shows S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
-			go UpdateShowsCache()
-			return true
-		case strings.HasPrefix(key, webCfg.C.ChordChartsS3BucketPrefix):
-			log.Info().Msgf("Detected chord chart S3 event %s for %s — updating cache", record.EventName, record.S3.Object.Key)
-			go UpdateChordChartsCache()
-			return true
+		// S3 URL-encodes keys in event notifications.
+		key, err := url.QueryUnescape(record.S3.Object.Key)
+		if err != nil {
+			key = record.S3.Object.Key
+		}
+		for _, ct := range candidates {
+			if ct.prefix != "" && !seen[ct.name] && strings.HasPrefix(key, ct.prefix) {
+				seen[ct.name] = true
+				matched = append(matched, ct)
+				break
+			}
 		}
 	}
-
-	log.Debug().Msg("SQS message not relevant to any known content prefix, ignoring.")
-	return false
+	return matched, nil
 }
 
 func deleteSQSMessage(queueURL, receiptHandle string) {

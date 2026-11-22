@@ -20,12 +20,6 @@ import (
 	"golang.org/x/text/language"
 )
 
-var (
-	s3Client        *s3.Client
-	presignedURLTTL = 30 * time.Minute
-	cacheTTL        = presignedURLTTL - 1*time.Minute
-)
-
 type S3Song struct {
 	Name         string
 	AudioURL     string
@@ -37,7 +31,7 @@ type S3Song struct {
 func UploadAudioToS3(filePath string) error {
 	log.Debug().Msgf("Uploading audio file %s to S3...", filePath)
 
-	client := getS3Client()
+	client := getAudioS3Client()
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -75,7 +69,7 @@ func GetAudioKeysFromS3() ([]string, error) {
 		Prefix: aws.String(webCfg.C.AudioS3BucketPrefix),
 	}
 
-	output, err := getS3Client().ListObjectsV2(context.TODO(), input)
+	output, err := getAudioS3Client().ListObjectsV2(context.TODO(), input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list objects in S3: %w", err)
 	}
@@ -97,7 +91,7 @@ func GetAudioKeysFromS3() ([]string, error) {
 func UploadAudioImageToS3(filePath string) error {
 	log.Debug().Msgf("Uploading image file %s to S3...", filePath)
 
-	client := getS3Client()
+	client := getAudioS3Client()
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -132,7 +126,7 @@ func GetAudioFromS3() ([]S3Song, error) {
 	}
 
 	start := time.Now()
-	output, err := getS3Client().ListObjectsV2(context.TODO(), input)
+	output, err := getAudioS3Client().ListObjectsV2(context.TODO(), input)
 	if err != nil {
 		log.Error().Msgf("Failed to list objects in S3: %v", err)
 		return nil, err
@@ -189,7 +183,7 @@ func GetAudioFromS3() ([]S3Song, error) {
 func DeleteAudioFromS3(key string) error {
 	log.Info().Msgf("Deleting audio file %s from S3...", key)
 
-	client := getS3Client()
+	client := getAudioS3Client()
 
 	if !strings.HasPrefix(key, webCfg.C.AudioS3BucketPrefix) {
 		key = filepath.Join(webCfg.C.AudioS3BucketPrefix, key)
@@ -234,7 +228,7 @@ func sortS3SongsByRecent(songs []S3Song) {
 const PresignURLExpiry = 60 * time.Minute
 
 func getPresignedURL(key string) (string, error) {
-	presigner := s3.NewPresignClient(getS3Client())
+	presigner := s3.NewPresignClient(getAudioS3Client())
 
 	resp, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(webCfg.C.AudioS3BucketName),

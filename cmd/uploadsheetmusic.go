@@ -13,6 +13,7 @@ import (
 	"github.com/andrewwillette/andrewwillettedotcom/aws"
 	webCfg "github.com/andrewwillette/andrewwillettedotcom/config"
 	"github.com/andrewwillette/andrewwillettedotcom/dropbox"
+	"github.com/andrewwillette/andrewwillettedotcom/internal/stringutil"
 	"github.com/andrewwillette/gofzf"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -88,8 +89,8 @@ func runUploadSheetMusic() error {
 		}
 	}
 
-	slug := slugify(displayName)
-	key := ensureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
+	slug := stringutil.Slugify(displayName)
+	key := stringutil.EnsureTrailingSlash(webCfg.C.SheetMusicS3BucketPrefix) + slug + ".json"
 
 	exists, err := keyExistsInS3(key)
 	if err != nil {
@@ -238,26 +239,6 @@ func toTitleWords(s string) string {
 		parts[i] = string(runes)
 	}
 	return strings.Join(parts, " ")
-}
-
-func slugify(s string) string {
-	s = strings.TrimSpace(strings.ToLower(s))
-	s = strings.ReplaceAll(s, " ", "_")
-	s = strings.ReplaceAll(s, "-", "_")
-	out := make([]rune, 0, len(s))
-	for _, r := range s {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_' {
-			out = append(out, r)
-		}
-	}
-	return strings.Trim(string(out), "_")
-}
-
-func ensureTrailingSlash(p string) string {
-	if p == "" || strings.HasSuffix(p, "/") {
-		return p
-	}
-	return p + "/"
 }
 
 func keyExistsInS3(fullKey string) (bool, error) {
