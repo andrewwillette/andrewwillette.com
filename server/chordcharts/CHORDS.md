@@ -132,7 +132,8 @@ measure, write both between the bars (`|  I  V7  |`).
 - The first measure starts at the left edge, and trailing spaces are removed.
 
 Each chord gets room for its longest letter spelling, a two-character root
-plus its quality (`I` → `Bb`, `ii7` → `Bbm7`), so the bars stay lined up
+plus its quality, plus `/` and a two-character bass for a slash chord (`I` →
+`Bb`, `ii7` → `Bbm7`, `ii7/V` → `Bbm7/Ab`), so the bars stay lined up
 after the key picker converts numerals to letters. The header, section labels,
 blank lines, and any line that isn't a valid chord line are left exactly as
 they are. Formatting a formatted file changes nothing.
@@ -309,8 +310,8 @@ Redeploy the site before syncing charts that use key changes.
 
 ## Chord tokens
 
-A chord token has the form `[accidental]NUMERAL[quality]`, such as `I`, `vi`,
-`V7`, `ii7`, `bVII`, or `IVmaj7`.
+A chord token has the form `[accidental]NUMERAL[quality][/BASS]`, such as `I`,
+`vi`, `V7`, `ii7`, `bVII`, `IVmaj7`, or `vi/V`.
 
 ### Numeral
 
@@ -365,18 +366,36 @@ numeral's case decides how it is spelled:
   lowercase numeral.
 - There is no `m` suffix. Use a lowercase numeral instead (`vi`, not `VIm`).
 
-Combined suffixes are not supported, such as `7sus4`, `maj9`, `13`, and slash
-chords like `I/III`. To add a suffix, edit `chordTokenRe` in `render.go`, and
+Combined suffixes are not supported, such as `7sus4`, `maj9`, and `13`. To add a suffix, edit `chordTokenRe` in `render.go`, and
 list longer alternatives before their prefixes (for example `m7b5` before
 `maj7`). If the new suffix is a lowercase case, also update the minor-handling
 `switch` in `parseChord`.
+
+### Slash chord bass (optional)
+
+Put `/` and a numeral after the chord to name a different bass note, such as
+`vi/V` (Em over D in G). The bass is counted from the same key as the chord,
+and takes an optional `b` or `#`:
+
+| Token        | In G      |
+|--------------|-----------|
+| `vi/V`       | `Em/D`    |
+| `I/III`      | `G/B`     |
+| `V7/VII`     | `D7/F#`   |
+| `IV/bVII`    | `C/F`     |
+| `ii7/#IV`    | `Am7/C#`  |
+
+- The bass is a single note, so its numeral is **always uppercase** and takes
+  no quality. `vi/v`, `I/V7`, and `vi/` are invalid.
+- The quality goes before the slash: `ii7/V`, not `ii/V7`.
 
 ### Letter spelling
 
 When a key is selected, `server/static/chordcharts.js` spells the chord from
 that key's major scale. It walks the letter names in order, so for example `IV`
 in F is `Bb`, not `A#`. The `b` or `#` prefix then lowers or raises that
-spelled note. The quality from the table above is added after it. The
+spelled note. The quality from the table above is added after it, then `/` and the bass,
+spelled the same way. The
 `Numerals` option shows each token exactly as written in the file.
 
 ## Key picker caveats

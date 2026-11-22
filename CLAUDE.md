@@ -54,6 +54,7 @@ Routes:
 - `/blog`, `/blog/:blog`, `/blog/rss` - Blog system with RSS
 - `/key-of-the-day` - Daily musical key feature
 - `/resume` - Redirects to S3-hosted resume
+- `git.andrewwillette.com` - Any request for this host is reverse-proxied to a self-hosted Forgejo (`server/gitproxy`), enabled by `GIT_HOST`/`GIT_UPSTREAM_URL`. In prod, Forgejo runs as a second container in the same Podman pod (`site`) as the website; its data lives in `/home/ubuntu/forgejo` on the instance. Git is HTTPS only (no SSH).
 
 Templates use a base layout pattern (`server/templates/base.tmpl`) with page-specific content blocks in `server/templates/*.tmpl`.
 

@@ -29,6 +29,15 @@ func TestFormatBodyReservesRoomForLetterChords(t *testing.T) {
 	}
 }
 
+func TestFormatBodyReservesRoomForSlashBass(t *testing.T) {
+	// "ii7/V" can spell as "Bbm7/Ab", so its column is seven wide.
+	got := FormatBody("ii7/V | V |\nI | I |")
+	want := "ii7/V   | V  |\nI       | I  |"
+	if got != want {
+		t.Errorf("FormatBody:\n got %q\nwant %q", got, want)
+	}
+}
+
 func TestFormatBodyLeadingBar(t *testing.T) {
 	got := FormatBody("|  I  |  V  |\n||  IV |  I  ||")
 	want := "|  I  | V  |\n|| IV | I  ||"

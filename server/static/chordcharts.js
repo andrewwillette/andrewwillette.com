@@ -78,12 +78,18 @@
       if (!node.classList.contains("chord")) return;
       const degree = node.dataset.degree;
       const quality = node.dataset.quality || "";
+      // Slash chord bass degree, e.g. "5" for "vi/V", or undefined.
+      const bass = node.dataset.bass;
       const numeral = node.dataset.numeral;
       // Chords in a section with a key change count from that degree of
       // the chart's key, e.g. data-tonic="4" spells the section in IV.
       const tonic = node.dataset.tonic;
       const chordKey = tonic && key !== "numerals" ? toLetterChord(key, tonic, "") : key;
-      const label = key === "numerals" ? numeral : toLetterChord(chordKey, degree, quality);
+      let label = numeral;
+      if (key !== "numerals") {
+        label = toLetterChord(chordKey, degree, quality);
+        if (bass) label += "/" + toLetterChord(chordKey, bass, "");
+      }
       // Pad to the cell width the chart was written with, less any overflow
       // to absorb; keep at least one space if the cell had trailing spaces.
       const width = parseInt(node.dataset.width, 10) || numeral.length;

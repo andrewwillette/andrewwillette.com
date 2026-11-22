@@ -57,6 +57,8 @@ type Config struct {
 	DropboxAppSecret          string `mapstructure:"DROPBOX_APP_SECRET"`
 	DropboxRefreshToken       string `mapstructure:"DROPBOX_REFRESH_TOKEN"`
 	DropboxSheetMusicFolder   string `mapstructure:"DROPBOX_SHEET_MUSIC_FOLDER"` // relative to the app's Dropbox access root; "" means that root itself
+	GitHost                   string `mapstructure:"GIT_HOST"`                   // e.g. "git.andrewwillette.com"; unset disables the git proxy
+	GitUpstreamURL            string `mapstructure:"GIT_UPSTREAM_URL"`           // where Forgejo listens, e.g. "http://127.0.0.1:3000"
 }
 
 func LoadDefaultConfig(fallbackpath string) (config Config, err error) {

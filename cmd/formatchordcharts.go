@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,7 @@ import (
 var (
 	formatChordChartsDirFlag string
 	formatChordChartsCheck   bool
+	formatChordChartsStdin   bool
 )
 
 var formatChordChartsCmd = &cobra.Command{
@@ -23,9 +25,17 @@ columns, with one space between each bar and the chord after it. Headers,
 section labels, and blank lines are left alone.
 
 With --check, nothing is written. The command lists the files that need
-formatting and exits with status 1 if there are any.`,
+formatting and exits with status 1 if there are any.
+
+With --stdin, a single chart is read from stdin and the formatted chart is
+written to stdout. No files are touched; this is meant for editor
+format-on-save.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := runFormatChordCharts(); err != nil {
+		run := runFormatChordCharts
+		if formatChordChartsStdin {
+			run = runFormatChordChartStdin
+		}
+		if err := run(); err != nil {
 			fmt.Fprintln(os.Stderr, "format-chord-charts failed:", err)
 			os.Exit(1)
 		}
@@ -35,7 +45,17 @@ formatting and exits with status 1 if there are any.`,
 func init() {
 	formatChordChartsCmd.Flags().StringVar(&formatChordChartsDirFlag, "dir", "", "Local directory of .chord files (default: CHORD_CHARTS_DIR config, else "+defaultChordChartsDir+")")
 	formatChordChartsCmd.Flags().BoolVar(&formatChordChartsCheck, "check", false, "List files that need formatting without changing them; exit 1 if any do")
+	formatChordChartsCmd.Flags().BoolVar(&formatChordChartsStdin, "stdin", false, "Format one chart read from stdin and write it to stdout")
 	rootCmd.AddCommand(formatChordChartsCmd)
+}
+
+func runFormatChordChartStdin() error {
+	raw, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return fmt.Errorf("reading stdin: %w", err)
+	}
+	_, err = io.WriteString(os.Stdout, chordcharts.FormatFile(string(raw)))
+	return err
 }
 
 func runFormatChordCharts() error {

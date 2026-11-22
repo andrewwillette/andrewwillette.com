@@ -30,6 +30,10 @@ func TestIsChordLine(t *testing.T) {
 		{"time signature mid-measure rejected", "I  2/4 V  |", false},
 		{"two time signatures in one measure rejected", "|  2/4 3/4 V  |", false},
 		{"bad time signature denominator rejected", "|  3/5 V  |", false},
+		{"slash chords", "vi/V | I/III | IVmaj7/bVII | ii7/#IV |", true},
+		{"lowercase slash bass rejected", "vi/v |", false},
+		{"slash with quality bass rejected", "I/V7 |", false},
+		{"empty slash bass rejected", "vi/ |", false},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -42,19 +46,22 @@ func TestIsChordLine(t *testing.T) {
 
 func TestParseChord(t *testing.T) {
 	cases := []struct {
-		token, degree, quality string
+		token, degree, quality, bass string
 	}{
-		{"I", "1", ""},
-		{"V7", "5", "7"},
-		{"ii", "2", "m"},
-		{"ii7", "2", "m7"},
-		{"iv6", "4", "m6"},
-		{"IVmaj7", "4", "maj7"},
-		{"bVII", "b7", ""},
-		{"#iv", "#4", "m"},
-		{"viidim", "7", "dim"},
-		{"viim7b5", "7", "m7b5"},
-		{"Vsus4", "5", "sus4"},
+		{"I", "1", "", ""},
+		{"V7", "5", "7", ""},
+		{"ii", "2", "m", ""},
+		{"ii7", "2", "m7", ""},
+		{"iv6", "4", "m6", ""},
+		{"IVmaj7", "4", "maj7", ""},
+		{"bVII", "b7", "", ""},
+		{"#iv", "#4", "m", ""},
+		{"viidim", "7", "dim", ""},
+		{"viim7b5", "7", "m7b5", ""},
+		{"Vsus4", "5", "sus4", ""},
+		{"vi/V", "6", "m", "5"},
+		{"I/III", "1", "", "3"},
+		{"ii7/bVII", "2", "m7", "b7"},
 	}
 	for _, c := range cases {
 		t.Run(c.token, func(t *testing.T) {
@@ -62,8 +69,8 @@ func TestParseChord(t *testing.T) {
 			if !ok {
 				t.Fatalf("parseChord(%q) rejected", c.token)
 			}
-			if got.Degree != c.degree || got.Quality != c.quality {
-				t.Errorf("parseChord(%q) = %+v, want degree %q quality %q", c.token, got, c.degree, c.quality)
+			if got.Degree != c.degree || got.Quality != c.quality || got.Bass != c.bass {
+				t.Errorf("parseChord(%q) = %+v, want degree %q quality %q bass %q", c.token, got, c.degree, c.quality, c.bass)
 			}
 		})
 	}
@@ -82,6 +89,16 @@ func TestRenderBodyWrapsChordTokens(t *testing.T) {
 	}
 	if !strings.Contains(html, "Amazing grace") {
 		t.Errorf("expected lyric line to pass through, got: %s", html)
+	}
+}
+
+func TestRenderBodyAddsSlashBass(t *testing.T) {
+	html := string(RenderBody("vi/V  |  I  |"))
+	if !strings.Contains(html, `data-numeral="vi/V" data-degree="6" data-quality="m" data-bass="5" data-width="6">vi/V  </span>|`) {
+		t.Errorf("expected slash chord span with bass, got: %s", html)
+	}
+	if strings.Count(html, "data-bass") != 1 {
+		t.Errorf("expected data-bass only on the slash chord, got: %s", html)
 	}
 }
 

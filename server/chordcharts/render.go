@@ -9,9 +9,10 @@ import (
 
 var (
 	// Roman-numeral chord token: optional accidental, numeral (uppercase =
-	// major, lowercase = minor), optional quality suffix. Longer
+	// major, lowercase = minor), optional quality suffix, optional slash bass
+	// note ("/" + optional accidental + uppercase numeral). Longer
 	// alternatives must precede their prefixes (VII before VI before V, ...).
-	chordTokenRe = regexp.MustCompile(`^([b#]?)(VII|VI|V|IV|III|II|I|vii|vi|v|iv|iii|ii|i)((?:maj7|m7b5|dim7|sus4|sus2|add9|aug|dim|6|7|9)?)$`)
+	chordTokenRe = regexp.MustCompile(`^([b#]?)(VII|VI|V|IV|III|II|I|vii|vi|v|iv|iii|ii|i)((?:maj7|m7b5|dim7|sus4|sus2|add9|aug|dim|6|7|9)?)(?:/([b#]?)(VII|VI|V|IV|III|II|I))?$`)
 	barTokenRe   = regexp.MustCompile(`^\|+$`)
 	// Time signature, e.g. "3/4" or "6/8". In the header it sets the whole
 	// chart's meter; inline it applies to the one measure it starts.
@@ -25,21 +26,23 @@ var (
 	romanDegrees = map[string]int{"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7}
 )
 
-// chord is a parsed Roman-numeral token, e.g. "bVII7" or "ii7".
+// chord is a parsed Roman-numeral token, e.g. "bVII7", "ii7", or "vi/V".
 type chord struct {
 	Degree  string // accidental + scale degree as a digit, e.g. "b7"
 	Quality string // letter-chord suffix, e.g. "", "m", "m7", "7", "dim"
+	Bass    string // slash bass degree like Degree, e.g. "5" for "vi/V", or ""
 }
 
 // parseChord parses a Roman-numeral chord token. Lowercase numerals are
 // minor, so "ii7" means a minor seventh (m7) on the 2nd degree. Lowercase
-// numerals can't take aug/sus suffixes, which contradict a minor third.
+// numerals can't take aug/sus suffixes, which contradict a minor third. A
+// slash bass is a single note, so its numeral is always uppercase.
 func parseChord(token string) (chord, bool) {
 	m := chordTokenRe.FindStringSubmatch(token)
 	if m == nil {
 		return chord{}, false
 	}
-	accidental, numeral, suffix := m[1], m[2], m[3]
+	accidental, numeral, suffix, bassAccidental, bassNumeral := m[1], m[2], m[3], m[4], m[5]
 	upper := strings.ToUpper(numeral)
 	minor := numeral != upper
 	quality := suffix
@@ -53,7 +56,11 @@ func parseChord(token string) (chord, bool) {
 			quality = "m" + suffix
 		}
 	}
-	return chord{Degree: fmt.Sprintf("%s%d", accidental, romanDegrees[upper]), Quality: quality}, true
+	c := chord{Degree: fmt.Sprintf("%s%d", accidental, romanDegrees[upper]), Quality: quality}
+	if bassNumeral != "" {
+		c.Bass = fmt.Sprintf("%s%d", bassAccidental, romanDegrees[bassNumeral])
+	}
+	return c, true
 }
 
 // isSectionLabel reports whether the line is a section label, e.g. "A part:".
@@ -137,7 +144,8 @@ func isChordLine(line string) bool {
 // renderChordLine wraps each numeral token in a <span class="chord"> while
 // preserving exact original whitespace/column alignment and bar characters.
 // The span carries the original numeral (shown in "Numerals" mode) plus the
-// degree and letter-chord quality the key picker uses to spell letter chords.
+// degree, letter-chord quality, and any slash bass degree the key picker uses
+// to spell letter chords.
 // tonic is the degree of the chart's key that the numerals count from, e.g.
 // "4" in a section that modulates to IV, or "" for the chart's own key.
 //
@@ -160,10 +168,11 @@ func renderChordLine(line, tonic string) string {
 				cellEnd++
 			}
 			cell := line[start:cellEnd]
-			fmt.Fprintf(&sb, `<span class="chord" data-numeral="%s" data-degree="%s" data-quality="%s"%s data-width="%d">%s</span>`,
+			fmt.Fprintf(&sb, `<span class="chord" data-numeral="%s" data-degree="%s" data-quality="%s"%s%s data-width="%d">%s</span>`,
 				template.HTMLEscapeString(token),
 				template.HTMLEscapeString(c.Degree),
 				template.HTMLEscapeString(c.Quality),
+				bassAttr(c.Bass),
 				tonicAttr(tonic),
 				len(cell),
 				template.HTMLEscapeString(cell))
@@ -177,6 +186,13 @@ func renderChordLine(line, tonic string) string {
 	}
 	sb.WriteString(template.HTMLEscapeString(line[last:]))
 	return sb.String()
+}
+
+func bassAttr(bass string) string {
+	if bass == "" {
+		return ""
+	}
+	return fmt.Sprintf(` data-bass="%s"`, template.HTMLEscapeString(bass))
 }
 
 func tonicAttr(tonic string) string {

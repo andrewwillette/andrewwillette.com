@@ -35,7 +35,8 @@ func FormatFile(raw string) string {
 //
 // Each column is as wide as its widest cell, where a chord counts as the
 // wider of its numeral and its longest letter spelling (a two-character
-// root plus the quality, e.g. "Bbm7"). That keeps the bars aligned in every
+// root plus the quality, plus "/" and a two-character bass for a slash chord,
+// e.g. "Bbm7" or "Bbm7/Ab"). That keeps the bars aligned in every
 // key, not just in Numerals.
 func FormatBody(body string) string {
 	lines := strings.Split(body, "\n")
@@ -107,7 +108,11 @@ func cellWidth(tokens []string) int {
 		}
 		w := len(t)
 		if c, ok := parseChord(t); ok {
-			w = max(w, maxRootWidth+len(c.Quality))
+			letter := maxRootWidth + len(c.Quality)
+			if c.Bass != "" {
+				letter += 1 + maxRootWidth
+			}
+			w = max(w, letter)
 		}
 		width += w
 	}

@@ -1,6 +1,6 @@
 # Build stage: runs on the build machine's native platform and cross-compiles
 # a static linux/amd64 binary, so no emulation is needed on Apple Silicon.
-FROM --platform=$BUILDPLATFORM golang:1.25 AS build
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build
 
 # Must stay /app: templates and blog posts are located at runtime via
 # runtime.Caller, which records this build path (so no -trimpath either).

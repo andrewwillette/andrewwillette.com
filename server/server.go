@@ -24,6 +24,7 @@ import (
 	"github.com/andrewwillette/andrewwillettedotcom/server/blog"
 	"github.com/andrewwillette/andrewwillettedotcom/server/chordcharts"
 	"github.com/andrewwillette/andrewwillettedotcom/server/echopprof"
+	"github.com/andrewwillette/andrewwillettedotcom/server/gitproxy"
 	"github.com/andrewwillette/andrewwillettedotcom/server/traffic"
 )
 
@@ -100,7 +101,15 @@ func StartServer(sslEnabled bool) {
 	)
 	if sslEnabled {
 		e.Pre(middleware.HTTPSRedirect())
-		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("andrewwillette.com")
+	}
+	// Registered after HTTPSRedirect so git traffic is only ever proxied over TLS.
+	addGitProxy(e)
+	if sslEnabled {
+		tlsHosts := []string{"andrewwillette.com"}
+		if config.C.GitHost != "" {
+			tlsHosts = append(tlsHosts, config.C.GitHost)
+		}
+		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(tlsHosts...)
 		const sslCacheDir = "/var/www/.cache"
 		e.AutoTLSManager.Cache = autocert.DirCache(sslCacheDir)
 		// Configure timeouts on the TLS server Echo uses internally for StartAutoTLS
@@ -145,6 +154,21 @@ func addRoutes(e *echo.Echo) {
 	e.File(chordChartsJsEndpoint, chordChartsJsResource)
 	e.File(robotsEndpoint, robotsTxtResource)
 	e.GET(adminEndpoint, traffic.HandleAdminPage, adminRateLimiter(), traffic.BasicAuthMiddleware())
+}
+
+// addGitProxy forwards requests for the git subdomain to Forgejo when
+// GIT_HOST is configured.
+func addGitProxy(e *echo.Echo) {
+	if config.C.GitHost == "" {
+		return
+	}
+	mw, err := gitproxy.Middleware(config.C.GitHost, config.C.GitUpstreamURL)
+	if err != nil {
+		zlog.Error().Err(err).Msg("git proxy disabled")
+		return
+	}
+	e.Pre(mw)
+	zlog.Info().Msgf("proxying %s to %s", config.C.GitHost, config.C.GitUpstreamURL)
 }
 
 // adminRateLimiter returns a rate limiter middleware scoped to the admin route.
