@@ -46,6 +46,8 @@ const (
 
 	chordChartsJsEndpoint = "/static/chordcharts.js"
 	chordChartsJsResource = "server/static/chordcharts.js"
+	fuzzySearchJsEndpoint = "/static/fuzzysearch.js"
+	fuzzySearchJsResource = "server/static/fuzzysearch.js"
 
 	robotsEndpoint    = "/robots.txt"
 	robotsTxtResource = "server/static/robots.txt"
@@ -153,6 +155,7 @@ func addRoutes(e *echo.Echo) {
 	e.GET(chordChartEndpoint, chordcharts.HandleChordChartPage)
 	e.File(cssEndpoint, cssResource)
 	e.File(chordChartsJsEndpoint, chordChartsJsResource)
+	e.File(fuzzySearchJsEndpoint, fuzzySearchJsResource)
 	e.File(robotsEndpoint, robotsTxtResource)
 	e.GET(adminEndpoint, traffic.HandleAdminPage, adminRateLimiter(), traffic.BasicAuthMiddleware())
 }

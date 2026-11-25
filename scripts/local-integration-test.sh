@@ -68,6 +68,7 @@ test_endpoint "/chord-charts" 200 "Chord charts listing"
 test_endpoint "/chord-charts/angels_waltz" 200 "Chord chart detail"
 test_endpoint "/key-of-the-day" 200 "Key of the day"
 test_endpoint "/static/main.css" 200 "CSS file"
+test_endpoint "/static/fuzzysearch.js" 200 "Fuzzy search JS"
 test_endpoint "/robots.txt" 200 "Robots.txt"
 
 echo ""

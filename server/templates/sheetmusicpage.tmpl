@@ -4,11 +4,15 @@
         <div id="sheet-music-description">
         Here are some of my efforts at transcription. I hope they might be useful to someone!
         </div>
-        <ul>
+        <input type="search" class="fuzzy-search" placeholder="Search sheet music..." autocomplete="off" autofocus
+               data-fuzzy-list="sheet-music-list" data-fuzzy-empty="sheet-music-no-results">
+        <ul id="sheet-music-list">
         {{range .Sheets}}
-            <li><a href="{{.DropboxURL}}">{{.DisplayName}}</a></li>
+            <li data-search="{{.DisplayName}}"><a href="{{.DropboxURL}}">{{.DisplayName}}</a></li>
         {{end}}
         </ul>
+        <p id="sheet-music-no-results" class="fuzzy-no-results" hidden>No matching sheet music.</p>
     </div>
 </div>
+<script src="/static/fuzzysearch.js"></script>
 {{end}}

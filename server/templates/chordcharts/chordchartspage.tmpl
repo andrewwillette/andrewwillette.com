@@ -1,14 +1,18 @@
 {{define "content"}}
 <div class="container">
     <div id="chord-charts-page">
-        <ul>
+        <input type="search" class="fuzzy-search" placeholder="Search songs..." autocomplete="off" autofocus
+               data-fuzzy-list="chord-chart-list" data-fuzzy-empty="chord-chart-no-results">
+        <ul id="chord-chart-list">
         {{range .ChordCharts}}
-            <li class="chord-chart-entry-li">
+            <li class="chord-chart-entry-li" data-search="{{.Title}} {{.Artist}}">
                 <h2><a href="/chord-charts/{{.URLVal}}">{{.Title}}</a></h2>
                 <p>{{.Artist}}</p>
             </li>
         {{end}}
         </ul>
+        <p id="chord-chart-no-results" class="fuzzy-no-results" hidden>No matching songs.</p>
     </div>
 </div>
+<script src="/static/fuzzysearch.js"></script>
 {{end}}

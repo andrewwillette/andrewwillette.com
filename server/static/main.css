@@ -356,6 +356,41 @@ footer {
     list-style-type: none;
 }
 
+.fuzzy-search {
+    display: block;
+    width: 100%;
+    max-width: 30rem;
+    margin: 1rem 0 0 2.5rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 1.2rem;
+    font-family: inherit;
+    color: #ebdbb2;
+    background-color: #3c3836;
+    border: 1px solid #665c54;
+    border-radius: 6px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.fuzzy-search::placeholder {
+    color: #928374;
+}
+
+.fuzzy-search:focus {
+    border-color: #b16286;
+    box-shadow: 0 0 0 2px rgba(177, 98, 134, 0.35);
+}
+
+.fuzzy-search::-webkit-search-cancel-button {
+    filter: invert(0.8);
+}
+
+.fuzzy-no-results {
+    font-size: 1.2rem;
+    padding: 1rem 2.5rem;
+}
+
 #chord-charts-page .chord-chart-entry-li h2 {
     font-size: 1.5rem;
     display: inline-block;
@@ -402,4 +437,8 @@ footer {
 #single-chord-chart-page .timesig {
     color: #458588;
     font-weight: bold;
+}
+
+#sheet-music-page .fuzzy-search {
+    margin: 1.5rem auto 0 auto;
 }
